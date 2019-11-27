@@ -1,0 +1,61 @@
+body {
+    background-color: black;
+    color: white;
+}
+.form {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    padding: 5px;
+}
+.header {
+    height: 71px;
+    padding: 5px;
+}
+.messages {
+    position: absolute;
+    top: 81px;
+    left: 5px;
+    right: 5px;
+    padding: 5px;
+    bottom: 70px;
+    overflow-y: scroll;
+    color: white;
+    border: 1px solid green;
+    background-color: black;
+    font-family: 'Roboto Mono', monospace;
+}
+.message {
+    margin-block-end: 0;
+    margin-block-start: 0;
+}
+.form label {
+    display: block;
+    color: #f7861f;
+}
+.form input {
+    height: 30px;
+}
+.form input[type=text] {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+.form input[type=button] {
+    float: right;
+    margin: 0 5px;
+    width: 50px;
+    border: 0;
+    border-radius: 4px;
+    background-color: #5e79cb;
+    color: white;
+    transition: background-color 500ms;
+}
+.form input[type=button]:hover {
+    background-color: #679af5;
+}
+.form .input-container {
+    margin-right: 60px;
+}

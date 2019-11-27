@@ -1,0 +1,41 @@
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'io.gitlab.arturbosch.detekt'
+}
+
+kotlin {
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
+        }
+    }
+    sourceSets {
+        all {
+            languageSettings {
+                enableLanguageFeature('InlineClasses')
+                useExperimentalAnnotation("kotlinx.coroutines.ExperimentalCoroutinesApi")
+                useExperimentalAnnotation("kotlinx.coroutines.FlowPreview")
+            }
+        }
+        commonMain {
+            dependencies {
+                implementation kotlin('stdlib-common')
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$kotlin_coroutines_version"
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation kotlin('test-common')
+                implementation kotlin('test-annotations-common')
+            }
+        }
+        jvmMain {
+            dependencies {
+                implementation kotlin('stdlib-jdk8')
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
+            }
+        }
+    }
+}

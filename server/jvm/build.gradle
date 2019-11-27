@@ -1,0 +1,11 @@
+plugins {
+    id 'kotlin'
+    id 'application'
+}
+
+mainClassName = "io.ktor.server.netty.DevelopmentEngine"
+
+dependencies {
+    implementation project(':server')
+    implementation "ch.qos.logback:logback-classic:+"
+}

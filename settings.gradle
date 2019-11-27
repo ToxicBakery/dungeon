@@ -1,0 +1,9 @@
+enableFeaturePreview("GRADLE_METADATA")
+
+include ':model'
+include ':configuration'
+include ':persistence'
+include ':client'
+
+include ':server'
+include ':server:jvm'
