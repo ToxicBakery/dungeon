@@ -1,0 +1,11 @@
+package com.toxicbakery.game.dungeon.machine
+
+import com.toxicbakery.game.dungeon.machine.authentication.authenticationMachineModule
+import com.toxicbakery.game.dungeon.machine.init.initMachineModule
+import org.kodein.di.Kodein
+
+val machineModules = Kodein.Module("machineModules") {
+    import(authenticationMachineModule)
+    import(initMachineModule)
+    import(gameMachineModule)
+}

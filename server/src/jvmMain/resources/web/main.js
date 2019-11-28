@@ -57,7 +57,7 @@ function write(message) {
         messageP = document.createElement("p");
         messageP.className = "message";
     }
-    messageP.textContent = message;
+    messageP.innerHTML = message.replace(/(?:\r\n|\r|\n)/g, '<br>');
     messagesDiv.appendChild(messageP);
     messagesDiv.scrollTop = messageP.offsetTop;
 }

@@ -30,6 +30,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$kotlin_coroutines_version"
                 implementation "com.ToxicBakery.logging:common:$arbor_version"
                 implementation "com.benasher44:uuid:$uuid_version"
+                implementation "co.touchlab:stately:$stately_version"
 
                 implementation project(':configuration')
                 implementation project(':model')

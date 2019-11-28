@@ -1,40 +1,65 @@
 package com.toxicbakery.game.dungeon.manager
 
 import com.toxicbakery.game.dungeon.Database
-import com.toxicbakery.game.dungeon.Player
 import com.toxicbakery.game.dungeon.auth.Credentials
+import com.toxicbakery.game.dungeon.character.Player
+import com.toxicbakery.game.dungeon.model.session.GameSession
+import com.toxicbakery.game.dungeon.model.session.PlayerSession
+import com.toxicbakery.game.dungeon.store.DungeonStateStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
 
 private class AuthenticationManagerImpl(
-    private val database: Database
+    private val database: Database,
+    private val dungeonStateStore: DungeonStateStore
 ) : AuthenticationManager {
 
+    override suspend fun authenticatedPlayers(): Flow<List<PlayerSession>> = dungeonStateStore
+        .observe()
+        .map { dungeonState -> dungeonState.playerSessionsList }
 
-
-    override suspend fun authenticatePlayerById(
-        id: String,
-        credentials: Credentials
-    ) = database.authenticatePlayer(id, credentials)
+    override suspend fun authenticatePlayer(
+        credentials: Credentials,
+        gameSession: GameSession
+    ): Player {
+        val player = database.authenticatePlayer(credentials)
+        dungeonStateStore.modify { dungeonState ->
+            dungeonState.set(player, gameSession)
+        }
+        return player
+    }
 
     override suspend fun registerPlayer(
-        player: Player,
         credentials: Credentials
-    ) = database.createPlayer(player, credentials)
+    ) = database.createPlayer(credentials)
+
+    override suspend fun playerLeft(
+        player: Player
+    ) = dungeonStateStore.modify { dungeonState ->
+        dungeonState - player
+    }
 
 }
 
 interface AuthenticationManager {
 
-    suspend fun authenticatePlayerById(
-        id: String,
-        credentials: Credentials
+    /**
+     * Registered players that have authenticated.
+     */
+    suspend fun authenticatedPlayers(): Flow<List<PlayerSession>>
+
+    suspend fun authenticatePlayer(
+        credentials: Credentials,
+        gameSession: GameSession
     ): Player
 
+    suspend fun playerLeft(player: Player)
+
     suspend fun registerPlayer(
-        player: Player,
         credentials: Credentials
     ): Player
 
@@ -43,7 +68,8 @@ interface AuthenticationManager {
 val authenticationManagerModule = Kodein.Module("authenticationManagerModule") {
     bind<AuthenticationManager>() with provider {
         AuthenticationManagerImpl(
-            database = instance()
+            database = instance(),
+            dungeonStateStore = instance()
         )
     }
 }

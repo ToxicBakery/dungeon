@@ -1,6 +1,10 @@
 package com.toxicbakery.game.dungeon
 
+import co.touchlab.stately.annotation.Throws
 import com.toxicbakery.game.dungeon.auth.Credentials
+import com.toxicbakery.game.dungeon.character.Player
+import com.toxicbakery.game.dungeon.exception.AuthenticationException
+import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.singleton
@@ -9,33 +13,30 @@ private class DatabaseImpl(
     private val persistenceDelegate: PersistenceDelegate
 ) : Database {
 
-    override fun authenticatePlayer(
-        id: String,
+    override suspend fun authenticatePlayer(
         credentials: Credentials
-    ): Player = persistenceDelegate.authenticatePlayer(id, credentials)
+    ): Player = persistenceDelegate.authenticatePlayer(credentials)
 
-    override fun createPlayer(
-        player: Player,
+    override suspend fun changeName(player: Player) = persistenceDelegate.changeName(player)
+
+    override suspend fun createPlayer(
         credentials: Credentials
-    ): Player = persistenceDelegate.createPlayer(player, credentials)
+    ): Player = persistenceDelegate.createPlayer(credentials)
 
-    override fun getPlayerById(id: String) = persistenceDelegate.getPlayerById(id)
+    override suspend fun getPlayerById(id: Int) = persistenceDelegate.getPlayerById(id)
 
 }
 
 interface Database {
 
-    fun authenticatePlayer(
-        id: String,
-        credentials: Credentials
-    ): Player
+    @Throws(NoPlayerWithUsernameException::class, AuthenticationException::class)
+    suspend fun authenticatePlayer(credentials: Credentials): Player
 
-    fun createPlayer(
-        player: Player,
-        credentials: Credentials
-    ): Player
+    suspend fun changeName(player: Player)
 
-    fun getPlayerById(id: String): Player
+    suspend fun createPlayer(credentials: Credentials): Player
+
+    suspend fun getPlayerById(id: Int): Player
 
 }
 

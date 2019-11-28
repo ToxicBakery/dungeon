@@ -2,23 +2,36 @@ package com.toxicbakery.game.dungeon.model.session
 
 interface GameSession {
 
-    val sessionId: PlayerSessionId
-
-    val gameSessionState: GameSessionState
-
-    suspend fun send(msg: String)
-
-    suspend fun close()
+    val isClosed: Boolean
 
     /**
-     * Copy the game session returning it with the new game session state applied.
+     * A unique identifier representing this session.
      */
-    fun setGameSessionState(gameSessionState: GameSessionState): GameSession
+    val sessionId: PlayerSessionId
 
-}
+    /**
+     * Write data back to the client
+     */
+    suspend fun send(
+        msg: String,
+        inputResponseType: InputResponseType = InputResponseType.Normal
+    )
 
-sealed class GameSessionState {
-    object Init : GameSessionState()
-    object Authenticating : GameSessionState()
-    object Authenticated : GameSessionState()
+    /**
+     * Terminate the session.
+     */
+    suspend fun close()
+
+    enum class InputResponseType {
+        /**
+         * Input field should be normal
+         */
+        Normal,
+
+        /**
+         * Input field should be masked for secure entry
+         */
+        Secure
+    }
+
 }
