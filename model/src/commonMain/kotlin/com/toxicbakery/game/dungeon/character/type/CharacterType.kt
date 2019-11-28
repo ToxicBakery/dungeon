@@ -1,3 +1,4 @@
+@file:Suppress("MagicNumber")
 package com.toxicbakery.game.dungeon.character.type
 
 import kotlinx.serialization.Serializable
@@ -5,6 +6,7 @@ import kotlinx.serialization.Serializable
 /**
  * Character types represent base stats of a character.
  */
+@Suppress("UnnecessaryAbstractClass")
 @Serializable
 abstract class CharacterType {
     abstract val type: String

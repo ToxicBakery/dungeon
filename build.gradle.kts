@@ -1,28 +1,30 @@
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.3.60'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.3.60'
-    id 'io.gitlab.arturbosch.detekt' version '1.2.0'
+    id("io.gitlab.arturbosch.detekt")
 }
 
 allprojects {
-    group 'com.toxicbakery.game.dungeon'
-    version '1.0-SNAPSHOT'
+    group = "com.toxicbakery.game.dungeon"
+    version = "1.0.0-SNAPSHOT"
 
     repositories {
         mavenCentral()
         jcenter()
+        maven { setUrl("http://dl.bintray.com/kotlin/kotlinx.html/") }
     }
 }
 
 subprojects {
+    apply {
+        plugin("io.gitlab.arturbosch.detekt")
+    }
+
     detekt {
         failFast = true
         buildUponDefaultConfig = true
         config = files("${rootProject.projectDir}/detekt/config.yml")
         input = files(
-                "$projectDir/src/commonMain/kotlin"
+            "$projectDir/src/commonMain/kotlin"
         )
-
         reports {
             html.enabled = true
         }

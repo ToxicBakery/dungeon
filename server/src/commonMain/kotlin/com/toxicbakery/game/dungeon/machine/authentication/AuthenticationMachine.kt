@@ -50,7 +50,7 @@ private class AuthenticationMachineImpl(
     }
 
     private suspend fun initAuthentication(): AuthenticationState =
-        if (authenticationErrorCount.incrementAndGet() > 3) tooManyAttempts()
+        if (authenticationErrorCount.incrementAndGet() > MAX_AUTH_ATTEMPTS) tooManyAttempts()
         else {
             credentials = Credentials()
             gameSession.send("What is your username?")
@@ -59,13 +59,11 @@ private class AuthenticationMachineImpl(
 
     private suspend fun takeUsernameAndProceed(username: String): AuthenticationState {
         credentials = credentials.copy(username = username)
-        gameSession.send(username)
         gameSession.send("What is your password?", InputResponseType.Secure)
         return AuthenticationState.AwaitingPassword
     }
 
     private suspend fun takePasswordAndProceed(password: String): AuthenticationState {
-        gameSession.send("***")
         credentials = credentials.copy(password = password)
         return try {
             authenticationManager.authenticatePlayer(credentials, gameSession)
@@ -80,10 +78,15 @@ private class AuthenticationMachineImpl(
     }
 
     private suspend fun tooManyAttempts(): AuthenticationState {
-        delay(5000)
+        delay(AUTH_FAILURE_TIMEOUT)
         gameSession.send("Too many failed authentication attempts.")
         gameSession.close()
         return AuthenticationState.Init
+    }
+
+    companion object {
+        private const val AUTH_FAILURE_TIMEOUT = 5000L
+        private const val MAX_AUTH_ATTEMPTS = 3
     }
 
 }
