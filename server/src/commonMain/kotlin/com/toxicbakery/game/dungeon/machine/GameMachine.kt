@@ -9,6 +9,9 @@ import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.factory
 
+/**
+ * Entry point into the game state machine.
+ */
 private class GameMachineImpl(
     initMachine: InitMachine
 ) : GameMachine {

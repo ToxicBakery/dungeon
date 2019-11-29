@@ -5,6 +5,7 @@ import co.touchlab.stately.concurrency.AtomicInt
 import com.toxicbakery.game.dungeon.auth.Credentials
 import com.toxicbakery.game.dungeon.auth.PlayerWithCredentials
 import com.toxicbakery.game.dungeon.character.Player
+import com.toxicbakery.game.dungeon.exception.AlreadyRegisteredException
 import com.toxicbakery.game.dungeon.exception.AuthenticationException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithIdException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
@@ -20,6 +21,11 @@ internal object InMemoryPersistenceDelegate : PersistenceDelegate {
 
     private val nextPlayerId: Int
         get() = playerIdGenerator.incrementAndGet()
+
+    private fun Map<Int, PlayerWithCredentials>.getPlayerWithUsername(username: String): Player =
+        values.first { playerWithCredentials ->
+            playerWithCredentials.credentials.username == username
+        }.player
 
     @Throws(NoPlayerWithUsernameException::class)
     private suspend fun getPlayerWithCredentialsByUsername(
@@ -50,13 +56,24 @@ internal object InMemoryPersistenceDelegate : PersistenceDelegate {
 
     override suspend fun createPlayer(
         credentials: Credentials
-    ): Player = Player(id = nextPlayerId, name = credentials.username).also { player ->
+    ): Player {
         playerMapStore.modify { playerMap ->
-            playerMap + (player.id to PlayerWithCredentials(
-                player = player,
-                credentials = credentials
-            ))
+            try {
+                playerMap.getPlayerWithUsername(credentials.username)
+                throw AlreadyRegisteredException()
+            } catch (e: NoSuchElementException) {
+                val player = Player(id = nextPlayerId, name = credentials.username)
+                // Player doesn't exist so they may be added to the DB
+                playerMap + (player.id to PlayerWithCredentials(
+                    player = player,
+                    credentials = credentials
+                ))
+            }
         }
+
+        return playerMapStore.observe()
+            .first()
+            .getPlayerWithUsername(credentials.username)
     }
 
     override suspend fun getPlayerById(

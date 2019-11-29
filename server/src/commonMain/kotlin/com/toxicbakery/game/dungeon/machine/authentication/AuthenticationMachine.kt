@@ -22,7 +22,7 @@ private class AuthenticationMachineImpl(
 ) : AuthenticationMachine {
 
     private val authenticationErrorCount = AtomicInt(0)
-    private var _currentState: AtomicReference<AuthenticationState> = AtomicReference(AuthenticationState.Init)
+    private val _currentState: AtomicReference<AuthenticationState> = AtomicReference(AuthenticationState.Init)
     private var credentials: Credentials = Credentials()
 
     override val name: String = "AuthenticationMachine"
@@ -46,7 +46,7 @@ private class AuthenticationMachineImpl(
         AuthenticationState.Init -> initAuthentication()
         AuthenticationState.AwaitingUsername -> takeUsernameAndProceed(message)
         AuthenticationState.AwaitingPassword -> takePasswordAndProceed(message)
-        AuthenticationState.Authenticated -> AuthenticationState.Authenticated
+        AuthenticationState.Authenticated -> error("Request to process on end state")
     }
 
     private suspend fun initAuthentication(): AuthenticationState =
@@ -67,6 +67,7 @@ private class AuthenticationMachineImpl(
         credentials = credentials.copy(password = password)
         return try {
             authenticationManager.authenticatePlayer(credentials, gameSession)
+            gameSession.send("Authentication successful! Welcome back ${credentials.username}")
             AuthenticationState.Authenticated
         } catch (e: NoPlayerWithUsernameException) {
             gameSession.send("User not found, are you sure you have registered?")
