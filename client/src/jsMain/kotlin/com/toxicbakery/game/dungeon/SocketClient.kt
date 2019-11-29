@@ -30,7 +30,7 @@ class SocketClient(
 
     fun sendMessage(message: String) {
         if (!connected) return
-        terminal.displayMessage(message)
+        terminal.displayMessage(">$message\n\n")
         socket.send(message)
     }
 
