@@ -21,8 +21,6 @@ data class DungeonState(
         .firstOrNull { playerSession -> playerSession.session.sessionId == gameSession.sessionId }
         ?.let(PlayerSession::session)
 
-    operator fun get(player: Player): PlayerSession? = playerSessionsByPlayerId[player.id]
-
     operator fun plus(session: GameSession) = copy(
         gameSessionsBySessionId = gameSessionsBySessionId + (session.sessionId to session)
     )
@@ -42,7 +40,7 @@ data class DungeonState(
 
     operator fun minus(
         player: Player
-    ): DungeonState = get(player)
+    ): DungeonState = playerSessionsByPlayerId[player.id]
         ?.session
         ?.let { session ->
             copy(

@@ -8,6 +8,7 @@ import com.toxicbakery.game.dungeon.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.exception.AuthenticationException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
 import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.manager.AuthenticationManager
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ import org.kodein.di.erased.instance
 
 private class AuthenticationMachineImpl(
     private val authenticationManager: AuthenticationManager,
+    private val commandMachineFactory: (GameSession) -> CommandMachine,
     private val gameSession: GameSession
 ) : AuthenticationMachine {
 
@@ -33,7 +35,7 @@ private class AuthenticationMachineImpl(
     override suspend fun acceptMessage(message: String): Machine<*> {
         _currentState.value = cycle(message)
         return when (currentState) {
-            AuthenticationState.Authenticated -> TODO()
+            AuthenticationState.Authenticated -> commandMachineFactory(gameSession)
             else -> this
         }
     }
@@ -98,6 +100,7 @@ val authenticationMachineModule = Kodein.Module("authenticationMachineModule") {
     bind<AuthenticationMachine>() with factory { gameSession: GameSession ->
         AuthenticationMachineImpl(
             authenticationManager = instance(),
+            commandMachineFactory = factory(),
             gameSession = gameSession
         )
     }

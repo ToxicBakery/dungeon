@@ -46,7 +46,7 @@ internal object InMemoryPersistenceDelegate : PersistenceDelegate {
         return playerWithCredentials.player
     }
 
-    override suspend fun changeName(player: Player) {
+    override suspend fun updatePlayer(player: Player) {
         playerMapStore.modify { playerMap ->
             playerMap + (player.id to requireNotNull(playerMap[player.id]).copy(
                 player = player

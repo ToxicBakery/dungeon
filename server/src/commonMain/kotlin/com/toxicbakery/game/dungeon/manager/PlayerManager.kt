@@ -4,6 +4,7 @@ import com.toxicbakery.game.dungeon.Database
 import com.toxicbakery.game.dungeon.character.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.store.DungeonStateStore
+import kotlinx.coroutines.flow.first
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
@@ -14,11 +15,18 @@ private class PlayerManagerImpl(
     private val database: Database
 ) : PlayerManager {
 
-    override suspend fun changeName(
+    override suspend fun getPlayerByGameSession(
+        gameSession: GameSession
+    ): Player = dungeonStateStore
+        .observe()
+        .first()
+        .let { dungeonState -> database.getPlayerById(dungeonState[gameSession]!!.playerId) }
+
+    override suspend fun updatePlayer(
         player: Player,
         gameSession: GameSession
     ) {
-        database.changeName(player)
+        database.updatePlayer(player)
         dungeonStateStore.modify {dungeonState ->
             dungeonState.set(player, gameSession)
         }
@@ -28,7 +36,11 @@ private class PlayerManagerImpl(
 
 interface PlayerManager {
 
-    suspend fun changeName(
+    suspend fun getPlayerByGameSession(
+        gameSession: GameSession
+    ): Player
+
+    suspend fun updatePlayer(
         player: Player,
         gameSession: GameSession
     )

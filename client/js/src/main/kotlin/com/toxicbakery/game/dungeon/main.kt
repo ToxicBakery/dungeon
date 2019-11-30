@@ -1,6 +1,7 @@
 package com.toxicbakery.game.dungeon
 
 import com.toxicbakery.game.dungeon.client.ClientMessage.UserMessage
+import com.toxicbakery.game.dungeon.client.ExpectedResponseType
 import com.toxicbakery.logging.Arbor
 import org.w3c.dom.Document
 import org.w3c.dom.HTMLInputElement
@@ -30,7 +31,10 @@ fun main() {
         fun sendMessage() {
             val inputText = input.value
             input.value = ""
-            client.sendMessage(UserMessage(inputText))
+            client.sendMessage(
+                message = UserMessage(inputText),
+                hide = terminal.expectedResponseType == ExpectedResponseType.Secure
+            )
         }
 
         val sendButton = document.getElementById("sendButton") as HTMLInputElement

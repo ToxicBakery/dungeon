@@ -18,6 +18,12 @@ interface GameSession {
     val sessionId: PlayerSessionId
 
     /**
+     * Id of the player once authenticated.
+     */
+    val playerId: Int
+        get() = NULL_PLAYER_ID
+
+    /**
      * Write data back to the client
      */
     suspend fun send(
@@ -29,5 +35,9 @@ interface GameSession {
      * Terminate the session.
      */
     suspend fun close()
+
+    companion object {
+        const val NULL_PLAYER_ID = -1
+    }
 
 }

@@ -3,6 +3,7 @@ package com.toxicbakery.game.dungeon.manager
 import com.toxicbakery.game.dungeon.Database
 import com.toxicbakery.game.dungeon.auth.Credentials
 import com.toxicbakery.game.dungeon.character.Player
+import com.toxicbakery.game.dungeon.model.session.AuthenticatedGameSession
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
 import com.toxicbakery.game.dungeon.store.DungeonStateStore
@@ -27,8 +28,9 @@ private class AuthenticationManagerImpl(
         gameSession: GameSession
     ): Player {
         val player = database.authenticatePlayer(credentials)
+        val authenticatedGameSession = AuthenticatedGameSession(player.id, gameSession)
         dungeonStateStore.modify { dungeonState ->
-            dungeonState.set(player, gameSession)
+            dungeonState.set(player, authenticatedGameSession)
         }
         return player
     }

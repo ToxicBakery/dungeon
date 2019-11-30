@@ -3,6 +3,7 @@ package com.toxicbakery.game.dungeon.machine.registration
 import co.touchlab.stately.concurrency.AtomicReference
 import co.touchlab.stately.concurrency.value
 import com.toxicbakery.game.dungeon.auth.Credentials
+import com.toxicbakery.game.dungeon.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.exception.AlreadyRegisteredException
 import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.authentication.AuthenticationMachine
@@ -56,7 +57,7 @@ private class RegistrationMachineImpl(
         if (username.isEmpty()) RegistrationState.Init
         else {
             credentials = credentials.copy(username = username)
-            gameSession.send("Enter a password:")
+            gameSession.send("Enter a password:", ExpectedResponseType.Secure)
             RegistrationState.AwaitingPassword
         }
 

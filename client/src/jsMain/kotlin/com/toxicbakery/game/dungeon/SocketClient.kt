@@ -4,12 +4,18 @@ import com.toxicbakery.game.dungeon.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.client.ClientMessage.UserMessage
 import com.toxicbakery.logging.Arbor
 import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.parse
+import kotlinx.serialization.dump
+import kotlinx.serialization.load
+import kotlinx.serialization.protobuf.ProtoBuf
+import org.khronos.webgl.ArrayBuffer
+import org.khronos.webgl.ArrayBufferView
+import org.khronos.webgl.Int8Array
+import org.khronos.webgl.Uint8Array
 import org.w3c.dom.MessageEvent
 import org.w3c.dom.WebSocket
 import org.w3c.dom.events.Event
+import org.w3c.files.Blob
+import kotlin.js.Promise
 
 @ImplicitReflectionSerializer
 class SocketClient(
@@ -19,13 +25,7 @@ class SocketClient(
 
     private lateinit var socket: WebSocket
     private var connected: Boolean = false
-
-    private val json = Json(
-        configuration = JsonConfiguration(
-            encodeDefaults = true,
-            strictMode = true
-        )
-    )
+    private val protoBuf: ProtoBuf = ProtoBuf()
 
     val isConnected: Boolean
         get() = connected
@@ -42,10 +42,14 @@ class SocketClient(
         socket.close()
     }
 
-    fun sendMessage(message: UserMessage) {
+    fun sendMessage(
+        message: UserMessage,
+        hide:Boolean = false
+    ) {
         if (!connected) return
-        terminal.displayMessage(ServerMessage(">${message.message}\n\n"))
-        socket.send(json.stringify(UserMessage.serializer(), message))
+        if (hide) terminal.displayMessage(ServerMessage("> ****"))
+        else terminal.displayMessage(ServerMessage("> ${message.message}\n\n"))
+        socket.send(protoBuf.dump(message).asUInt8Array())
     }
 
     private fun onOpen() {
@@ -60,10 +64,16 @@ class SocketClient(
     private fun onMessage(event: MessageEvent) {
         Arbor.d("onMessage(${event.data})")
         when (val message = event.data) {
-            is String -> handleMessage(json.parse(message))
+            is Blob -> handleBlob(message)
             else -> Arbor.d("Unhandled message %s", event)
         }
     }
+
+    private fun handleBlob(blob: Blob) = blob
+        .arrayBuffer()
+        .then { buffer ->
+            handleMessage(protoBuf.load(buffer.asByteArray()))
+        }
 
     private fun onClose() {
         Arbor.d("Socket closed")
@@ -71,5 +81,11 @@ class SocketClient(
     }
 
     private fun handleMessage(message: ServerMessage) = terminal.displayMessage(message)
+
+    private fun ByteArray.asUInt8Array(): ArrayBufferView = Uint8Array(toTypedArray())
+
+    private fun ArrayBuffer.asByteArray(): ByteArray = Int8Array(this).unsafeCast<ByteArray>()
+
+    private fun Blob.arrayBuffer(): Promise<ArrayBuffer> = asDynamic().arrayBuffer() as Promise<ArrayBuffer>
 
 }

@@ -1,10 +1,12 @@
 package com.toxicbakery.game.dungeon.client
 
+import kotlinx.serialization.SerialId
 import kotlinx.serialization.Serializable
 
 /**
  * Message base type. Client messages represent data transfers between the client and server.
  */
+@Serializable
 sealed class ClientMessage {
 
     /**
@@ -12,12 +14,15 @@ sealed class ClientMessage {
      */
     @Serializable
     data class UserMessage(
+        @SerialId(1)
         val message: String
     ) : ClientMessage()
 
     @Serializable
     data class ServerMessage(
+        @SerialId(1)
         val message: String,
+        @SerialId(2)
         val expectedResponseType: ExpectedResponseType = ExpectedResponseType.Normal
     ) : ClientMessage()
 

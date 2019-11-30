@@ -17,7 +17,7 @@ private class DatabaseImpl(
         credentials: Credentials
     ): Player = persistenceDelegate.authenticatePlayer(credentials)
 
-    override suspend fun changeName(player: Player) = persistenceDelegate.changeName(player)
+    override suspend fun updatePlayer(player: Player) = persistenceDelegate.updatePlayer(player)
 
     override suspend fun createPlayer(
         credentials: Credentials
@@ -32,7 +32,7 @@ interface Database {
     @Throws(NoPlayerWithUsernameException::class, AuthenticationException::class)
     suspend fun authenticatePlayer(credentials: Credentials): Player
 
-    suspend fun changeName(player: Player)
+    suspend fun updatePlayer(player: Player)
 
     suspend fun createPlayer(credentials: Credentials): Player
 

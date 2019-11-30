@@ -5,12 +5,6 @@ plugins {
 }
 
 kotlin {
-    js() {
-        browser {
-        }
-        nodejs {
-        }
-    }
     jvm {
         compilations.all {
             kotlinOptions {
@@ -30,6 +24,7 @@ kotlin {
         }
         sourceSets["commonMain"].dependencies {
             implementation(kotlin("stdlib-common"))
+            implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
             implementation("io.ktor:ktor-server-netty:${findProperty("ktor_version")}")
             implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
             implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")
@@ -56,11 +51,6 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${findProperty("kotlin_serialization_version")}")
             }
-        }
-        sourceSets["jsMain"].dependencies {
-            implementation(kotlin("test-junit"))
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:${findProperty("kotlin_coroutines_version")}")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:${findProperty("kotlin_serialization_version")}")
         }
     }
 
