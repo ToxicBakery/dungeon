@@ -4,12 +4,12 @@ import co.touchlab.stately.concurrency.AtomicInt
 import co.touchlab.stately.concurrency.AtomicReference
 import co.touchlab.stately.concurrency.value
 import com.toxicbakery.game.dungeon.auth.Credentials
+import com.toxicbakery.game.dungeon.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.exception.AuthenticationException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
 import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.manager.AuthenticationManager
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import com.toxicbakery.game.dungeon.model.session.GameSession.InputResponseType
 import kotlinx.coroutines.delay
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -59,7 +59,7 @@ private class AuthenticationMachineImpl(
 
     private suspend fun takeUsernameAndProceed(username: String): AuthenticationState {
         credentials = credentials.copy(username = username)
-        gameSession.send("What is your password?", InputResponseType.Secure)
+        gameSession.send("What is your password?", ExpectedResponseType.Secure)
         return AuthenticationState.AwaitingPassword
     }
 

@@ -15,6 +15,7 @@ kotlin {
             implementation(project(":configuration"))
             implementation(project(":model"))
             implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:${findProperty("kotlin_serialization_version")}")
         }
         sourceSets["commonTest"].dependencies {
             implementation(kotlin("test-common"))
@@ -23,6 +24,7 @@ kotlin {
         sourceSets["jsMain"].dependencies {
             implementation(kotlin("stdlib-js"))
             implementation("org.jetbrains.kotlinx:kotlinx-html-js:${findProperty("kotlin_html_version")}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:${findProperty("kotlin_serialization_version")}")
         }
     }
 }

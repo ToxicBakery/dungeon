@@ -2,10 +2,14 @@ package com.toxicbakery.game.dungeon
 
 import co.touchlab.stately.concurrency.AtomicBoolean
 import com.benasher44.uuid.uuid4
+import com.toxicbakery.game.dungeon.client.ClientMessage.*
+import com.toxicbakery.game.dungeon.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSessionId
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.websocket.WebSocketServerSession
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.stringify
 
 class WebSocketGameSession(
     override val sessionId: PlayerSessionId = PlayerSessionId(uuid4().toString()),
@@ -19,10 +23,12 @@ class WebSocketGameSession(
 
     override suspend fun send(
         msg: String,
-        inputResponseType: GameSession.InputResponseType
+        expectedResponseType: ExpectedResponseType
     ) {
         if (_isClosed.value) return
-        webSocketServerSession.send(Frame.Text(msg))
+        val output = Json(jsonConfiguration)
+            .stringify(ServerMessage(msg, expectedResponseType))
+        webSocketServerSession.send(Frame.Text(output))
     }
 
     override suspend fun close() {

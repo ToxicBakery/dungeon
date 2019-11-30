@@ -1,7 +1,15 @@
 package com.toxicbakery.game.dungeon.model.session
 
+import com.toxicbakery.game.dungeon.client.ExpectedResponseType
+
+/**
+ * Representation of a connection to a client.
+ */
 interface GameSession {
 
+    /**
+     * True if the session has been terminated.
+     */
     val isClosed: Boolean
 
     /**
@@ -14,24 +22,12 @@ interface GameSession {
      */
     suspend fun send(
         msg: String,
-        inputResponseType: InputResponseType = InputResponseType.Normal
+        expectedResponseType: ExpectedResponseType = ExpectedResponseType.Normal
     )
 
     /**
      * Terminate the session.
      */
     suspend fun close()
-
-    enum class InputResponseType {
-        /**
-         * Input field should be normal
-         */
-        Normal,
-
-        /**
-         * Input field should be masked for secure entry
-         */
-        Secure
-    }
 
 }

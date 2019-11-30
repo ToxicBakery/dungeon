@@ -1,5 +1,7 @@
 package com.toxicbakery.game.dungeon
 
+import com.toxicbakery.game.dungeon.client.ClientMessage.*
+import com.toxicbakery.game.dungeon.client.ExpectedResponseType
 import kotlinx.html.dom.create
 import kotlinx.html.p
 import org.w3c.dom.Element
@@ -12,7 +14,7 @@ class Terminal(
     private val bufferSize: Int = 500
 ) {
 
-    fun displayMessage(message: String) {
+    fun displayMessage(message: ServerMessage) {
         terminalMessages.append(
             if (terminalMessages.childElementCount < bufferSize) createMessageElement(message)
             else {
@@ -25,15 +27,19 @@ class Terminal(
         terminalMessages.scrollTo(0.0, terminalMessages.scrollHeight.toDouble())
     }
 
-    private fun recycleMessageElement(element: Element, message: String) {
-        element.innerHTML = message.toHtml()
+    private fun recycleMessageElement(element: Element, serverMessage: ServerMessage) {
+        element.innerHTML = serverMessage.toHtml()
     }
 
-    private fun createMessageElement(message: String): HTMLElement =
+    private fun createMessageElement(serverMessage: ServerMessage): HTMLElement =
         document.create.p("message").apply {
-            innerHTML = message.toHtml()
+            innerHTML = serverMessage.toHtml()
         }
 
-    private fun String.toHtml(): String = replace("\n", "<br/>")
+    private fun ServerMessage.toHtml(): String = when (expectedResponseType) {
+        ExpectedResponseType.Normal -> message.replace("\n", "<br/>")
+        ExpectedResponseType.Secure -> "* * * *"
+    }
+
 
 }

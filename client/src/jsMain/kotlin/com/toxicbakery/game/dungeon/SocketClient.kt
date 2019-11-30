@@ -1,10 +1,17 @@
 package com.toxicbakery.game.dungeon
 
+import com.toxicbakery.game.dungeon.client.ClientMessage.ServerMessage
+import com.toxicbakery.game.dungeon.client.ClientMessage.UserMessage
 import com.toxicbakery.logging.Arbor
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.parse
 import org.w3c.dom.MessageEvent
 import org.w3c.dom.WebSocket
 import org.w3c.dom.events.Event
 
+@ImplicitReflectionSerializer
 class SocketClient(
     private val host: String,
     private val terminal: Terminal
@@ -12,6 +19,13 @@ class SocketClient(
 
     private lateinit var socket: WebSocket
     private var connected: Boolean = false
+
+    private val json = Json(
+        configuration = JsonConfiguration(
+            encodeDefaults = true,
+            strictMode = true
+        )
+    )
 
     val isConnected: Boolean
         get() = connected
@@ -28,10 +42,10 @@ class SocketClient(
         socket.close()
     }
 
-    fun sendMessage(message: String) {
+    fun sendMessage(message: UserMessage) {
         if (!connected) return
-        terminal.displayMessage(">$message\n\n")
-        socket.send(message)
+        terminal.displayMessage(ServerMessage(">${message.message}\n\n"))
+        socket.send(json.stringify(UserMessage.serializer(), message))
     }
 
     private fun onOpen() {
@@ -46,7 +60,7 @@ class SocketClient(
     private fun onMessage(event: MessageEvent) {
         Arbor.d("onMessage(${event.data})")
         when (val message = event.data) {
-            is String -> handleMessage(message)
+            is String -> handleMessage(json.parse(message))
             else -> Arbor.d("Unhandled message %s", event)
         }
     }
@@ -56,6 +70,6 @@ class SocketClient(
         connected = false
     }
 
-    private fun handleMessage(message: String) = terminal.displayMessage(message)
+    private fun handleMessage(message: ServerMessage) = terminal.displayMessage(message)
 
 }

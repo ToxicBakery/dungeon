@@ -15,6 +15,7 @@ import io.ktor.routing.routing
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.serialization.json.JsonConfiguration
 import org.kodein.di.Kodein
 import org.kodein.di.erased.instance
 import java.time.Duration
