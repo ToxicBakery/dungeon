@@ -25,7 +25,7 @@ private class InitMachineImpl(
         CMD_LOGIN -> authenticationMachineFactory(gameSession)
         CMD_REGISTER -> registrationMachineFactory(gameSession)
         else -> {
-            gameSession.send("Invalid request")
+            gameSession.sendMessage("Invalid request")
             printInstructions()
             this
         }
@@ -33,7 +33,7 @@ private class InitMachineImpl(
 
     override suspend fun initMachine() = printInstructions()
 
-    private suspend fun printInstructions() = gameSession.send(HELP_INSTRUCTIONS)
+    private suspend fun printInstructions() = gameSession.sendMessage(HELP_INSTRUCTIONS)
 
     companion object {
         private const val CMD_LOGIN = "login"

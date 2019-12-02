@@ -1,10 +1,11 @@
 package com.toxicbakery.game.dungeon
 
+import com.toxicbakery.game.dungeon.client.ClientMessage
 import com.toxicbakery.game.dungeon.client.ClientMessage.UserMessage
 import com.toxicbakery.game.dungeon.manager.GameSessionManager
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.logging.Arbor
-import kotlinx.serialization.load
+import kotlinx.serialization.loads
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -19,11 +20,13 @@ private class DungeonServerImpl(
 
     override suspend fun receivedMessage(
         session: GameSession,
-        message: ByteArray
+        message: String
     ) {
-        Arbor.d("Received text from session %s", session.sessionId)
-        val userMessage: UserMessage = protoBuf.load(message)
-        gameSessionManager.receivedMessage(session, userMessage.message)
+        Arbor.d("Received message from session %s (%s)", session.sessionId, message)
+        when (val clientMessage = protoBuf.loads(ClientMessage.serializer(), message)) {
+            is UserMessage -> gameSessionManager.receivedMessage(session, clientMessage.message)
+            else -> error("Unexpected ClientMessage ${clientMessage::class.simpleName}")
+        }
     }
 
     override suspend fun onNewSession(session: GameSession) = gameSessionManager.sessionCreated(session)
@@ -36,7 +39,7 @@ interface DungeonServer {
 
     suspend fun receivedMessage(
         session: GameSession,
-        message: ByteArray
+        message: String
     )
 
     suspend fun onNewSession(

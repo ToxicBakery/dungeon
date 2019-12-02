@@ -19,4 +19,11 @@ data class Player(
     val global: Global = Global(),
     @SerialId(6)
     val location: Location = Location()
-) : Character
+) : Character {
+
+    /**
+     * Representation of the [statsBase] + [stats]. As
+     */
+    fun getComputedStats(): Stats = statsBase + stats
+
+}

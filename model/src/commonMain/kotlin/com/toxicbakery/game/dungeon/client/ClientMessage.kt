@@ -18,12 +18,24 @@ sealed class ClientMessage {
         val message: String
     ) : ClientMessage()
 
+    /**
+     * Message sent by the server that may expect a response.
+     */
     @Serializable
     data class ServerMessage(
         @SerialId(1)
         val message: String,
         @SerialId(2)
         val expectedResponseType: ExpectedResponseType = ExpectedResponseType.Normal
+    ) : ClientMessage()
+
+    /**
+     * Message sent by the server conveying the current player information.
+     */
+    @Serializable
+    data class PlayerDataMessage(
+        @SerialId(1)
+        val playerData: PlayerData
     ) : ClientMessage()
 
 }

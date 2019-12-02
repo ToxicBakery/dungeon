@@ -7,6 +7,7 @@ import io.ktor.application.install
 import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
 import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.readText
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
@@ -61,7 +62,7 @@ class DungeonApplication(
         frame: Frame
     ) {
         when (frame) {
-            is Frame.Binary -> dungeonServer.receivedMessage(session, frame.data)
+            is Frame.Text -> dungeonServer.receivedMessage(session, frame.readText())
             else -> Arbor.w("Ignoring unhandled frame of type %s", frame.frameType)
         }
     }

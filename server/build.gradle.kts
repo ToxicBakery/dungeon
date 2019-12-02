@@ -20,7 +20,7 @@ kotlin {
             languageSettings.useExperimentalAnnotation("kotlinx.coroutines.FlowPreview")
             languageSettings.useExperimentalAnnotation("kotlinx.serialization.UnstableDefault")
             languageSettings.useExperimentalAnnotation("kotlinx.serialization.ImplicitReflectionSerializer")
-            languageSettings.useExperimentalAnnotation("kotlin.Experimental")
+            languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
         }
         sourceSets["commonMain"].dependencies {
             implementation(kotlin("stdlib-common"))

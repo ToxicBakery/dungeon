@@ -16,4 +16,15 @@ data class Stats(
     val defence: Int = 0,
     @SerialId(5)
     val luck: Int = 0
-)
+) {
+
+    operator fun plus(other: Stats): Stats =
+        Stats(
+            health = other.health, // Health is subtracted so only the remaining health needs to be shown
+            strength = strength + other.strength,
+            dexterity = dexterity + other.dexterity,
+            defence = defence + other.defence,
+            luck = luck + other.luck
+        )
+
+}

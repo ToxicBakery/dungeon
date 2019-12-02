@@ -3,19 +3,16 @@ package com.toxicbakery.game.dungeon.machine.command
 import co.touchlab.stately.concurrency.AtomicReference
 import co.touchlab.stately.concurrency.value
 import com.toxicbakery.game.dungeon.machine.Machine
-import com.toxicbakery.game.dungeon.manager.PlayerManager
-import com.toxicbakery.game.dungeon.manager.WorldManager
+import com.toxicbakery.game.dungeon.manager.PlayerDataManager
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.factory
 import org.kodein.di.erased.instance
-import kotlin.math.max
 
 private class CommandMachineImpl(
     private val gameSession: GameSession,
-    private val playerManager: PlayerManager,
-    private val worldManager: WorldManager
+    private val playerDataManager: PlayerDataManager
 ) : CommandMachine {
 
     private val _currentState: AtomicReference<CommandState> = AtomicReference(CommandState.Init)
@@ -42,13 +39,7 @@ private class CommandMachineImpl(
     }
 
     private suspend fun initCommand(): CommandState {
-        playerManager.getPlayerByGameSession(gameSession)
-            .let { player ->
-                val hp = player.stats.health / max(player.statsBase.health, 1)
-                val loc = player.location
-                val wName = worldManager.getWorldById(loc.worldId).name
-                gameSession.send("$hp $wName(${loc.x}, ${loc.y})")
-            }
+        gameSession.sendPlayerData(playerDataManager.getPlayerData(gameSession))
         return CommandState.Init
     }
 
@@ -56,7 +47,7 @@ private class CommandMachineImpl(
         groupList
             .map { group -> "~~ ${group.name} ~~\n${group.commands.joinToString()}" }
             .joinToString(separator = "\n\n")
-            .let { output -> gameSession.send(output) }
+            .let { output -> gameSession.sendMessage(output) }
         return initCommand()
     }
 
@@ -112,8 +103,7 @@ val commandMachineModule = Kodein.Module("") {
     bind<CommandMachine>() with factory { gameSession: GameSession ->
         CommandMachineImpl(
             gameSession = gameSession,
-            playerManager = instance(),
-            worldManager = instance()
+            playerDataManager = instance()
         )
     }
 }

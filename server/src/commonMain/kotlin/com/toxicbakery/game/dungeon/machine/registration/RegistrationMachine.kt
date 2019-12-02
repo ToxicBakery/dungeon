@@ -49,7 +49,7 @@ private class RegistrationMachineImpl(
 
     private suspend fun initRegistration(): RegistrationState {
         credentials = Credentials()
-        gameSession.send("Choose a username:")
+        gameSession.sendMessage("Choose a username:")
         return RegistrationState.AwaitingUsername
     }
 
@@ -57,7 +57,7 @@ private class RegistrationMachineImpl(
         if (username.isEmpty()) RegistrationState.Init
         else {
             credentials = credentials.copy(username = username)
-            gameSession.send("Enter a password:", ExpectedResponseType.Secure)
+            gameSession.sendMessage("Enter a password:", ExpectedResponseType.Secure)
             RegistrationState.AwaitingPassword
         }
 
@@ -67,10 +67,10 @@ private class RegistrationMachineImpl(
             credentials = credentials.copy(password = password)
             try {
                 authenticationManager.registerPlayer(credentials)
-                gameSession.send("Registration successful! Returning to login.")
+                gameSession.sendMessage("Registration successful! Returning to login.")
                 RegistrationState.Registered
             } catch (e: AlreadyRegisteredException) {
-                gameSession.send("Registration failure! User already exists.")
+                gameSession.sendMessage("Registration failure! User already exists.")
                 initRegistration()
             }
         }

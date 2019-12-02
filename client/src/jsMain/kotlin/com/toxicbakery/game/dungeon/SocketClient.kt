@@ -1,21 +1,17 @@
 package com.toxicbakery.game.dungeon
 
+import com.toxicbakery.game.dungeon.client.ClientMessage
 import com.toxicbakery.game.dungeon.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.client.ClientMessage.UserMessage
 import com.toxicbakery.logging.Arbor
 import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.dump
-import kotlinx.serialization.load
+import kotlinx.serialization.UnstableDefault
+import kotlinx.serialization.dumps
+import kotlinx.serialization.loads
 import kotlinx.serialization.protobuf.ProtoBuf
-import org.khronos.webgl.ArrayBuffer
-import org.khronos.webgl.ArrayBufferView
-import org.khronos.webgl.Int8Array
-import org.khronos.webgl.Uint8Array
 import org.w3c.dom.MessageEvent
 import org.w3c.dom.WebSocket
 import org.w3c.dom.events.Event
-import org.w3c.files.Blob
-import kotlin.js.Promise
 
 @ImplicitReflectionSerializer
 class SocketClient(
@@ -24,11 +20,14 @@ class SocketClient(
 ) {
 
     private lateinit var socket: WebSocket
-    private var connected: Boolean = false
+    private var _connected: Boolean = false
     private val protoBuf: ProtoBuf = ProtoBuf()
 
-    val isConnected: Boolean
-        get() = connected
+    var isConnected: Boolean
+        get() = _connected
+        private set(value) {
+            _connected = value
+        }
 
     fun start() {
         socket = WebSocket("ws://$host/ws")
@@ -42,19 +41,19 @@ class SocketClient(
         socket.close()
     }
 
-    fun sendMessage(
-        message: UserMessage,
-        hide:Boolean = false
-    ) {
-        if (!connected) return
-        if (hide) terminal.displayMessage(ServerMessage("> ****"))
-        else terminal.displayMessage(ServerMessage("> ${message.message}\n\n"))
-        socket.send(protoBuf.dump(message).asUInt8Array())
+    @UnstableDefault
+    fun sendMessage(message: String) {
+        if (!isConnected) return
+        val userMessage = UserMessage(message)
+        terminal.displayMessage(userMessage)
+        val output = protoBuf.dumps(ClientMessage.serializer(), userMessage)
+        Arbor.d("Sending message: %s\n%s\noutput: %s", message, userMessage.message, output)
+        socket.send(output)
     }
 
     private fun onOpen() {
         Arbor.d("Socket opened")
-        connected = true
+        isConnected = true
     }
 
     private fun onError(event: Event) {
@@ -64,28 +63,22 @@ class SocketClient(
     private fun onMessage(event: MessageEvent) {
         Arbor.d("onMessage(${event.data})")
         when (val message = event.data) {
-            is Blob -> handleBlob(message)
+            is String -> handleText(message)
             else -> Arbor.d("Unhandled message %s", event)
         }
     }
 
-    private fun handleBlob(blob: Blob) = blob
-        .arrayBuffer()
-        .then { buffer ->
-            handleMessage(protoBuf.load(buffer.asByteArray()))
-        }
+    private fun handleText(text: String) {
+        Arbor.d("Handling text %s", text)
+        handleMessage(protoBuf.loads(ClientMessage.serializer(), text))
+    }
 
     private fun onClose() {
         Arbor.d("Socket closed")
-        connected = false
+        isConnected = false
+        handleMessage(ServerMessage("Disconnected"))
     }
 
-    private fun handleMessage(message: ServerMessage) = terminal.displayMessage(message)
-
-    private fun ByteArray.asUInt8Array(): ArrayBufferView = Uint8Array(toTypedArray())
-
-    private fun ArrayBuffer.asByteArray(): ByteArray = Int8Array(this).unsafeCast<ByteArray>()
-
-    private fun Blob.arrayBuffer(): Promise<ArrayBuffer> = asDynamic().arrayBuffer() as Promise<ArrayBuffer>
+    private fun handleMessage(message: ClientMessage) = terminal.displayMessage(message)
 
 }

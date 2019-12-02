@@ -4,13 +4,15 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":model"))
-    implementation(project(":configuration"))
-    implementation(project(":client"))
+    implementation(kotlin("stdlib-common"))
     implementation(kotlin("stdlib-js"))
+    implementation(project(":client"))
+    implementation(project(":configuration"))
+    implementation(project(":model"))
+    implementation("com.ToxicBakery.logging:arbor-js:${findProperty("arbor_version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:${findProperty("kotlin_serialization_version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-html-js:${findProperty("kotlin_html_version")}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${findProperty("kotlin_serialization_version")}")
-    implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:${findProperty("kotlin_serialization_version")}")
 }
 
 kotlin {

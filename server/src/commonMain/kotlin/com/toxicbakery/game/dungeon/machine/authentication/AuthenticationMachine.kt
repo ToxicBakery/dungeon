@@ -55,13 +55,13 @@ private class AuthenticationMachineImpl(
         if (authenticationErrorCount.incrementAndGet() > MAX_AUTH_ATTEMPTS) tooManyAttempts()
         else {
             credentials = Credentials()
-            gameSession.send("What is your username?")
+            gameSession.sendMessage("What is your username?")
             AuthenticationState.AwaitingUsername
         }
 
     private suspend fun takeUsernameAndProceed(username: String): AuthenticationState {
         credentials = credentials.copy(username = username)
-        gameSession.send("What is your password?", ExpectedResponseType.Secure)
+        gameSession.sendMessage("What is your password?", ExpectedResponseType.Secure)
         return AuthenticationState.AwaitingPassword
     }
 
@@ -69,20 +69,20 @@ private class AuthenticationMachineImpl(
         credentials = credentials.copy(password = password)
         return try {
             authenticationManager.authenticatePlayer(credentials, gameSession)
-            gameSession.send("Authentication successful! Welcome back ${credentials.username}")
+            gameSession.sendMessage("Authentication successful! Welcome back ${credentials.username}")
             AuthenticationState.Authenticated
         } catch (e: NoPlayerWithUsernameException) {
-            gameSession.send("User not found, are you sure you have registered?")
+            gameSession.sendMessage("User not found, are you sure you have registered?")
             initAuthentication()
         } catch (e: AuthenticationException) {
-            gameSession.send("Authentication failed, check your password and try again.")
+            gameSession.sendMessage("Authentication failed, check your password and try again.")
             initAuthentication()
         }
     }
 
     private suspend fun tooManyAttempts(): AuthenticationState {
         delay(AUTH_FAILURE_TIMEOUT)
-        gameSession.send("Too many failed authentication attempts.")
+        gameSession.sendMessage("Too many failed authentication attempts.")
         gameSession.close()
         return AuthenticationState.Init
     }
