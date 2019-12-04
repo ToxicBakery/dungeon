@@ -44,7 +44,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${findProperty("kotlin_serialization_version")}")
     implementation("ch.qos.logback:logback-classic:+")
     implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
-    implementation("co.touchlab:stately:${findProperty("stately_version")}")
 }
 
 val taskGetJs by tasks.register<Copy>("getJsFromClient") {

@@ -1,34 +1,33 @@
 package com.toxicbakery.game.dungeon.persistence
 
-import co.touchlab.stately.annotation.Throws
-import co.touchlab.stately.concurrency.AtomicInt
-import com.toxicbakery.game.dungeon.model.auth.Credentials
-import com.toxicbakery.game.dungeon.model.auth.PlayerWithCredentials
-import com.toxicbakery.game.dungeon.model.character.Player
 import com.toxicbakery.game.dungeon.exception.AlreadyRegisteredException
 import com.toxicbakery.game.dungeon.exception.AuthenticationException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithIdException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
+import com.toxicbakery.game.dungeon.model.auth.Credentials
+import com.toxicbakery.game.dungeon.model.auth.PlayerWithCredentials
+import com.toxicbakery.game.dungeon.model.character.Player
 import com.toxicbakery.game.dungeon.persistence.store.BroadcastChannelStore
 import com.toxicbakery.game.dungeon.persistence.store.ChannelStore
 import kotlinx.coroutines.flow.first
+import kotlin.jvm.Volatile
 
 // FIXME Move the business logic out of the delegate and migrate to a real db
 internal object InMemoryPersistenceDelegate : PersistenceDelegate {
 
-    private val playerIdGenerator: AtomicInt = AtomicInt(0)
+    @Volatile
+    private var playerIdGenerator: Int = 0
     private val playerMapStore: ChannelStore<Map<Int, PlayerWithCredentials>> =
         PlayerMapStore
 
     private val nextPlayerId: Int
-        get() = playerIdGenerator.incrementAndGet()
+        get() = ++playerIdGenerator
 
     private fun Map<Int, PlayerWithCredentials>.getPlayerWithUsername(username: String): Player =
         values.first { playerWithCredentials ->
             playerWithCredentials.credentials.username == username
         }.player
 
-    @Throws(NoPlayerWithUsernameException::class)
     private suspend fun getPlayerWithCredentialsByUsername(
         username: String
     ): PlayerWithCredentials = playerMapStore
@@ -38,7 +37,6 @@ internal object InMemoryPersistenceDelegate : PersistenceDelegate {
         .firstOrNull { playerWithCredentials -> playerWithCredentials.credentials.username == username }
         ?: throw NoPlayerWithUsernameException(username)
 
-    @Throws(NoPlayerWithUsernameException::class, AuthenticationException::class)
     override suspend fun authenticatePlayer(
         credentials: Credentials
     ): Player {

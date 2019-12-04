@@ -1,5 +1,7 @@
 enableFeaturePreview("GRADLE_METADATA")
 
+include(":map")
+include(":map-generator")
 include(":common")
 include(":common-client")
 include(":common-server")

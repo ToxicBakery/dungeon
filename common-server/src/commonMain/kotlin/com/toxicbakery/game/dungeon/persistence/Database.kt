@@ -1,10 +1,7 @@
 package com.toxicbakery.game.dungeon.persistence
 
-import co.touchlab.stately.annotation.Throws
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.character.Player
-import com.toxicbakery.game.dungeon.exception.AuthenticationException
-import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.singleton
@@ -29,7 +26,6 @@ private class DatabaseImpl(
 
 interface Database {
 
-    @Throws(NoPlayerWithUsernameException::class, AuthenticationException::class)
     suspend fun authenticatePlayer(credentials: Credentials): Player
 
     suspend fun updatePlayer(player: Player)

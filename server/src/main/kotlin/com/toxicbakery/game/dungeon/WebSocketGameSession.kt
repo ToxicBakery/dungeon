@@ -1,6 +1,5 @@
 package com.toxicbakery.game.dungeon
 
-import co.touchlab.stately.concurrency.AtomicBoolean
 import com.benasher44.uuid.uuid4
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.PlayerDataMessage
@@ -20,16 +19,17 @@ class WebSocketGameSession(
     private val webSocketServerSession: WebSocketServerSession
 ) : GameSession {
 
-    private val _isClosed = AtomicBoolean(false)
+    @Volatile
+    private var _isClosed = false
 
     override val isClosed: Boolean
-        get() = _isClosed.value
+        get() = _isClosed
 
     override suspend fun sendMessage(
         msg: String,
         expectedResponseType: ExpectedResponseType
     ) {
-        if (_isClosed.value) return
+        if (_isClosed) return
         val clientMessage: ClientMessage = ServerMessage(msg, expectedResponseType)
         Arbor.d("Sending clientMessage: %s", clientMessage)
         val output: String = ProtoBuf().dumps(ClientMessage.serializer(), clientMessage)
@@ -37,7 +37,7 @@ class WebSocketGameSession(
     }
 
     override suspend fun sendPlayerData(playerData: PlayerData) {
-        if (_isClosed.value) return
+        if (_isClosed) return
         val output: String = ProtoBuf().dumps(ClientMessage.serializer(), PlayerDataMessage(playerData))
         Arbor.d("Sending PlayerData: %s", output)
         webSocketServerSession.send(textFrame(output))
@@ -45,7 +45,7 @@ class WebSocketGameSession(
 
     override suspend fun close() {
         webSocketServerSession.close()
-        _isClosed.value = true
+        _isClosed = true
     }
 
 }
