@@ -24,8 +24,10 @@ kotlin {
             languageSettings.useExperimentalAnnotation("kotlinx.coroutines.FlowPreview")
             languageSettings.useExperimentalAnnotation("kotlinx.serialization.ImplicitReflectionSerializer")
             languageSettings.useExperimentalAnnotation("io.ktor.util.KtorExperimentalAPI")
+            languageSettings.useExperimentalAnnotation("kotlinx.serialization.UnstableDefault")
         }
         sourceSets["commonMain"].dependencies {
+            implementation(project(":common"))
             implementation(kotlin("stdlib-common"))
             implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
             implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")

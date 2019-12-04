@@ -1,23 +1,19 @@
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
     application
-//    id("io.gitlab.arturbosch.detekt")
+    id("io.gitlab.arturbosch.detekt")
 }
 
-//detekt {
-//    failFast = true
-//    buildUponDefaultConfig = true
-//    config = files("${rootProject.projectDir}/detekt/config.yml")
-//    input = files(
-//        "$projectDir/src/commonMain/kotlin"
-//    )
-//    reports {
-//        html.enabled = true
-//    }
-//}
+detekt {
+    failFast = true
+    buildUponDefaultConfig = true
+    config = files("${rootProject.projectDir}/detekt/config.yml")
+    reports {
+        html.enabled = true
+    }
+}
 
 application {
     mainClassName = "io.ktor.server.netty.DevelopmentEngine"
@@ -36,6 +32,8 @@ sourceSets {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":common-client"))
+    implementation(project(":common-server"))
     implementation(kotlin("stdlib-jdk8"))
     implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
     implementation("io.ktor:ktor-server-netty:${findProperty("ktor_version")}")
@@ -50,15 +48,10 @@ dependencies {
 }
 
 val taskGetJs by tasks.register<Copy>("getJsFromClient") {
-    val clientJsProject = project(":common")
+    val clientJsProject = project(":common-client")
     dependsOn(clientJsProject.tasks.getByName("jsBrowserWebpack"))
-    from("${clientJsProject.buildDir}/distributions/common.js")
+    from("${clientJsProject.buildDir}/distributions/${clientJsProject.name}.js")
     into("$buildDir/external-resources/web")
 }
-//val taskGetResources by tasks.register<Copy>("getResourcesFromClient"){
-//    val clientJsProject = project(":client:js")
-//    dependsOn(clientJsProject.tasks.getByName("browserWebpack"))
-//    from("${clientJsProject.buildDir}/processedResources/Js/main")
-//    into("$buildDir/external-resources/web")
-//}
+
 tasks.getByName("compileKotlin").dependsOn(taskGetJs)

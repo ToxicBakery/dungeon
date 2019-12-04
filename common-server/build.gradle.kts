@@ -26,6 +26,7 @@ kotlin {
             languageSettings.useExperimentalAnnotation("io.ktor.util.KtorExperimentalAPI")
         }
         sourceSets["commonMain"].dependencies {
+            implementation(project(":common"))
             implementation(kotlin("stdlib-common"))
             implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
             implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
@@ -34,6 +35,7 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:${findProperty("kotlin_coroutines_version")}")
             implementation("co.touchlab:stately:${findProperty("stately_version")}")
             implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
+            implementation("com.soywiz.korlibs.klock:klock:${findProperty("klock_version")}")
         }
         sourceSets["commonTest"].dependencies {
             implementation(kotlin("test-common"))
