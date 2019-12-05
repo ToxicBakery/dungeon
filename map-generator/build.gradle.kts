@@ -27,6 +27,7 @@ compileKotlin.kotlinOptions.freeCompilerArgs += "-Xuse-experimental=kotlin.Exper
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation(project(":model"))
     implementation(project(":map"))
     implementation(project(":common"))
     implementation("com.ToxicBakery.logging:arbor-jvm:${findProperty("arbor_version")}")

@@ -26,8 +26,10 @@ kotlin {
             languageSettings.useExperimentalAnnotation("io.ktor.util.KtorExperimentalAPI")
         }
         sourceSets["commonMain"].dependencies {
-            implementation(project(":common"))
             implementation(kotlin("stdlib-common"))
+            implementation(project(":model"))
+            implementation(project(":common"))
+            implementation(project(":map:"))
             implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
             implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
             implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")

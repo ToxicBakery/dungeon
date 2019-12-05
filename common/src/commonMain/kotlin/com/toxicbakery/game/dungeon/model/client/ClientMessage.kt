@@ -1,5 +1,6 @@
 package com.toxicbakery.game.dungeon.model.client
 
+import com.toxicbakery.game.dungeon.map.WorldMap
 import kotlinx.serialization.SerialId
 import kotlinx.serialization.Serializable
 
@@ -41,7 +42,7 @@ sealed class ClientMessage {
     @Serializable
     class MapMessage(
         @SerialId(1)
-        val byteArray: ByteArray
+        val worldMap: WorldMap
     ) : ClientMessage()
 
 }

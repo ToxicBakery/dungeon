@@ -12,8 +12,10 @@ data class RegionLocation(
      * Ensure x and y coords are in bounds and wrap if necessary.
      */
     fun wrap(regionsWidth: Int): RegionLocation {
-        val newX = wrapCoordinate(regionsWidth, x)
-        val newY = wrapCoordinate(regionsWidth, y)
+        val newX =
+            wrapCoordinate(regionsWidth, x)
+        val newY =
+            wrapCoordinate(regionsWidth, y)
         return if (newX == x && newY == y) this
         else RegionLocation(newX, newY)
     }
@@ -39,8 +41,14 @@ data class RegionLocation(
     companion object {
         fun wrapped(regionCount: Int, x: Int, y: Int): RegionLocation =
             RegionLocation(
-                x = wrapCoordinate(regionCount, x),
-                y = wrapCoordinate(regionCount, y)
+                x = wrapCoordinate(
+                    regionCount,
+                    x
+                ),
+                y = wrapCoordinate(
+                    regionCount,
+                    y
+                )
             )
 
         private fun wrapCoordinate(

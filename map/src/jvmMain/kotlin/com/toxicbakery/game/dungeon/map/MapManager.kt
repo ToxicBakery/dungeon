@@ -3,81 +3,21 @@ package com.toxicbakery.game.dungeon.map
 import com.toxicbakery.game.dungeon.model.character.Location
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
+import org.kodein.di.erased.instance
 import org.kodein.di.erased.singleton
-import org.mapdb.Atomic
-import org.mapdb.DBMaker
-import org.mapdb.HTreeMap
 import kotlin.math.abs
 
-/**
- * Size of the table measuring the width (width == height, square map). Must be a power of 2.
- */
-private const val TABLE_MAP_SIZE_REF = "table_map_size_ref"
-
-/**
- * Size of regions in the map. Must be a power of 2.
- */
-private const val TABLE_REGION_SIZE_REF = "table_region_size_ref"
-
-private const val TABLE_MAP = "map_"
-
-/**id "com.github.gmazzo.buildconfig" version "1.6.1"
- * Root map (id = 0)
- */
-private const val TABLE_MAP_ROOT = "${TABLE_MAP}_0"
-
-class MapManager(
-    private val mapSizeAtomic: Atomic.Integer,
-    private val regionSizeAtomic: Atomic.Integer,
-    private val map: HTreeMap<RegionLocation, Region>
-) {
-
-    /**
-     * Size of the table measuring the width (width == height, square map). Must be a power of 2.
-     */
-    var mapSize: Int
-        get() = mapSizeAtomic.get().throwIfInvalid()
-        set(value) {
-            mapSizeAtomic.set(value)
-        }
-
-    /**
-     * Size of regions in the map. Must be a power of 2.
-     */
-    var regionSize: Int
-        get() = regionSizeAtomic.get().throwIfInvalid()
-        set(value) = regionSizeAtomic.set(value)
-
-    /**
-     * Number of regions along the x or y axis
-     */
-    private val regionCount: Int
-        get() = mapSize / regionSize
-
-    fun generateMap() {
-        map.clear()
-
-        if (!mapSize.isPositivePowerOfTwo() || !regionSize.isPositivePowerOfTwo())
-            error("Map and Region sizes must be positive powers of 2")
-
-        if (regionSize > mapSize) error("No..")
-
-        val regionCount = regionCount
-        (0 until regionCount)
-            .flatMap { y -> (0 until regionCount).map { x -> RegionLocation(x, y) } }
-            .forEach { regionLocation ->
-                map[regionLocation] = Region(
-                    byteArray = ByteArray(regionSize * regionSize) {
-                        (regionLocation.x + regionLocation.y).toByte()
-                    }
-                )
-            }
-    }
+private class MapManagerImpl(
+    private val mapStore: MapStore
+) : MapBaseFunctionality(
+    mapSizeAtomic = mapStore.mapSizeAtomic,
+    regionSizeAtomic = mapStore.regionSizeAtomic
+), MapManager {
 
     /**
      * Get a windowed view of the map using given display dimensions and a location.
      */
-    fun drawWindow(window: Window): String {
+    override fun drawWindow(window: Window): List<List<Byte>> {
         if (window.size > mapSize) error("Request ${window.size} exceeds world dimension $mapSize")
         if (window.size and 1 == 0) error("Request ${window.size} must be odd")
 
@@ -87,7 +27,10 @@ class MapManager(
         val topLeftInRegion = window.topLeftLocation.boundTo(regionSize)
 
         fun regionDistance(left: Int, right: Int): Int =
-            if (left > right) distance((left - rCount) % rCount, right)
+            if (left > right) distance(
+                (left - rCount) % rCount,
+                right
+            )
             else distance(left, right)
 
         val xDistance = regionDistance(topLeftRegionLocation.x, bottomRightRegionLocation.x)
@@ -112,7 +55,6 @@ class MapManager(
 
                 rows.filterIndexed { index, _ -> index >= topLeftInRegion.y && index < bottomRightInRegion.y }
                     .map { arr -> arr.slice(topLeftInRegion.x until bottomRightInRegion.x) }
-                    .joinToString("\n", transform = {it.joinToString("")})
             }
     }
 
@@ -137,14 +79,14 @@ class MapManager(
     private fun Location.boundTo(regionSize: Int): Location {
         val topLeftXNorm = x % regionSize
         val topLeftYNorm = y % regionSize
-
         return Location(
             x = if (topLeftXNorm < 0) regionSize + topLeftXNorm else topLeftXNorm,
             y = if (topLeftYNorm < 0) regionSize + topLeftYNorm else topLeftYNorm
         )
     }
 
-    private fun fetchRegion(regionLocation: RegionLocation): Region = map.getValue(regionLocation)
+    private fun fetchRegion(regionLocation: RegionLocation): Region =
+        mapStore.map.getValue(regionLocation)
 
     private val RegionLocation.region: Region
         get() = fetchRegion(this)
@@ -157,10 +99,6 @@ class MapManager(
                 y = if (y < 0) (mapSize + y) / size else y / size
             )
         }
-
-    private fun Int.throwIfInvalid(): Int = if (this <= 0) error("Dimension not set!") else this
-
-    private fun Int.isPositivePowerOfTwo(): Boolean = this > 0 && ((this and (this - 1)) == 0)
 
     companion object {
 
@@ -176,33 +114,12 @@ class MapManager(
 
 }
 
-val mapManagerModule = Kodein.Module("mapManagerModule") {
+
+actual val mapManagerModule = Kodein.Module("mapManagerModule") {
+    import(mapStoreModule)
     bind<MapManager>() with singleton {
-        @Suppress("MagicNumber")
-        val oneHundredMB = 100L * 1024L * 1024L
-        val db = DBMaker.fileDB("dungeon.db")
-            .closeOnJvmShutdown()
-            .executorEnable()
-            .fileMmapEnable()
-            .allocateStartSize(oneHundredMB)
-            .make()
-
-        val tableSize = db.atomicInteger(TABLE_MAP_SIZE_REF)
-            .createOrOpen()
-
-        val regionSize = db.atomicInteger(TABLE_REGION_SIZE_REF)
-            .createOrOpen()
-
-        val map = db.hashMap(
-            name = TABLE_MAP_ROOT,
-            keySerializer = RegionLocation.Serializer,
-            valueSerializer = Region.Serializer
-        ).createOrOpen()
-
-        MapManager(
-            mapSizeAtomic = tableSize,
-            regionSizeAtomic = regionSize,
-            map = map
+        MapManagerImpl(
+            mapStore = instance()
         )
     }
 }

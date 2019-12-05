@@ -27,6 +27,8 @@ kotlin {
         }
         sourceSets["commonMain"].dependencies {
             implementation(kotlin("stdlib-common"))
+            implementation(project(":model"))
+            implementation(project(":map"))
             implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
             implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
             implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")

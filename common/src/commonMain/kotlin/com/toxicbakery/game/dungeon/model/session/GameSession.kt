@@ -1,7 +1,7 @@
 package com.toxicbakery.game.dungeon.model.session
 
+import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
-import com.toxicbakery.game.dungeon.model.client.PlayerData
 
 /**
  * Representation of a connection to a client.
@@ -25,7 +25,7 @@ interface GameSession {
         get() = NULL_PLAYER_ID
 
     /**
-     * Write message back to the client
+     * Write message back to the client. This is a helper for sending [ClientMessage.ServerMessage] instances.
      */
     suspend fun sendMessage(
         msg: String,
@@ -33,9 +33,9 @@ interface GameSession {
     )
 
     /**
-     * Write the player data to the client
+     * Write a client message out.
      */
-    suspend fun sendPlayerData(playerData: PlayerData)
+    suspend fun sendClientMessage(clientMessage: ClientMessage)
 
     /**
      * Terminate the session.

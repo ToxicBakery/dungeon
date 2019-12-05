@@ -1,5 +1,6 @@
 enableFeaturePreview("GRADLE_METADATA")
 
+include(":model")
 include(":map")
 include(":map-generator")
 include(":common")

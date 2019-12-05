@@ -3,6 +3,7 @@ package com.toxicbakery.game.dungeon.machine.command
 import com.toxicbakery.game.dungeon.exception.UnknownCommandException
 import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.manager.PlayerDataManager
+import com.toxicbakery.game.dungeon.model.client.ClientMessage.PlayerDataMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -45,8 +46,10 @@ private class CommandMachineImpl(
         initCommand()
     }
 
-    private suspend fun GameSession.initCommand() =
-        sendPlayerData(playerDataManager.getPlayerData(this))
+    private suspend fun GameSession.initCommand() {
+        val playerData = playerDataManager.getPlayerData(this)
+        sendClientMessage(PlayerDataMessage(playerData))
+    }
 
     private suspend fun GameSession.helpCommand() {
         sendMessage(commandMap.helpMessage)

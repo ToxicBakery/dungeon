@@ -31,6 +31,8 @@ sourceSets {
 }
 
 dependencies {
+    implementation(project(":map"))
+    implementation(project(":model"))
     implementation(project(":common"))
     implementation(project(":common-client"))
     implementation(project(":common-server"))
@@ -46,6 +48,13 @@ dependencies {
     implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
 }
 
+val taskGetDb by tasks.register<Copy>("getDbFromMapGenerator") {
+    val mapGeneratorProject = project(":map-generator")
+    dependsOn(mapGeneratorProject.tasks.getByName("run"))
+    from("${mapGeneratorProject.projectDir}/dungeon.db")
+    into("$projectDir")
+}
+
 val taskGetJs by tasks.register<Copy>("getJsFromClient") {
     val clientJsProject = project(":common-client")
     dependsOn(clientJsProject.tasks.getByName("jsBrowserWebpack"))
@@ -53,4 +62,4 @@ val taskGetJs by tasks.register<Copy>("getJsFromClient") {
     into("$buildDir/external-resources/web")
 }
 
-tasks.getByName("compileKotlin").dependsOn(taskGetJs)
+tasks.getByName("compileKotlin").dependsOn(taskGetJs, taskGetDb)

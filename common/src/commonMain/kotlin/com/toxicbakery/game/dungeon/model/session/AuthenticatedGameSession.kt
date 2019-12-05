@@ -1,7 +1,7 @@
 package com.toxicbakery.game.dungeon.model.session
 
+import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
-import com.toxicbakery.game.dungeon.model.client.PlayerData
 
 class AuthenticatedGameSession(
     override val playerId: Int,
@@ -17,8 +17,8 @@ class AuthenticatedGameSession(
     override suspend fun sendMessage(msg: String, expectedResponseType: ExpectedResponseType) =
         gameSession.sendMessage(msg, expectedResponseType)
 
-    override suspend fun sendPlayerData(playerData: PlayerData) =
-        gameSession.sendPlayerData(playerData)
+    override suspend fun sendClientMessage(clientMessage: ClientMessage) =
+        gameSession.sendClientMessage(clientMessage)
 
     override suspend fun close() = gameSession.close()
 
