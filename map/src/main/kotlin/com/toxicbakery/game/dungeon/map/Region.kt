@@ -27,12 +27,12 @@ class Region(
         org.mapdb.Serializer<Region> {
 
         override fun serialize(out: DataOutput2, value: Region) {
-            out.writeInt(value.byteArray.size)
+            out.packInt(value.byteArray.size)
             out.write(value.byteArray)
         }
 
         override fun deserialize(input: DataInput2, available: Int): Region {
-            val size = input.readInt()
+            val size = input.unpackInt()
             val byteArray = ByteArray(size)
             input.readFully(byteArray)
             return Region(byteArray)

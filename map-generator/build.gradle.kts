@@ -1,7 +1,14 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     kotlin("jvm")
     id("com.github.gmazzo.buildconfig").version("1.6.1")
     id("io.gitlab.arturbosch.detekt")
+    application
+}
+
+application {
+    mainClassName = "com.toxicbakery.game.dungeon.map.MainKt"
 }
 
 repositories {
@@ -20,6 +27,8 @@ compileKotlin.kotlinOptions.freeCompilerArgs += "-Xuse-experimental=kotlin.Exper
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation(project(":map"))
+    implementation(project(":common"))
     implementation("com.ToxicBakery.logging:arbor-jvm:${findProperty("arbor_version")}")
     implementation("org.kodein.di:kodein-di-erased-jvm:${findProperty("kodein_version")}")
     implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")

@@ -38,4 +38,10 @@ sealed class ClientMessage {
         val playerData: PlayerData
     ) : ClientMessage()
 
+    @Serializable
+    class MapMessage(
+        @SerialId(1)
+        val byteArray: ByteArray
+    ) : ClientMessage()
+
 }
