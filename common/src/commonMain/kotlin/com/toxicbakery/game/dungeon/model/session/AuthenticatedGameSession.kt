@@ -3,7 +3,7 @@ package com.toxicbakery.game.dungeon.model.session
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
 
-class AuthenticatedGameSession(
+data class AuthenticatedGameSession(
     override val playerId: Int,
     private val gameSession: GameSession
 ) : GameSession {
@@ -11,7 +11,7 @@ class AuthenticatedGameSession(
     override val isClosed: Boolean
         get() = gameSession.isClosed
 
-    override val sessionId: PlayerSessionId
+    override val sessionId: String
         get() = gameSession.sessionId
 
     override suspend fun sendMessage(msg: String, expectedResponseType: ExpectedResponseType) =

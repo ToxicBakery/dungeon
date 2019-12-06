@@ -16,7 +16,7 @@ interface GameSession {
     /**
      * A unique identifier representing this session.
      */
-    val sessionId: PlayerSessionId
+    val sessionId: String
 
     /**
      * Id of the player once authenticated.

@@ -1,6 +1,8 @@
 package com.toxicbakery.game.dungeon.persistence
 
+import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.model.auth.Credentials
+import com.toxicbakery.game.dungeon.model.character.Location
 import com.toxicbakery.game.dungeon.model.character.Player
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -22,6 +24,11 @@ private class DatabaseImpl(
 
     override suspend fun getPlayerById(id: Int) = persistenceDelegate.getPlayerById(id)
 
+    override suspend fun getPlayersNear(
+        location: Location,
+        distanceFilter: DistanceFilter
+    ): List<Player> = persistenceDelegate.getPlayersNear(location, distanceFilter)
+
 }
 
 interface Database {
@@ -33,6 +40,8 @@ interface Database {
     suspend fun createPlayer(credentials: Credentials): Player
 
     suspend fun getPlayerById(id: Int): Player
+
+    suspend fun getPlayersNear(location: Location, distanceFilter: DistanceFilter): List<Player>
 
 }
 

@@ -1,9 +1,13 @@
 package com.toxicbakery.game.dungeon.manager
 
+import com.toxicbakery.game.dungeon.map.DistanceFilter
+import com.toxicbakery.game.dungeon.model.character.Location
 import com.toxicbakery.game.dungeon.model.character.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.persistence.Database
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -20,17 +24,25 @@ private class PlayerManagerImpl(
     ): Player = dungeonStateStore
         .observe()
         .first()
-        .let { dungeonState -> database.getPlayerById(dungeonState[gameSession]!!.playerId) }
+        .let { dungeonState ->
+            val playerId = dungeonState.getGameSession(gameSession).playerId
+            dungeonState.getPlayerSessionById(playerId).player
+        }
 
     override suspend fun updatePlayer(
         player: Player,
         gameSession: GameSession
-    ) {
-        database.updatePlayer(player)
-        dungeonStateStore.modify {dungeonState ->
-            dungeonState.set(player, gameSession)
-        }
+    ) = coroutineScope {
+        val t1 = async { database.updatePlayer(player) }
+        val t2 = async { dungeonStateStore.modify { dungeonState -> dungeonState.updatePlayer(player) } }
+        t1.await()
+        t2.await()
     }
+
+    override suspend fun getPlayersNear(
+        location: Location,
+        distanceFilter: DistanceFilter
+    ): List<Player> = database.getPlayersNear(location, distanceFilter)
 
 }
 
@@ -44,6 +56,11 @@ interface PlayerManager {
         player: Player,
         gameSession: GameSession
     )
+
+    suspend fun getPlayersNear(
+        location: Location,
+        distanceFilter: DistanceFilter
+    ): List<Player>
 
 }
 

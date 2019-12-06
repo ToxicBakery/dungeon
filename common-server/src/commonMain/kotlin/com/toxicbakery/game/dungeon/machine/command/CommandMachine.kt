@@ -39,6 +39,8 @@ private class CommandMachineImpl(
     } catch (e: UnknownCommandException) {
         processorFailure()
         this@CommandMachineImpl
+    } finally {
+        initCommand()
     }
 
     private suspend fun GameSession.processorFailure() {

@@ -1,8 +1,8 @@
 package com.toxicbakery.game.dungeon
 
+import com.toxicbakery.game.dungeon.manager.GameSessionManager
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
-import com.toxicbakery.game.dungeon.manager.GameSessionManager
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.logging.Arbor
 import kotlinx.serialization.loads
@@ -22,7 +22,7 @@ private class DungeonServerImpl(
         session: GameSession,
         message: String
     ) {
-        Arbor.d("Received message from session %s (%s)", session.sessionId, message)
+        Arbor.d("Received message from session %s", session.sessionId)
         when (val clientMessage = protoBuf.loads(ClientMessage.serializer(), message)) {
             is UserMessage -> gameSessionManager.receivedMessage(session, clientMessage.message)
             else -> error("Unexpected ClientMessage ${clientMessage::class.simpleName}")

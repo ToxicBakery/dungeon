@@ -36,10 +36,7 @@ class DungeonApplication(
         }
         routing {
             webSocket("/ws") {
-
-                val gameSession: GameSession = WebSocketGameSession(
-                    webSocketServerSession = this
-                )
+                val gameSession: GameSession = WebSocketGameSession(webSocketServerSession = this)
                 dungeonServer.onNewSession(gameSession)
                 try {
                     incoming.consumeEach { frame: Frame ->

@@ -30,7 +30,7 @@ private class AuthenticationManagerImpl(
         val player = database.authenticatePlayer(credentials)
         val authenticatedGameSession = AuthenticatedGameSession(player.id, gameSession)
         dungeonStateStore.modify { dungeonState ->
-            dungeonState.set(player, authenticatedGameSession)
+            dungeonState.setAuthenticatedPlayer(player, authenticatedGameSession)
         }
         return player
     }
@@ -41,9 +41,7 @@ private class AuthenticationManagerImpl(
 
     override suspend fun playerLeft(
         player: Player
-    ) = dungeonStateStore.modify { dungeonState ->
-        dungeonState - player
-    }
+    ) = dungeonStateStore.modify { dungeonState -> dungeonState.removePlayerAndSession(player) }
 
 }
 

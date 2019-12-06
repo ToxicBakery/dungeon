@@ -4,7 +4,6 @@ import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorLook.Companion.COMMAND
 import com.toxicbakery.game.dungeon.manager.WorldManager
-import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.*
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import org.kodein.di.Kodein
@@ -23,7 +22,7 @@ private class ProcessorLookImpl(
         gameSession: GameSession,
         message: String
     ): Machine<*> {
-        val map = worldManager.getMap(gameSession)
+        val map = worldManager.getWindow(gameSession)
         gameSession.sendClientMessage(MapMessage(map))
         return commandMachine
     }

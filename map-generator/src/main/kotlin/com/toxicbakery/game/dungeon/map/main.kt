@@ -25,13 +25,15 @@ fun main() {
     // Preview the home position
     println(
         mapManager.drawWindow(
-            Window(
+            WindowDescription(
                 location = Location(
                     x = 0,
                     y = 0
                 ),
                 size = 11
             )
-        ).joinToString("\n", transform = { row -> row.joinToString("") })
+        ).windowRows.joinToString("\n", transform = { windowRow ->
+            windowRow.row.joinToString("")
+        })
     )
 }

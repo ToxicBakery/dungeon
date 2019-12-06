@@ -1,5 +1,7 @@
 package com.toxicbakery.game.dungeon.map
 
+import com.toxicbakery.game.dungeon.map.model.WindowMutable
+import com.toxicbakery.game.dungeon.map.model.WindowRowMutable
 import com.toxicbakery.game.dungeon.model.character.Location
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -14,32 +16,30 @@ private class MapManagerImpl(
     regionSizeAtomic = mapStore.regionSizeAtomic
 ), MapManager {
 
-    /**
-     * Get a windowed view of the map using given display dimensions and a location.
-     */
-    override fun drawWindow(window: Window): List<List<Byte>> {
-        if (window.size > mapSize) error("Request ${window.size} exceeds world dimension $mapSize")
-        if (window.size and 1 == 0) error("Request ${window.size} must be odd")
+    override fun mapSize(): Int = mapSize
+
+    override fun drawWindow(windowDescription: WindowDescription): WindowMutable {
+        if (windowDescription.size > mapSize)
+            error("Request ${windowDescription.size} exceeds world dimension $mapSize")
+        if (windowDescription.size and 1 == 0)
+            error("Request ${windowDescription.size} must be odd")
 
         val rCount = regionCount
-        val topLeftRegionLocation = window.topLeftLocation.regionLocation
-        val bottomRightRegionLocation = window.bottomRightLocation.regionLocation
-        val topLeftInRegion = window.topLeftLocation.boundTo(regionSize)
+        val topLeftRegionLocation = windowDescription.topLeftLocation.regionLocation
+        val bottomRightRegionLocation = windowDescription.bottomRightLocation.regionLocation
+        val topLeftInRegion = windowDescription.topLeftLocation.boundTo(regionSize)
 
         fun regionDistance(left: Int, right: Int): Int =
-            if (left > right) distance(
-                (left - rCount) % rCount,
-                right
-            )
+            if (left > right) distance((left - rCount) % rCount, right)
             else distance(left, right)
 
-        val xDistance = regionDistance(topLeftRegionLocation.x, bottomRightRegionLocation.x)
-        val yDistance = regionDistance(topLeftRegionLocation.y, bottomRightRegionLocation.y)
+        val xRegionDistance = regionDistance(topLeftRegionLocation.x, bottomRightRegionLocation.x)
+        val yRegionDistance = regionDistance(topLeftRegionLocation.y, bottomRightRegionLocation.y)
 
         // Strings are written left to right so iterate row by row collecting the byte arrays
         // so they are in order for drawing
-        return (0..yDistance).map { y ->
-            (0..xDistance).map { x ->
+        return (0..yRegionDistance).map { y ->
+            (0..xRegionDistance).map { x ->
                 RegionLocation.wrapped(
                     x = topLeftRegionLocation.x + x,
                     y = topLeftRegionLocation.y + y,
@@ -49,12 +49,17 @@ private class MapManagerImpl(
         }.flatMap { regionRow -> regionRow.rows }
             .let { rows ->
                 val bottomRightInRegion = Location(
-                    x = topLeftInRegion.x + window.size,
-                    y = topLeftInRegion.y + window.size
+                    x = topLeftInRegion.x + windowDescription.size,
+                    y = topLeftInRegion.y + windowDescription.size
                 )
 
-                rows.filterIndexed { index, _ -> index >= topLeftInRegion.y && index < bottomRightInRegion.y }
-                    .map { arr -> arr.slice(topLeftInRegion.x until bottomRightInRegion.x) }
+                rows.filterIndexed { index, _ ->
+                    index >= topLeftInRegion.y && index < bottomRightInRegion.y
+                }.map { arr ->
+                    WindowRowMutable(
+                        row = arr.slice(topLeftInRegion.x until bottomRightInRegion.x).toMutableList()
+                    )
+                }.let { mutableRows -> WindowMutable(mutableRows.toMutableList()) }
             }
     }
 

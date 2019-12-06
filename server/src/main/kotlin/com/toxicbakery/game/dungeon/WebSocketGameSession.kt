@@ -7,12 +7,13 @@ import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSessionId
 import com.toxicbakery.game.dungeon.util.textFrame
+import com.toxicbakery.logging.Arbor
 import io.ktor.websocket.WebSocketServerSession
 import kotlinx.serialization.dumps
 import kotlinx.serialization.protobuf.ProtoBuf
 
-class WebSocketGameSession(
-    override val sessionId: PlayerSessionId = PlayerSessionId(uuid4().toString()),
+data class WebSocketGameSession(
+    override val sessionId: String = uuid4().toString(),
     private val webSocketServerSession: WebSocketServerSession
 ) : GameSession {
 

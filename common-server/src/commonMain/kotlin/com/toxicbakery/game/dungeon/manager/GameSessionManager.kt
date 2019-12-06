@@ -4,7 +4,6 @@ import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.init.InitMachine
 import com.toxicbakery.game.dungeon.model.DungeonState
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import com.toxicbakery.game.dungeon.model.session.PlayerSessionId
 import com.toxicbakery.game.dungeon.persistence.store.BroadcastChannelStore
 import com.toxicbakery.game.dungeon.persistence.store.ChannelStore
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
@@ -20,8 +19,8 @@ private class GameSessionManagerImpl(
     private val initMachine: Machine<*>
 ) : GameSessionManager {
 
-    private val gameMachineStore: ChannelStore<Map<PlayerSessionId, Machine<*>>> =
-        object : BroadcastChannelStore<Map<PlayerSessionId, Machine<*>>>(mapOf()) {}
+    private val gameMachineStore: ChannelStore<Map<String, Machine<*>>> =
+        object : BroadcastChannelStore<Map<String, Machine<*>>>(mapOf()) {}
 
     override suspend fun observeGameSessions(): Flow<List<GameSession>> = dungeonStateStore
         .observe()
@@ -41,8 +40,8 @@ private class GameSessionManagerImpl(
 
     override suspend fun sessionCreated(gameSession: GameSession) {
         dungeonStateStore.modify { dungeonState ->
-            dungeonState[gameSession]?.close()
-            dungeonState + gameSession
+            dungeonState.getAuthenticatedGameSession(gameSession)?.close()
+            dungeonState.addUnauthenticatedSession(gameSession)
         }
         gameMachineStore.modify { gameMachineMap ->
             val nextMachine = initMachine.initMachine(gameSession)
@@ -51,12 +50,8 @@ private class GameSessionManagerImpl(
     }
 
     override suspend fun sessionDestroyed(gameSession: GameSession) {
-        dungeonStateStore.modify { dungeonState ->
-            dungeonState - gameSession
-        }
-        gameMachineStore.modify { gameMachineMap ->
-            gameMachineMap - gameSession.sessionId
-        }
+        dungeonStateStore.modify { dungeonState -> dungeonState.removePlayerAndSession(gameSession) }
+        gameMachineStore.modify { gameMachineMap -> gameMachineMap - gameSession.sessionId }
     }
 
 }

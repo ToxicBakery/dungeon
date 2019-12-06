@@ -38,33 +38,34 @@ fun setConnected(connected: Boolean) = connectionStatusElement.apply {
 
 fun main() {
     Arbor.sow(Seedling())
-    fun onLoad() {
-        val terminal = Terminal(
-            healthElement = getElementById("healthValue"),
-            locationElement = getElementById("locationValue"),
-            messagesElement = getElementById("messages")
-        )
-        val client = SocketClient(
-            host = window.location.host,
-            terminal = terminal
-        )
+    document.onclick = { _ -> input.focus() }
+    window.onload = { onLoad() }
+}
 
-        startConnectionMonitor(client)
-        client.start()
+fun onLoad() {
+    val terminal = Terminal(
+        healthElement = getElementById("healthValue"),
+        locationElement = getElementById("locationValue"),
+        messagesElement = getElementById("messages")
+    )
+    val client = SocketClient(
+        host = window.location.host,
+        terminal = terminal
+    )
 
-        fun sendMessage() {
-            val inputText = input.value
-            if (inputText.isEmpty()) return
-            input.value = ""
-            client.sendMessage(message = inputText)
-        }
+    startConnectionMonitor(client)
+    client.start()
 
-        val sendButton = document.getElementById("sendButton") as HTMLInputElement
-        sendButton.onclick = { sendMessage() }
-        input.onkeydown = { e -> if (e.keyCode == KEY_ENTER) sendMessage() }
+    fun sendMessage() {
+        val inputText = input.value
+        if (inputText.isEmpty()) return
+        input.value = ""
+        client.sendMessage(message = inputText)
     }
 
-    window.onload = { onLoad() }
+    val sendButton = document.getElementById("sendButton") as HTMLInputElement
+    sendButton.onclick = { sendMessage() }
+    input.onkeydown = { e -> if (e.keyCode == KEY_ENTER) sendMessage() }
 }
 
 private fun startConnectionMonitor(client: SocketClient) {

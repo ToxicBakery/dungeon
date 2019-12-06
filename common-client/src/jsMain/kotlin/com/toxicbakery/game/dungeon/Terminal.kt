@@ -18,13 +18,14 @@ class Terminal(
     private val bufferSize: Int = 500
 ) {
 
+    private val windowRenderer: WindowRenderer = WindowRenderer(::handleMessage)
     private var expectedResponseType: ExpectedResponseType = ExpectedResponseType.Normal
 
     fun displayMessage(message: ClientMessage) = when (message) {
         is UserMessage -> handleMessage(message)
         is ServerMessage -> handleMessage(message)
         is PlayerDataMessage -> handleMessage(message)
-        is MapMessage -> handleMessage(message)
+        is MapMessage -> windowRenderer.render(message.window)
     }
 
     private fun handleMessage(message: UserMessage) {
@@ -45,15 +46,6 @@ class Terminal(
         val hp = round(playerData.stats.health.toDouble() / maxHealth.toDouble() * PERCENT_MULTIPLIER)
         healthElement.textContent = "${hp}%"
         locationElement.textContent = "(${loc.x}, ${loc.y})"
-    }
-
-    private fun handleMessage(message: MapMessage) {
-        message.worldMap
-            .data
-            .joinToString("<br/>", transform = { row ->
-                row.joinToString("", transform = { "...." })
-            })
-            .let(::handleMessage)
     }
 
     private fun handleMessage(message: String) {

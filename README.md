@@ -8,7 +8,7 @@
 
 ### Run
 ```bash  
-./gradlew :server:jvm:run
+./gradlew :server:run
 ```
 
 Then connect with chrome at http://localhost:8080

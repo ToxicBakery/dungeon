@@ -47,7 +47,6 @@ class SocketClient(
         val userMessage = UserMessage(message)
         terminal.displayMessage(userMessage)
         val output = protoBuf.dumps(ClientMessage.serializer(), userMessage)
-        Arbor.d("Sending message: %s\n%s\noutput: %s", message, userMessage, output)
         socket.send(output)
     }
 
@@ -69,7 +68,6 @@ class SocketClient(
 
     private fun handleText(text: String) {
         val clientMessage = protoBuf.loads(ClientMessage.serializer(), text)
-        Arbor.d("Received message: %s", clientMessage.toString())
         handleMessage(clientMessage)
     }
 
