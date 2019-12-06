@@ -21,8 +21,8 @@ actual class WindowRenderer(
     private fun Byte.toTile(): String = MapLegend.lookupMap
         .getOrElse(this, { MapLegend.NULL })
         .toTile()
-    
-    private fun MapLegend.toTile():String = when (this) {
+
+    private fun MapLegend.toTile(): String = when (this) {
         MapLegend.NULL -> "...."
         MapLegend.PLAYER -> "&lt;oo&gt;"
         MapLegend.NPC -> "&lt;..&gt;"
@@ -38,6 +38,7 @@ actual class WindowRenderer(
         MapLegend.BEACH_S -> "...."
         MapLegend.BEACH_W -> "~..."
         MapLegend.BEACH_E -> "...~"
+        MapLegend.MOUNTAIN -> "/\\/\\"
         MapLegend.ANIMAL_AGGRESSIVE -> ".&gt;&lt;."
         MapLegend.ANIMAL_PASSIVE -> ".&lt;&gt;."
         MapLegend.CREATURE -> "&gt;&amp;&amp;&lt;"

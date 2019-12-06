@@ -35,6 +35,7 @@ enum class MapLegend(
     BEACH_S(0x19),
     BEACH_W(0x1A),
     BEACH_E(0x1B),
+    MOUNTAIN(0x1C),
 
 
     // Animals

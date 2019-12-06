@@ -30,6 +30,7 @@ dependencies {
     implementation(project(":model"))
     implementation(project(":map"))
     implementation(project(":common"))
+    implementation(project(":map-generator:map-generator-common"))
     implementation("com.ToxicBakery.logging:arbor-jvm:${findProperty("arbor_version")}")
     implementation("org.kodein.di:kodein-di-erased-jvm:${findProperty("kodein_version")}")
     implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")

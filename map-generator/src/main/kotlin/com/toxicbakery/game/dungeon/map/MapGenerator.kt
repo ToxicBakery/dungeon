@@ -18,6 +18,13 @@ private class MapGeneratorImpl(
         get() = mapStore.map
 
     override fun generateMap(mapConfig: MapConfig) {
+        TerrainGenerator(
+            Config(
+                size = mapConfig.mapSize,
+                regionSize = mapConfig.regionSize
+            )
+        ).generate()
+
         // Avoid regen
         if (mapSize == mapConfig.mapSize && regionSize == mapConfig.regionSize) return
         mapSize = mapConfig.mapSize
