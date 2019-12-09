@@ -1,7 +1,6 @@
 package com.toxicbakery.game.dungeon.map
 
-import com.toxicbakery.game.dungeon.map.model.WindowMutable
-import com.toxicbakery.game.dungeon.map.model.WindowRowMutable
+import com.toxicbakery.game.dungeon.map.model.Window
 import com.toxicbakery.game.dungeon.model.character.Location
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -16,83 +15,6 @@ private class MapManagerImpl(
     regionSizeAtomic = mapStore.regionSizeAtomic
 ), MapManager {
 
-    override fun mapSize(): Int = mapSize
-
-    override fun drawWindow(windowDescription: WindowDescription): WindowMutable {
-        if (windowDescription.size > mapSize)
-            error("Request ${windowDescription.size} exceeds world dimension $mapSize")
-        if (windowDescription.size and 1 == 0)
-            error("Request ${windowDescription.size} must be odd")
-
-        val rCount = regionCount
-        val topLeftRegionLocation = windowDescription.topLeftLocation.regionLocation
-        val bottomRightRegionLocation = windowDescription.bottomRightLocation.regionLocation
-        val topLeftInRegion = windowDescription.topLeftLocation.boundTo(regionSize)
-
-        fun regionDistance(left: Int, right: Int): Int =
-            if (left > right) distance((left - rCount) % rCount, right)
-            else distance(left, right)
-
-        val xRegionDistance = regionDistance(topLeftRegionLocation.x, bottomRightRegionLocation.x)
-        val yRegionDistance = regionDistance(topLeftRegionLocation.y, bottomRightRegionLocation.y)
-
-        // Strings are written left to right so iterate row by row collecting the byte arrays
-        // so they are in order for drawing
-        return (0..yRegionDistance).map { y ->
-            (0..xRegionDistance).map { x ->
-                RegionLocation.wrapped(
-                    x = topLeftRegionLocation.x + x,
-                    y = topLeftRegionLocation.y + y,
-                    regionCount = regionCount
-                ).region
-            }.fold(RegionRow(), { acc, region -> acc + region })
-        }.flatMap { regionRow -> regionRow.rows }
-            .let { rows ->
-                val bottomRightInRegion = Location(
-                    x = topLeftInRegion.x + windowDescription.size,
-                    y = topLeftInRegion.y + windowDescription.size
-                )
-
-                rows.filterIndexed { index, _ ->
-                    index >= topLeftInRegion.y && index < bottomRightInRegion.y
-                }.map { arr ->
-                    WindowRowMutable(
-                        row = arr.slice(topLeftInRegion.x until bottomRightInRegion.x).toMutableList()
-                    )
-                }.let { mutableRows -> WindowMutable(mutableRows.toMutableList()) }
-            }
-    }
-
-    private inner class RegionRow(
-        val rows: List<ByteArray> = listOf()
-    ) {
-
-        operator fun plus(region: Region): RegionRow = (0 until regionSize)
-            .map { row ->
-                val start = row * regionSize
-                val end = start + regionSize
-                region.byteArray.sliceArray(start until end)
-            }
-            .let { incomingRows ->
-                if (rows.isEmpty()) incomingRows
-                else (0 until regionSize).map { i -> rows[i] + incomingRows[i] }
-            }
-            .let(::RegionRow)
-
-    }
-
-    private fun Location.boundTo(regionSize: Int): Location {
-        val topLeftXNorm = x % regionSize
-        val topLeftYNorm = y % regionSize
-        return Location(
-            x = if (topLeftXNorm < 0) regionSize + topLeftXNorm else topLeftXNorm,
-            y = if (topLeftYNorm < 0) regionSize + topLeftYNorm else topLeftYNorm
-        )
-    }
-
-    private fun fetchRegion(regionLocation: RegionLocation): Region =
-        mapStore.map.getValue(regionLocation)
-
     private val RegionLocation.region: Region
         get() = fetchRegion(this)
 
@@ -100,10 +22,100 @@ private class MapManagerImpl(
         get() = regionSize.let { size ->
             RegionLocation.wrapped(
                 regionCount = regionCount,
-                x = if (x < 0) (mapSize + x) / size else x / size,
-                y = if (y < 0) (mapSize + y) / size else y / size
+                x = wrapWorldPosition(x) / size,
+                y = wrapWorldPosition(y) / size
             )
         }
+
+    override fun mapSize(): Int = mapSize
+
+    override fun drawWindow(windowDescription: WindowDescription): Window {
+        windowDescription.validate()
+
+        val topLeftRegionLocation = windowDescription.topLeftLocation.regionLocation
+        val bottomRightRegionLocation = windowDescription.bottomRightLocation.regionLocation
+        val xRegionDistance = regionDistance(topLeftRegionLocation.x, bottomRightRegionLocation.x)
+        val yRegionDistance = regionDistance(topLeftRegionLocation.y, bottomRightRegionLocation.y)
+        val windowRows = (0..xRegionDistance)
+            .flatMap { y ->
+                (0..yRegionDistance)
+                    .map { x ->
+                        RelativeRegionLocation(x, y) to RegionLocation.wrapped(
+                            regionCount = regionCount,
+                            x = topLeftRegionLocation.x + x,
+                            y = topLeftRegionLocation.y + y
+                        ).region.byteArray
+                    }
+            }
+
+        return Window(
+            windowRows = paintRegions(
+                windowDescription = windowDescription,
+                regions = windowRows
+            )
+        )
+
+    }
+
+    override fun drawCompleteMap(): Window = (0 until regionCount)
+        .flatMap { y -> (0 until regionCount).map { x -> RegionLocation(x, y) } }
+        .map { regionLocation -> regionLocation to regionLocation.region.byteArray }
+        .toMap()
+        .let { regionMap: Map<RegionLocation, ByteArray> ->
+            val rows = List(mapSize) { ByteArray(mapSize) }
+            for (x in 0 until mapSize) {
+                for (y in 0 until mapSize) {
+                    val regionLocation = RegionLocation(x / regionSize, y / regionSize)
+                    val region = regionMap.getValue(regionLocation)
+                    val rX = x % regionSize
+                    val rY = y % regionSize
+                    rows[x][y] = region[rX * regionSize + rY]
+                }
+            }
+
+            Window(rows.toList())
+        }
+
+    private fun paintRegions(
+        windowDescription: WindowDescription,
+        regions: List<Pair<RelativeRegionLocation, ByteArray>>
+    ): List<ByteArray> {
+        val rows = List(windowDescription.size) { ByteArray(windowDescription.size) }
+        val visionTopLeftX = wrapWorldPosition(windowDescription.topLeftLocation.x)
+        val visionTopLeftY = wrapWorldPosition(windowDescription.topLeftLocation.y)
+        val offsetX = visionTopLeftX - windowDescription.topLeftLocation.regionLocation.x * regionSize
+        val offsetY = visionTopLeftY - windowDescription.topLeftLocation.regionLocation.y * regionSize
+        regions.forEach { (location, byteArray) ->
+            val (rx, ry) = location
+            byteArray.forEachIndexed { i, b ->
+                val x = i / regionSize
+                val y = i % regionSize
+                val rx1 = (rx * regionSize + x) - offsetX
+                val ry1 = (ry * regionSize + y) - offsetY
+                val xInBound = rx1 >= 0 && rx1 < windowDescription.size
+                val yInBound = ry1 >= 0 && ry1 < windowDescription.size
+                if (xInBound && yInBound) rows[rx1][ry1] = b
+            }
+        }
+
+        return rows
+    }
+
+    private fun fetchRegion(regionLocation: RegionLocation): Region =
+        mapStore.map.getValue(regionLocation)
+
+    private fun regionDistance(left: Int, right: Int): Int =
+        if (left > right) distance((left - regionCount) % regionCount, right)
+        else distance(left, right)
+
+    private fun WindowDescription.validate() {
+        if (size > mapSize)
+            error("Request $size exceeds world dimension $mapSize")
+        if (size and 1 == 0)
+            error("Request $size must be odd")
+    }
+
+    private fun wrapWorldPosition(pos: Int) = if (pos < 0) mapSize + pos else pos
 
     companion object {
 
@@ -119,6 +131,7 @@ private class MapManagerImpl(
 
 }
 
+private data class RelativeRegionLocation(val x: Int, val y: Int)
 
 actual val mapManagerModule = Kodein.Module("mapManagerModule") {
     import(mapStoreModule)

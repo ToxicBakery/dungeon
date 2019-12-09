@@ -2,3 +2,5 @@
 /build
 dungeon.db
 /*.log
+/*.bmp
+/*.html
