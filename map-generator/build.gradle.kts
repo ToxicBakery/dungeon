@@ -17,7 +17,8 @@ repositories {
 
 buildConfig {
     packageName("com.toxicbakery.game.dungeon.map")
-    buildConfigField("int", "MAP_SIZE", "4096")
+    buildConfigField("int", "MAP_SIZE", "8192")
+    buildConfigField("int", "REGION_SIZE", "8")
 }
 
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
@@ -30,7 +31,7 @@ dependencies {
     implementation(project(":model"))
     implementation(project(":map"))
     implementation(project(":common"))
-    implementation(project(":map-generator:map-generator-common"))
+    implementation("com.ToxicBakery.library.noise:generator-jvm:1.0.10")
     implementation("com.ToxicBakery.logging:arbor-jvm:${findProperty("arbor_version")}")
     implementation("org.kodein.di:kodein-di-erased-jvm:${findProperty("kodein_version")}")
     implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")

@@ -8,13 +8,13 @@ data class WindowDescription(
 ) {
 
     val topLeftLocation: Location = Location(
-        x = location.x - (size / 2),
-        y = location.y - (size / 2)
+        x = location.x - size / 2,
+        y = location.y - size / 2
     )
 
     val bottomRightLocation = Location(
-        x = location.x + (size / 2),
-        y = location.y + (size / 2)
+        x = location.x + size / 2,
+        y = location.y + size / 2
     )
 
 }

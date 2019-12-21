@@ -6,15 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Window(
     @SerialId(1)
-    val windowRows: List<WindowRow>
+    val windowRows: List<ByteArray>
 )
-
-data class WindowMutable(
-    val windowRows: MutableList<WindowRowMutable>
-) {
-
-    fun toWindow():Window = Window(
-        windowRows = windowRows.map(WindowRowMutable::toWindowRow)
-    )
-
-}

@@ -66,11 +66,10 @@ private class WorldManagerImpl(
                 windowRows.forEachIndexed { index, windowRow ->
                     locations.forEach { location ->
                         if (location.y == index && location.x < WINDOW_SIZE)
-                            windowRow.row[location.x] = MapLegend.PLAYER.byteRepresentation
+                            windowRow[location.x] = MapLegend.PLAYER.byteRepresentation
                     }
                 }
             }
-            .toWindow()
     }
 
     private fun wrapped(
@@ -93,7 +92,7 @@ private class WorldManagerImpl(
 
     companion object {
         private const val MILLIS_PER_SECOND: Long = 1000L
-        private const val WINDOW_SIZE = 7
+        private const val WINDOW_SIZE = 37
     }
 
 }
