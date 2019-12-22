@@ -50,14 +50,12 @@ dependencies {
 
 val taskGetDb by tasks.register<Copy>("getDbFromMapGenerator") {
     val mapGeneratorProject = project(":map-generator")
-    dependsOn(mapGeneratorProject.tasks.getByName("run"))
     from("${mapGeneratorProject.projectDir}/dungeon.db")
     into("$projectDir")
 }
 
 val taskGetJs by tasks.register<Copy>("getJsFromClient") {
     val clientJsProject = project(":common-client")
-    dependsOn(clientJsProject.tasks.getByName("jsBrowserWebpack"))
     from("${clientJsProject.buildDir}/distributions/${clientJsProject.name}.js")
     into("$buildDir/external-resources/web")
 }
