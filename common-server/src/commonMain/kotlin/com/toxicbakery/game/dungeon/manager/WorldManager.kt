@@ -9,8 +9,12 @@ import com.toxicbakery.game.dungeon.map.MapManager
 import com.toxicbakery.game.dungeon.map.WindowDescription
 import com.toxicbakery.game.dungeon.map.model.Direction
 import com.toxicbakery.game.dungeon.map.model.Window
+import com.toxicbakery.game.dungeon.model.Displayable
+import com.toxicbakery.game.dungeon.model.animal.Animal
 import com.toxicbakery.game.dungeon.model.character.Location
 import com.toxicbakery.game.dungeon.model.character.Player
+import com.toxicbakery.game.dungeon.model.character.npc.Npc
+import com.toxicbakery.game.dungeon.model.creature.Creature
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.world.World
 import com.toxicbakery.game.dungeon.persistence.store.GameClock
@@ -18,16 +22,13 @@ import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
+import kotlin.math.abs
 
 private class WorldManagerImpl(
     private val gameClock: GameClock,
     private val mapManager: MapManager,
     private val playerManager: PlayerManager
 ) : WorldManager {
-
-    private val dateFormat: DateFormat by lazy {
-        PatternDateFormat("yyyy-MM-dd HH:mm")
-    }
 
     override suspend fun getWorldById(id: Int): World = World(0, "Overworld")
 
@@ -44,33 +45,60 @@ private class WorldManagerImpl(
 
     @Suppress("MagicNumber")
     private suspend fun getWindow(player: Player): Window {
-        val players = playerManager.getPlayersNear(
-            location = player.location,
-            distanceFilter = DistanceFilter(mapManager.mapSize(), WINDOW_SIZE / 2 + 1)
-        )
+        val windowDescription = windowDescriptionFor(player)
+        val window = mapManager.drawWindow(windowDescription)
+        val nearbyThings = nearbyThings(player)
+        val center = WINDOW_SIZE / 2
+        val mapSize = mapManager.mapSize()
+        val halfMapSize = mapSize / 2
 
-        val windowDescription = WindowDescription(
-            location = player.location,
-            size = WINDOW_SIZE
-        )
+        nearbyThings.forEach { displayable ->
+            val xDist = abs(displayable.location.x - player.location.x)
+            val yDist = abs(displayable.location.y - player.location.y)
 
-        val locations = players.map { p ->
-            Location(
-                x = wrapped(WINDOW_SIZE, p.location.x - windowDescription.topLeftLocation.x),
-                y = wrapped(WINDOW_SIZE, p.location.y - windowDescription.topLeftLocation.y)
-            )
+            // Account for wrap points and offset from center
+            val rX = (if (xDist > halfMapSize) mapSize - displayable.location.x else xDist) + center
+            val rY = (if (yDist > halfMapSize) mapSize - displayable.location.y else yDist) + center
+
+            val xInBounds = rX in 0 until WINDOW_SIZE
+            val yInBounds = rY in 0 until WINDOW_SIZE
+            if (xInBounds && yInBounds) window.windowRows[rY][rX] = displayable.toMapLegend.byteRepresentation
         }
 
-        return mapManager.drawWindow(windowDescription)
-//            .apply {
-//                windowRows.forEachIndexed { index, windowRow ->
-//                    locations.forEach { location ->
-//                        if (location.y == index && location.x < WINDOW_SIZE)
-//                            windowRow[location.x] = MapLegend.PLAYER.byteRepresentation
-//                    }
-//                }
-//            }
+        return window
     }
+
+    // TODO This should be moved to its own manager
+    private suspend fun nearbyThings(player: Player): List<Displayable> {
+        val npcsNearby = listOf<Displayable>().locationMapped()
+        val animalsNearby = listOf<Displayable>(
+            Animal(0, "", Location(0, 0), true),
+            Animal(0, "", Location(0, -1), true),
+            Animal(0, "", Location(-1, 0), true),
+            Animal(0, "", Location(-1, -1), true)
+        ).locationMapped()
+        val creaturesNearby = listOf<Displayable>().locationMapped()
+        val playersNearbyAndThisPlayer = playersNear(player)
+            .plus(player)
+            .locationMapped()
+
+        // Stack nearby things in order of importance, first stacked is of lowest visual importance.
+        return animalsNearby
+            .plus(npcsNearby)
+            .plus(playersNearbyAndThisPlayer)
+            .plus(creaturesNearby)
+            .values
+            .toList()
+    }
+
+    private fun List<Displayable>.locationMapped(): Map<Location, Displayable> =
+        map { displayable -> displayable.location to displayable }
+            .toMap()
+
+    private suspend fun playersNear(player: Player): List<Player> = playerManager.getPlayersNear(
+        location = player.location,
+        distanceFilter = DistanceFilter(mapManager.mapSize(), WINDOW_SIZE / 2 + 1)
+    )
 
     private fun wrapped(
         mapSize: Int,
@@ -93,6 +121,24 @@ private class WorldManagerImpl(
     companion object {
         private const val MILLIS_PER_SECOND: Long = 1000L
         private const val WINDOW_SIZE = 7
+
+        private val dateFormat: DateFormat by lazy {
+            PatternDateFormat("yyyy-MM-dd HH:mm")
+        }
+
+        private val Displayable.toMapLegend: MapLegend
+            get() = when (this) {
+                is Player -> MapLegend.PLAYER
+                is Npc -> MapLegend.NPC
+                is Animal -> if (this.passive) MapLegend.ANIMAL_PASSIVE else MapLegend.ANIMAL_AGGRESSIVE
+                is Creature -> MapLegend.CREATURE
+                else -> MapLegend.WTF
+            }
+
+        private fun windowDescriptionFor(player: Player) = WindowDescription(
+            location = player.location,
+            size = WINDOW_SIZE
+        )
     }
 
 }

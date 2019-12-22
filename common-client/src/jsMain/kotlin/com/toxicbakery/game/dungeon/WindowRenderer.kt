@@ -15,7 +15,7 @@ actual class WindowRenderer(
         .windowRows
         .joinToString(buildString { htmlBr() }) { windowRow ->
             windowRow.joinToString("", transform = { byte ->
-                MapLegend.representingByte(byte).ascii
+                MapLegend.representingByte(byte).htmlSafeAscii
             })
         }
         .let { output -> printer(output) }

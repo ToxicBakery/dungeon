@@ -32,10 +32,20 @@ enum class MapLegend(
     ANIMAL_PASSIVE(0x51, ".<>."),
 
     // Creatures
-    CREATURE(0x60, ">&&<");
+    CREATURE(0x60, ">&&<"),
+
+    /**
+     * A displayable lacking correlation to a [MapLegend].
+     */
+    WTF(0xFF.toByte(), "!!!!");
 
     val htmlRepresentation: String
         get() = "<span class=\"_${byteRepresentation}\">${htmlSafeAscii}</span>"
+
+    val htmlSafeAscii: String = ascii
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
 
     companion object {
 
@@ -44,12 +54,6 @@ enum class MapLegend(
             .toMap()
 
         fun representingByte(b: Byte): MapLegend = legendMap.getOrElse(b, { NULL })
-
-        private val MapLegend.htmlSafeAscii: String
-            get() = ascii
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
 
     }
 

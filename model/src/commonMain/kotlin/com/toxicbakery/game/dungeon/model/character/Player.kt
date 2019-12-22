@@ -18,7 +18,7 @@ data class Player(
     @SerialId(5)
     val global: Global = Global(),
     @SerialId(6)
-    val location: Location = Location()
+    override val location: Location = Location()
 ) : Character {
 
     /**
