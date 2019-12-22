@@ -62,14 +62,14 @@ private class WorldManagerImpl(
         }
 
         return mapManager.drawWindow(windowDescription)
-            .apply {
-                windowRows.forEachIndexed { index, windowRow ->
-                    locations.forEach { location ->
-                        if (location.y == index && location.x < WINDOW_SIZE)
-                            windowRow[location.x] = MapLegend.PLAYER.byteRepresentation
-                    }
-                }
-            }
+//            .apply {
+//                windowRows.forEachIndexed { index, windowRow ->
+//                    locations.forEach { location ->
+//                        if (location.y == index && location.x < WINDOW_SIZE)
+//                            windowRow[location.x] = MapLegend.PLAYER.byteRepresentation
+//                    }
+//                }
+//            }
     }
 
     private fun wrapped(
@@ -77,7 +77,7 @@ private class WorldManagerImpl(
         position: Int
     ) = when {
         position < 0 -> mapSize - 1
-        position > mapSize -> 0
+        position >= mapSize -> 0
         else -> position
     }
 
@@ -92,7 +92,7 @@ private class WorldManagerImpl(
 
     companion object {
         private const val MILLIS_PER_SECOND: Long = 1000L
-        private const val WINDOW_SIZE = 37
+        private const val WINDOW_SIZE = 7
     }
 
 }
