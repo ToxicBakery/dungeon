@@ -17,7 +17,7 @@ repositories {
 
 buildConfig {
     packageName("com.toxicbakery.game.dungeon.map")
-    buildConfigField("int", "MAP_SIZE", "8192")
+    buildConfigField("int", "MAP_SIZE", "4096")
     buildConfigField("int", "REGION_SIZE", "8")
 }
 
