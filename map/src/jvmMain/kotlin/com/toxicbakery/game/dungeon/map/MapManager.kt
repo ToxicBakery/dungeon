@@ -7,6 +7,7 @@ import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.singleton
 import kotlin.math.abs
+import kotlin.math.ceil
 
 private class MapManagerImpl(
     private val mapStore: MapStore
@@ -27,13 +28,22 @@ private class MapManagerImpl(
             )
         }
 
+    private val Location.regionLocationRoundUp: RegionLocation
+        get() = regionSize.let { size ->
+            RegionLocation.wrapped(
+                regionCount = regionCount,
+                x = ceil(wrapWorldPosition(x) / size.toDouble()).toInt(),
+                y = ceil(wrapWorldPosition(y) / size.toDouble()).toInt()
+            )
+        }
+
     override fun mapSize(): Int = mapSize
 
     override fun drawWindow(windowDescription: WindowDescription): Window {
         windowDescription.validate()
 
         val topLeftRegionLocation = windowDescription.topLeftLocation.regionLocation
-        val bottomRightRegionLocation = windowDescription.bottomRightLocation.regionLocation
+        val bottomRightRegionLocation = windowDescription.bottomRightLocation.regionLocationRoundUp
         val xRegionDistance = regionDistance(topLeftRegionLocation.x, bottomRightRegionLocation.x)
         val yRegionDistance = regionDistance(topLeftRegionLocation.y, bottomRightRegionLocation.y)
         val windowRows = (0..xRegionDistance)
@@ -54,7 +64,6 @@ private class MapManagerImpl(
                 regions = windowRows
             )
         )
-
     }
 
     override fun drawCompleteMap(): Window = (0 until regionCount)
