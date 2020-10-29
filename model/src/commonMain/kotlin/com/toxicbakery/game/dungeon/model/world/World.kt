@@ -1,13 +1,13 @@
 package com.toxicbakery.game.dungeon.model.world
 
 import com.toxicbakery.game.dungeon.model.Identifiable
-import kotlinx.serialization.SerialId
+import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class World(
-    @SerialId(1)
+    @ProtoNumber(1)
     override val id: Int,
-    @SerialId(2)
+    @ProtoNumber(2)
     val name: String
 ) : Identifiable

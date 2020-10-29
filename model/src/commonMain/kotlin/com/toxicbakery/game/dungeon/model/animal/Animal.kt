@@ -4,8 +4,8 @@ import com.toxicbakery.game.dungeon.model.Displayable
 import com.toxicbakery.game.dungeon.model.Identifiable
 import com.toxicbakery.game.dungeon.model.Named
 import com.toxicbakery.game.dungeon.model.character.Location
-import kotlinx.serialization.SerialId
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 
 /**
  * Animals roam freely in the world and can be harvested for materials and nutrients.
@@ -14,12 +14,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Animal(
-    @SerialId(1)
+    @ProtoNumber(1)
     override val id: Int = 0,
-    @SerialId(2)
+    @ProtoNumber(2)
     override val name: String,
-    @SerialId(3)
+    @ProtoNumber(3)
     override val location: Location,
-    @SerialId(4)
+    @ProtoNumber(4)
     val passive: Boolean
 ) : Identifiable, Displayable, Named

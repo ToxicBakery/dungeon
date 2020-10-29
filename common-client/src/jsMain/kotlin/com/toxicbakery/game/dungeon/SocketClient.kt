@@ -4,16 +4,13 @@ import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
 import com.toxicbakery.logging.Arbor
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.UnstableDefault
-import kotlinx.serialization.dumps
-import kotlinx.serialization.loads
+import kotlinx.serialization.decodeFromHexString
+import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.w3c.dom.MessageEvent
 import org.w3c.dom.WebSocket
 import org.w3c.dom.events.Event
 
-@ImplicitReflectionSerializer
 class SocketClient(
     private val host: String,
     private val terminal: Terminal
@@ -21,7 +18,6 @@ class SocketClient(
 
     private lateinit var socket: WebSocket
     private var _connected: Boolean = false
-    private val protoBuf: ProtoBuf = ProtoBuf()
 
     var isConnected: Boolean
         get() = _connected
@@ -41,12 +37,11 @@ class SocketClient(
         socket.close()
     }
 
-    @UnstableDefault
     fun sendMessage(message: String) {
         if (!isConnected) return
         val userMessage = UserMessage(message)
         terminal.displayMessage(userMessage)
-        val output = protoBuf.dumps(ClientMessage.serializer(), userMessage)
+        val output = ProtoBuf.encodeToHexString(ClientMessage.serializer(), userMessage)
         socket.send(output)
     }
 
@@ -67,7 +62,7 @@ class SocketClient(
     }
 
     private fun handleText(text: String) {
-        val clientMessage = protoBuf.loads(ClientMessage.serializer(), text)
+        val clientMessage = ProtoBuf.decodeFromHexString(ClientMessage.serializer(), text)
         handleMessage(clientMessage)
     }
 

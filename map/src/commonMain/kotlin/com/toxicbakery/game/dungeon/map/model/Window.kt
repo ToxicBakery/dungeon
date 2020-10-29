@@ -1,10 +1,10 @@
 package com.toxicbakery.game.dungeon.map.model
 
-import kotlinx.serialization.SerialId
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
 data class Window(
-    @SerialId(1)
+    @ProtoNumber(1)
     val windowRows: List<ByteArray>
 )

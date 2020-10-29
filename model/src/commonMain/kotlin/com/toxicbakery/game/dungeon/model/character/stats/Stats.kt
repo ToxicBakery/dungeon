@@ -1,20 +1,20 @@
 @file:Suppress("MagicNumber")
 package com.toxicbakery.game.dungeon.model.character.stats
 
-import kotlinx.serialization.SerialId
+import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Stats(
-    @SerialId(1)
+    @ProtoNumber(1)
     val health: Int = 0,
-    @SerialId(2)
+    @ProtoNumber(2)
     val strength: Int = 0,
-    @SerialId(3)
+    @ProtoNumber(3)
     val dexterity: Int = 0,
-    @SerialId(4)
+    @ProtoNumber(4)
     val defence: Int = 0,
-    @SerialId(5)
+    @ProtoNumber(5)
     val luck: Int = 0
 ) {
 

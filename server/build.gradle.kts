@@ -16,7 +16,7 @@ detekt {
 }
 
 application {
-    mainClassName = "io.ktor.server.netty.DevelopmentEngine"
+    mainClass.set("io.ktor.server.netty.DevelopmentEngine")
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -43,7 +43,9 @@ dependencies {
     implementation("org.kodein.di:kodein-di-erased-jvm:${findProperty("kodein_version")}")
     implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${findProperty("kotlin_serialization_version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:${findProperty("kotlin_date_time_version")}")
     implementation("ch.qos.logback:logback-classic:+")
     implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
 }

@@ -29,7 +29,8 @@ kotlin {
     sourceSets["commonMain"].dependencies {
         implementation(kotlin("stdlib-common"))
         implementation(project(":model"))
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:${findProperty("kotlin_serialization_version")}")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
         implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
         implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")
         implementation("com.soywiz.korlibs.klock:klock:${findProperty("klock_version")}")
@@ -37,16 +38,19 @@ kotlin {
     sourceSets["commonTest"].dependencies {
         implementation(kotlin("test-common"))
         implementation(kotlin("test-annotations-common"))
-        implementation("io.ktor:ktor-server-test-host:${findProperty("ktor_version")}")
     }
     sourceSets["jvmMain"].dependencies {
         implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${findProperty("kotlin_serialization_version")}")
+    }
+    sourceSets["jvmTest"].dependencies {
+        implementation(kotlin("test-junit"))
     }
     sourceSets["jsMain"].dependencies {
         implementation(kotlin("stdlib-js"))
         implementation("org.kodein.di:kodein-di-erased-js:${findProperty("kodein_version")}")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:${findProperty("kotlin_serialization_version")}")
+    }
+    sourceSets["jsTest"].dependencies {
+        implementation(kotlin("test-js"))
     }
 }
 

@@ -2,7 +2,7 @@
 
 package com.toxicbakery.game.dungeon.model.character
 
-import kotlinx.serialization.SerialId
+import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -15,11 +15,11 @@ import kotlin.math.sqrt
  */
 @Serializable
 data class Location(
-    @SerialId(1)
+    @ProtoNumber(1)
     val x: Int = 0,
-    @SerialId(2)
+    @ProtoNumber(2)
     val y: Int = 0,
-    @SerialId(3)
+    @ProtoNumber(3)
     val worldId: Int = 0
 ) {
 

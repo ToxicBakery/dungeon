@@ -1,6 +1,6 @@
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("org.jetbrains.kotlin.plugin.serialization")
+    kotlin("multiplatform")
+    kotlin("plugin.serialization")
     id("io.gitlab.arturbosch.detekt")
 }
 
@@ -28,22 +28,20 @@ kotlin {
         sourceSets["commonMain"].dependencies {
             implementation(kotlin("stdlib-common"))
             implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
-            implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
+            //implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
             implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:${findProperty("kotlin_serialization_version")}")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:${findProperty("kotlin_coroutines_version")}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
             implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
         }
         sourceSets["commonTest"].dependencies {
             implementation(kotlin("test-common"))
             implementation(kotlin("test-annotations-common"))
-            implementation("io.ktor:ktor-server-test-host:${findProperty("ktor_version")}")
         }
         sourceSets["jvmMain"].apply {
             dependencies {
                 implementation(kotlin("stdlib-jdk8"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${findProperty("kotlin_serialization_version")}")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
                 implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
             }
         }
@@ -53,10 +51,7 @@ kotlin {
         sourceSets["jsMain"].dependencies {
             implementation(kotlin("stdlib-js"))
             implementation("org.kodein.di:kodein-di-erased-js:${findProperty("kodein_version")}")
-            implementation("io.ktor:ktor-server-netty:${findProperty("ktor_version")}")
             implementation("org.jetbrains.kotlinx:kotlinx-html-js:${findProperty("kotlin_html_version")}")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:${findProperty("kotlin_serialization_version")}")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:${findProperty("kotlin_coroutines_version")}")
         }
     }
 }

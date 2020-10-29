@@ -1,7 +1,7 @@
 @file:Suppress("MagicNumber")
 package com.toxicbakery.game.dungeon.model.character
 
-import kotlinx.serialization.SerialId
+import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,6 +9,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Global(
-    @SerialId(1)
+    @ProtoNumber(1)
     val hasFinishedRegistration: Boolean = false
 )

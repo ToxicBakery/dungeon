@@ -3,22 +3,22 @@ package com.toxicbakery.game.dungeon.persistence.store
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.singleton
 import kotlin.random.Random
-import kotlin.time.ClockMark
-import kotlin.time.MonoClock
 
 class GameClock(
     startDay: Int,
-    private val clockMark: ClockMark
+    private val clockMark: Instant
 ) {
 
     private val startDayInSeconds: Long = startDay * SECONDS_PER_DAY
 
     val gameSeconds: Long
-        get() = startDayInSeconds + clockMark.elapsedNow().inSeconds.toLong()
+        get() = startDayInSeconds + clockMark.epochSeconds
 
     fun CoroutineScope.observeGameTicks() = produce<Long> {
         while (true) {
@@ -41,12 +41,14 @@ private const val DAYS_PER_YEAR = 365
 private val targetYear = Random.nextInt(MIN_YEAR, MAX_YEAR)
 private val targetDay = Random.nextInt(0, DAYS_PER_YEAR - 1)
 private val gameDaysStart = targetYear * DAYS_PER_YEAR + targetDay
+private val now: Instant
+    get() = Clock.System.now()
 
 val gameClockModule = Kodein.Module("gameClockModule") {
     bind<GameClock>() with singleton {
         GameClock(
             startDay = gameDaysStart,
-            clockMark = MonoClock.markNow()
+            clockMark = now
         )
     }
 }

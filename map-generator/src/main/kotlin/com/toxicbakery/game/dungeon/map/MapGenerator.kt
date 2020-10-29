@@ -51,8 +51,10 @@ private class MapGeneratorImpl(
         mapSize = mapConfig.mapSize
         regionSize = mapConfig.regionSize
 
-        if (mapSize == mapConfig.mapSize && regionSize == mapConfig.regionSize)
+        if (mapSize == mapConfig.mapSize && regionSize == mapConfig.regionSize) {
             println("Skipping map generation; map meets requested configuration.")
+            return
+        }
 
         if (mapSize <= regionSize) error("Map size must be larger than region size")
 

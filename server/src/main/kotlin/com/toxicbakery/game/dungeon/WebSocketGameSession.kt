@@ -5,11 +5,10 @@ import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import com.toxicbakery.game.dungeon.model.session.PlayerSessionId
 import com.toxicbakery.game.dungeon.util.textFrame
-import com.toxicbakery.logging.Arbor
-import io.ktor.websocket.WebSocketServerSession
-import kotlinx.serialization.dumps
+import io.ktor.http.cio.websocket.*
+import io.ktor.websocket.*
+import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 
 data class WebSocketGameSession(
@@ -29,13 +28,13 @@ data class WebSocketGameSession(
     ) {
         if (_isClosed) return
         val clientMessage: ClientMessage = ServerMessage(msg, expectedResponseType)
-        val output: String = ProtoBuf().dumps(ClientMessage.serializer(), clientMessage)
+        val output: String = ProtoBuf.encodeToHexString(ClientMessage.serializer(), clientMessage)
         webSocketServerSession.send(textFrame(output))
     }
 
     override suspend fun sendClientMessage(clientMessage: ClientMessage) {
         if (_isClosed) return
-        val output: String = ProtoBuf().dumps(ClientMessage.serializer(), clientMessage)
+        val output: String = ProtoBuf.encodeToHexString(ClientMessage.serializer(), clientMessage)
         webSocketServerSession.send(textFrame(output))
     }
 

@@ -2,22 +2,22 @@
 package com.toxicbakery.game.dungeon.model.character
 
 import com.toxicbakery.game.dungeon.model.character.stats.Stats
-import kotlinx.serialization.SerialId
+import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Player(
-    @SerialId(1)
+    @ProtoNumber(1)
     override val id: Int = 0,
-    @SerialId(2)
+    @ProtoNumber(2)
     override val name: String = "",
-    @SerialId(3)
+    @ProtoNumber(3)
     override val stats: Stats = Stats(),
-    @SerialId(4)
+    @ProtoNumber(4)
     override val statsBase: Stats = Stats(),
-    @SerialId(5)
+    @ProtoNumber(5)
     val global: Global = Global(),
-    @SerialId(6)
+    @ProtoNumber(6)
     override val location: Location = Location()
 ) : Character {
 
