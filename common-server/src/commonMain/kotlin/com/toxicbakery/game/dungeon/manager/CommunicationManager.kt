@@ -22,8 +22,17 @@ private class CommunicationManagerImpl(
         player: Player,
         message: String
     ) = playerSessionList()
-        .filter { playerSession: PlayerSession -> playerSession.player.location == player.location }
+        .filter { session: PlayerSession -> session.player.location == player.location }
         .forEach { session: PlayerSession -> session.sendMessage("[SAY] ${player.name}: $message") }
+
+    override suspend fun shout(
+        player: Player,
+        message: String
+    ) = playerSessionList()
+        .filter { session: PlayerSession ->
+            session.player.location.distance(player.location, 0) <= SHOUT_DISTANCE
+        }
+        .forEach { session: PlayerSession -> session.sendMessage("[SHOUT] ${player.name}: $message") }
 
     override suspend fun gsay(
         player: Player,
@@ -35,6 +44,13 @@ private class CommunicationManagerImpl(
 
     private suspend fun PlayerSession.sendMessage(message: String) = session.sendMessage(message)
 
+    companion object {
+        /**
+         * Distance a player can shout.
+         */
+        private const val SHOUT_DISTANCE: Int = 3
+    }
+
 }
 
 interface CommunicationManager {
@@ -43,6 +59,14 @@ interface CommunicationManager {
      * Send a message to a player in the room.
      */
     suspend fun say(
+        player: Player,
+        message: String
+    )
+
+    /**
+     * Shout a message to nearby players.
+     */
+    suspend fun shout(
         player: Player,
         message: String
     )

@@ -2,7 +2,7 @@ package com.toxicbakery.game.dungeon.machine.command.processor
 
 import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
-import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorSay.Companion.COMMAND
+import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorShout.Companion.COMMAND
 import com.toxicbakery.game.dungeon.manager.CommunicationManager
 import com.toxicbakery.game.dungeon.manager.PlayerManager
 import com.toxicbakery.game.dungeon.model.session.GameSession
@@ -11,11 +11,11 @@ import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
 
-private class ProcessorSayImpl(
+private class ProcessorShoutImpl(
     private val commandMachine: CommandMachine,
     private val communicationManager: CommunicationManager,
     private val playerManager: PlayerManager
-) : ASingleStateProcessor(), ProcessorSay {
+) : ASingleStateProcessor(), ProcessorShout {
 
     override val name: String = COMMAND
 
@@ -24,24 +24,24 @@ private class ProcessorSayImpl(
         message: String
     ): Machine<*> {
         val player = playerManager.getPlayerByGameSession(gameSession)
-        communicationManager.say(player, message)
+        communicationManager.shout(player, message)
         return commandMachine
     }
 
 }
 
-interface ProcessorSay : SingleStateProcessor {
+interface ProcessorShout : SingleStateProcessor {
     companion object {
-        const val COMMAND = "say"
+        const val COMMAND = "shout"
     }
 }
 
-val processorSayModule = Kodein.Module("processorSayModule") {
+val processorShoutModule = Kodein.Module("processorShoutModule") {
     bind<CommandRef>(COMMAND) with provider {
         CommandRef(
             name = COMMAND,
             processor = { commandMachine ->
-                ProcessorSayImpl(
+                ProcessorShoutImpl(
                     commandMachine = commandMachine,
                     communicationManager = instance(),
                     playerManager = instance()

@@ -27,7 +27,8 @@ val commandGroupsModule = Kodein.Module("commandGroupsModule") {
             name = "Communication",
             commands = listOf(
                 instance(ProcessorGsay.COMMAND),
-                instance(ProcessorSay.COMMAND)
+                instance(ProcessorSay.COMMAND),
+                instance(ProcessorShout.COMMAND)
             )
         )
     }
