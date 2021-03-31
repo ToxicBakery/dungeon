@@ -1,4 +1,5 @@
 @file:Suppress("MagicNumber")
+
 package com.toxicbakery.game.dungeon.map
 
 enum class MapLegend(
@@ -46,6 +47,11 @@ enum class MapLegend(
         .replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
+
+    init {
+        // All map legend elements should be 4 characters in length
+        require(ascii.length == 4)
+    }
 
     companion object {
 

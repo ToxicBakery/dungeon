@@ -12,6 +12,7 @@ import kotlin.math.ceil
 private class MapManagerImpl(
     private val mapStore: MapStore
 ) : MapBaseFunctionality(
+    mapIsFinalized = mapStore.mapIsFinalized,
     mapSizeAtomic = mapStore.mapSizeAtomic,
     regionSizeAtomic = mapStore.regionSizeAtomic
 ), MapManager {
@@ -43,12 +44,12 @@ private class MapManagerImpl(
         windowDescription.validate()
 
         val topLeftRegionLocation = windowDescription.topLeftLocation.regionLocation
-        val bottomRightRegionLocation = windowDescription.bottomRightLocation.regionLocationRoundUp
+        val bottomRightRegionLocation = windowDescription.bottomRightLocation.regionLocation
         val xRegionDistance = regionDistance(topLeftRegionLocation.x, bottomRightRegionLocation.x)
         val yRegionDistance = regionDistance(topLeftRegionLocation.y, bottomRightRegionLocation.y)
-        val windowRows = (0..xRegionDistance)
+        val windowRows = (0..yRegionDistance)
             .flatMap { y ->
-                (0..yRegionDistance)
+                (0..xRegionDistance)
                     .map { x ->
                         RelativeRegionLocation(x, y) to RegionLocation.wrapped(
                             regionCount = regionCount,
@@ -57,6 +58,19 @@ private class MapManagerImpl(
                         ).region.byteArray
                     }
             }
+
+        println(windowDescription)
+        windowRows.forEach { (location, array) ->
+            println(location)
+            println(
+                (0 until regionSize).joinToString(separator = "\n") { y ->
+                    (0 until regionSize).joinToString(separator = "") { x ->
+                        MapLegend.representingByte(array[(y * regionSize) + x]).ascii
+                    }
+                }
+            )
+            println()
+        }
 
         return Window(
             windowRows = paintRegions(

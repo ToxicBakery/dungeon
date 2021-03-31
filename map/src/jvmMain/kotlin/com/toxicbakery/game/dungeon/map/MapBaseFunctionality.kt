@@ -4,8 +4,15 @@ import org.mapdb.Atomic
 
 open class MapBaseFunctionality(
     private val mapSizeAtomic: Atomic.Integer,
-    private val regionSizeAtomic: Atomic.Integer
+    private val regionSizeAtomic: Atomic.Integer,
+    private val mapIsFinalized: Atomic.Boolean
 ) {
+
+    protected var isFinalized: Boolean
+        get() = mapIsFinalized.get()
+        set(value) {
+            mapIsFinalized.set(value)
+        }
 
     /**
      * Size of the table measuring the width (width == height, square map). Must be a power of 2.

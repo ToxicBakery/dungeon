@@ -8,7 +8,7 @@ plugins {
 }
 
 application {
-    mainClassName = "com.toxicbakery.game.dungeon.map.MainKt"
+    mainClass.set("com.toxicbakery.game.dungeon.map.MainKt")
 }
 
 repositories {
@@ -17,8 +17,8 @@ repositories {
 
 buildConfig {
     packageName("com.toxicbakery.game.dungeon.map")
-    buildConfigField("int", "MAP_SIZE", "4096")
-    buildConfigField("int", "REGION_SIZE", "8")
+    buildConfigField("int", "MAP_SIZE", "16")
+    buildConfigField("int", "REGION_SIZE", "4")
 }
 
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks

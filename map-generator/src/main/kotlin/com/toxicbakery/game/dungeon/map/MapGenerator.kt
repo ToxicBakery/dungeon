@@ -17,6 +17,7 @@ import kotlin.random.Random
 private class MapGeneratorImpl(
     private val mapStore: MapStore
 ) : MapBaseFunctionality(
+    mapIsFinalized = mapStore.mapIsFinalized,
     mapSizeAtomic = mapStore.mapSizeAtomic,
     regionSizeAtomic = mapStore.regionSizeAtomic
 ), MapGenerator {
@@ -48,12 +49,15 @@ private class MapGeneratorImpl(
         mapConfig: MapConfig,
         previewers: List<MapPreviewer>
     ) {
-        mapSize = mapConfig.mapSize
-        regionSize = mapConfig.regionSize
 
-        if (mapSize == mapConfig.mapSize && regionSize == mapConfig.regionSize) {
-            println("Skipping map generation; map meets requested configuration.")
+        if (isFinalized) {
+            println("Skipping map generation; map previously generated.")
             return
+        } else {
+            // Finalize the map to prevent regen
+            isFinalized = true
+            mapSize = mapConfig.mapSize
+            regionSize = mapConfig.regionSize
         }
 
         if (mapSize <= regionSize) error("Map size must be larger than region size")

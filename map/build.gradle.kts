@@ -40,7 +40,7 @@ kotlin {
         implementation(kotlin("test-annotations-common"))
     }
     sourceSets["jvmMain"].dependencies {
-        implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")
+        api("org.mapdb:mapdb:${findProperty("mapdb_version")}")
     }
     sourceSets["jvmTest"].dependencies {
         implementation(kotlin("test-junit"))

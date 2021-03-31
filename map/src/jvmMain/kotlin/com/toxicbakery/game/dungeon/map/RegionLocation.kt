@@ -9,13 +9,13 @@ data class RegionLocation(
 ) {
 
     /**
-     * Ensure x and y coords are in bounds and wrap if necessary.
+     * Ensure **x** and **y** coords are in bounds and wrap if necessary. Performance
+     * optimized to return this RegionLocation if the calculated new coordinates are
+     * identical.
      */
-    fun wrap(regionsWidth: Int): RegionLocation {
-        val newX =
-            wrapCoordinate(regionsWidth, x)
-        val newY =
-            wrapCoordinate(regionsWidth, y)
+    fun wrap(regionsSize: Int): RegionLocation {
+        val newX = wrapCoordinate(regionsSize, x)
+        val newY = wrapCoordinate(regionsSize, y)
         return if (newX == x && newY == y) this
         else RegionLocation(newX, newY)
     }

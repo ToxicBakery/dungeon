@@ -31,8 +31,8 @@ class HtmlMapPreviewer : MapPreviewer {
                         |<body style="white-space: nowrap;">
                         |""".trimMargin()
                 )
-                for (y in 0 until mapSize) {
-                    for (x in 0 until mapSize) {
+                for (x in 0 until mapSize) {
+                    for (y in 0 until mapSize) {
                         val mapLegendValue = mapData[x * mapSize + y]
                         writer.write(mapLegendValue.htmlRepresentation)
                     }
