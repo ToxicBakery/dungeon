@@ -4,11 +4,11 @@ import com.toxicbakery.game.dungeon.exception.AuthenticationException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
 import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
+import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorLook
 import com.toxicbakery.game.dungeon.manager.AuthenticationManager
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import kotlinx.coroutines.delay
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
@@ -29,7 +29,7 @@ private class AuthenticationMachineImpl(
         message: String
     ): Machine<*> = gameSession.cycle(message).let { nextState ->
         when (nextState.state) {
-            AuthenticationState.Authenticated -> commandMachine
+            AuthenticationState.Authenticated -> commandMachine.acceptMessage(gameSession, ProcessorLook.COMMAND)
             else -> AuthenticationMachineImpl(
                 authenticationManager = authenticationManager,
                 commandMachine = commandMachine,
@@ -54,15 +54,13 @@ private class AuthenticationMachineImpl(
         AuthenticationState.Authenticated -> error("Request to process on end state")
     }
 
-    private suspend fun GameSession.initAuthentication(): AuthMachineState =
-        if (authMachineState.errorCount > MAX_AUTH_ATTEMPTS) tooManyAttempts()
-        else {
-            sendMessage("What is your username?")
-            authMachineState.copy(
-                state = AuthenticationState.AwaitingUsername,
-                credentials = Credentials()
-            )
-        }
+    private suspend fun GameSession.initAuthentication(): AuthMachineState {
+        sendMessage("What is your username?")
+        return authMachineState.copy(
+            state = AuthenticationState.AwaitingUsername,
+            credentials = Credentials()
+        )
+    }
 
     private suspend fun GameSession.takeUsernameAndProceed(username: String): AuthMachineState {
         sendMessage("What is your password?", ExpectedResponseType.Secure)
@@ -82,28 +80,17 @@ private class AuthenticationMachineImpl(
         )
     } catch (e: NoPlayerWithUsernameException) {
         sendMessage("User not found, are you sure you have registered?")
+        close()
         initAuthentication()
     } catch (e: AuthenticationException) {
         sendMessage("Authentication failed, check your password and try again.")
-        initAuthentication()
-    }
-
-    private suspend fun GameSession.tooManyAttempts(): AuthMachineState {
-        delay(AUTH_FAILURE_TIMEOUT)
-        sendMessage("Too many failed authentication attempts.")
         close()
-        return AuthMachineState(state = AuthenticationState.Init)
-    }
-
-    companion object {
-        private const val AUTH_FAILURE_TIMEOUT = 5000L
-        private const val MAX_AUTH_ATTEMPTS = 3
+        initAuthentication()
     }
 
 }
 
 private data class AuthMachineState(
-    val errorCount: Int = 0,
     val credentials: Credentials = Credentials(),
     val state: AuthenticationState = AuthenticationState.Init
 )

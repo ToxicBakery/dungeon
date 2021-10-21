@@ -11,7 +11,7 @@ open class MapBaseFunctionality(
      * Size of the table measuring the width (width == height, square map). Must be a power of 2.
      */
     protected var mapSize: Int
-        get() = mapSizeAtomic.get().throwIfInvalid()
+        get() = mapSizeAtomic.get().throwIfInvalid("mapSize")
         set(value) {
             mapSizeAtomic.set(value)
         }
@@ -20,7 +20,7 @@ open class MapBaseFunctionality(
      * Size of regions in the map. Must be a power of 2.
      */
     protected var regionSize: Int
-        get() = regionSizeAtomic.get().throwIfInvalid()
+        get() = regionSizeAtomic.get().throwIfInvalid("regionSize")
         set(value) = regionSizeAtomic.set(value)
 
     /**
@@ -30,8 +30,8 @@ open class MapBaseFunctionality(
         get() = mapSize / regionSize
 
     companion object {
-        private fun Int.throwIfInvalid(): Int =
-            if (this <= 0) error("Dimension not set!") else this
+        private fun Int.throwIfInvalid(dimensionName: String): Int =
+            if (this <= 0) throw DimensionNotSetException(dimensionName) else this
     }
 
 }

@@ -4,6 +4,7 @@ import com.toxicbakery.game.dungeon.map.BuildConfig.MAP_SIZE
 import com.toxicbakery.game.dungeon.map.BuildConfig.REGION_SIZE
 import com.toxicbakery.game.dungeon.map.model.Window
 import com.toxicbakery.game.dungeon.map.preview.BmpMapPreviewer
+import com.toxicbakery.game.dungeon.map.preview.HtmlMapPreviewer
 import org.kodein.di.Kodein
 import org.kodein.di.erased.instance
 import kotlin.time.ExperimentalTime
@@ -25,9 +26,12 @@ fun main() {
             regionSize = REGION_SIZE
         ),
         previewers = listOf(
-            BmpMapPreviewer()
+            BmpMapPreviewer(),
+            HtmlMapPreviewer()
         )
     )
+
+
 }
 
 private fun Window.render() = windowRows

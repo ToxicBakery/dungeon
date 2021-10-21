@@ -57,7 +57,7 @@ class Region(
                 }
                 .map { (b1, b2) -> b1 - b2 }
                 .firstOrNull { result -> result != 0 }
-                ?: o1.byteArray.size - o2.byteArray.size
+                ?: (o1.byteArray.size - o2.byteArray.size)
 
     }
 

@@ -1,11 +1,11 @@
 package com.toxicbakery.game.dungeon.map.preview
 
-import com.toxicbakery.game.dungeon.map.MapLegend
+import com.toxicbakery.game.dungeon.map.MapData
 import java.io.File
 
 class HtmlMapPreviewer : MapPreviewer {
 
-    override fun preview(mapSize: Int, mapData: Array<MapLegend>) {
+    override fun preview(mapSize: Int, mapData: MapData) {
         File("render.raw.html")
             .bufferedWriter()
             .use { writer ->
@@ -31,8 +31,8 @@ class HtmlMapPreviewer : MapPreviewer {
                         |<body style="white-space: nowrap;">
                         |""".trimMargin()
                 )
-                for (y in 0 until mapSize) {
-                    for (x in 0 until mapSize) {
+                for (x in 0 until mapSize) {
+                    for (y in 0 until mapSize) {
                         val mapLegendValue = mapData[x * mapSize + y]
                         writer.write(mapLegendValue.htmlRepresentation)
                     }

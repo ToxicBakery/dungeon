@@ -13,7 +13,7 @@ import org.kodein.di.erased.provider
 import org.mapdb.HTreeMap
 import kotlin.random.Random
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "SameParameterValue")
 private class MapGeneratorImpl(
     private val mapStore: MapStore
 ) : MapBaseFunctionality(
@@ -48,44 +48,77 @@ private class MapGeneratorImpl(
         mapConfig: MapConfig,
         previewers: List<MapPreviewer>
     ) {
-        mapSize = mapConfig.mapSize
-        regionSize = mapConfig.regionSize
 
-        if (mapSize == mapConfig.mapSize && regionSize == mapConfig.regionSize) {
-            println("Skipping map generation; map meets requested configuration.")
-            return
+        try {
+            if (mapSize == mapConfig.mapSize && regionSize == mapConfig.regionSize) {
+                println("Skipping map generation; map meets requested configuration.")
+                return
+            }
+
+            if (mapConfig.mapSize <= regionSize) error("Map size must be larger than region size")
+
+            if (!mapConfig.mapSize.isPositivePowerOfTwo() || !mapConfig.regionSize.isPositivePowerOfTwo())
+                error("Map and Region sizes must be positive powers of 2")
+        } catch (e: DimensionNotSetException) {
+            // No map previously generated, starting with clean database.
+            println("Creating new map DB")
         }
 
-        if (mapSize <= regionSize) error("Map size must be larger than region size")
-
-        if (!mapSize.isPositivePowerOfTwo() || !regionSize.isPositivePowerOfTwo())
-            error("Map and Region sizes must be positive powers of 2")
+        mapSize = mapConfig.mapSize
+        regionSize = mapConfig.regionSize
 
         val mapData = TerrainGenerator(
             moduleFactory = { sampleGenerator },
             configuration = TerrainConfiguration(mapSize = mapSize)
         ).generate()
 
-        map.clear()
-
         // Generate previews
         previewers.forEach { previewer -> previewer.preview(mapSize, mapData) }
 
-        // Fill the map with regions
-        for (x in 0 until mapSize / regionSize)
-            for (y in 0 until mapSize / regionSize)
-                map[RegionLocation(x, y)] = Region(ByteArray(regionSize * regionSize))
+        // Copy generated map into db
+        populateDb(mapData)
 
-        // Copy map data into the regions
-        for (x in 0 until mapSize) {
-            for (y in 0 until mapSize) {
-                val regionLocation = RegionLocation(x / regionSize, y / regionSize)
-                val regionData = map.getValue(regionLocation).byteArray
-                val mapLegend = mapData[x * mapSize + y]
-                val x0 = x % regionSize
-                val y0 = y % regionSize
-                regionData[x0 * regionSize + y0] = mapLegend.byteRepresentation
-                map[regionLocation] = Region(regionData)
+        printRegion(0, 0)
+        printRegion(1, 0)
+        printRegion(0,1)
+        printRegion(1, 1)
+    }
+
+    private fun printRegion(rX: Int, rY: Int) {
+        println("$rX, $rY")
+        val region = map[RegionLocation(rX, rY)]!!
+        for (x in 0 until regionSize) {
+            for (y in 0 until regionSize)
+                print(MapLegend.representingByte(region.byteArray[y * regionSize + x]).ascii)
+
+            println()
+        }
+    }
+
+    /**
+     * Copy map data into the database splitting the map into regions.
+     */
+    private fun populateDb(mapData: MapData) {
+        // Reset the map in the database
+        map.clear()
+
+        // Fill the map with regions. Reminder that source data is in y,x format and thus has to be rotated
+        // when copying to the map database such that regions and their sub data are properly populated.
+        val regionSizePow2 = regionSize * regionSize
+        val mapRegions = mapSize / regionSize
+        for (rY in 0 until mapRegions) {
+            for (rX in 0 until mapRegions) {
+                val regionData = ByteArray(regionSizePow2)
+                for (x in 0 until regionSize) {
+                    for (y in 0 until regionSize) {
+                        val x0 = x % regionSize
+                        val y0 = y % regionSize
+                        regionData[x0 * regionSize + y0] =
+                            mapData[(rY * regionSize + y) * mapSize + (rX * regionSize + x)].byteRepresentation
+                    }
+                }
+
+                map[RegionLocation(rX, rY)] = Region(regionData)
             }
         }
     }

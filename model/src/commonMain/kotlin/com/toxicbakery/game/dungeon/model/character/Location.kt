@@ -27,7 +27,7 @@ data class Location(
         location: Location,
         mapSize: Int
     ): Int {
-        if (worldId != location.worldId) error("Attempt to calculate distance between worlds.")
+        if (worldId != location.worldId) error("Attempted to calculate distance between different worlds.")
         val x = wrappedDistance(x, location.x, mapSize).pow(2)
         val y = wrappedDistance(y, location.y, mapSize).pow(2)
         return sqrt((x + y).toDouble()).toInt()
@@ -43,6 +43,6 @@ data class Location(
     }
 
     private fun Int.pow(pow: Int): Int =
-        (0 until pow - 1).fold(this, { acc, _ -> acc * this })
+        (0 until pow - 1).fold(this) { acc, _ -> acc * this }
 
 }

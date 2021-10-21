@@ -2,7 +2,7 @@ import org.gradle.kotlin.dsl.implementation
 
 plugins {
     kotlin("jvm")
-    id("com.github.gmazzo.buildconfig").version("1.6.1")
+    id("com.github.gmazzo.buildconfig").version("3.0.3")
     id("io.gitlab.arturbosch.detekt")
     application
 }
@@ -17,8 +17,8 @@ repositories {
 
 buildConfig {
     packageName("com.toxicbakery.game.dungeon.map")
-    buildConfigField("int", "MAP_SIZE", "4096")
-    buildConfigField("int", "REGION_SIZE", "8")
+    buildConfigField("int", "MAP_SIZE", "32")
+    buildConfigField("int", "REGION_SIZE", "4")
 }
 
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks

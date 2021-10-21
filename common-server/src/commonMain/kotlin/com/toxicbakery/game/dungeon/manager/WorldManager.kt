@@ -72,10 +72,11 @@ private class WorldManagerImpl(
     private suspend fun nearbyThings(player: Player): List<Displayable> {
         val npcsNearby = listOf<Displayable>().locationMapped()
         val animalsNearby = listOf<Displayable>(
-            Animal(0, "", Location(0, 0), true),
-            Animal(0, "", Location(0, -1), true),
-            Animal(0, "", Location(-1, 0), true),
-            Animal(0, "", Location(-1, -1), true)
+            Animal(0, "", Location(1, 1), true),
+            Animal(0, "", Location(0, 1), true),
+            Animal(0, "", Location(1, 0), true),
+            Animal(0, "", Location(2, 1), true),
+            Animal(0, "", Location(1, 2), true)
         ).locationMapped()
         val creaturesNearby = listOf<Displayable>().locationMapped()
         val playersNearbyAndThisPlayer = playersNear(player)
@@ -92,8 +93,7 @@ private class WorldManagerImpl(
     }
 
     private fun List<Displayable>.locationMapped(): Map<Location, Displayable> =
-        map { displayable -> displayable.location to displayable }
-            .toMap()
+        associate { displayable -> displayable.location to displayable }
 
     private suspend fun playersNear(player: Player): List<Player> = playerManager.getPlayersNear(
         location = player.location,

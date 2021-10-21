@@ -22,8 +22,8 @@ private class ProcessorLookImpl(
         gameSession: GameSession,
         message: String
     ): Machine<*> {
-        val map = worldManager.getWindow(gameSession)
-        gameSession.sendClientMessage(MapMessage(map))
+        val window = worldManager.getWindow(gameSession)
+        gameSession.sendClientMessage(MapMessage(window))
         return commandMachine
     }
 }
