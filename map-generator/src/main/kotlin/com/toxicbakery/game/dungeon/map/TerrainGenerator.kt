@@ -17,7 +17,7 @@ class TerrainGenerator(
         if (!configuration.mapSize.isPowerOfTwo()) error("Size must be a power of 2")
     }
 
-    fun generate(): Array<MapLegend> {
+    fun generate(): MapData {
         val map: Array<MapLegend> = Array(width * height) { MapLegend.NULL }
         val coordinatePoints: Array<Point> = Array(width * height) { i -> point(i / width, i % width) }
         generateBaseLand(map, coordinatePoints)

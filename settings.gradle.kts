@@ -1,4 +1,3 @@
-enableFeaturePreview("GRADLE_METADATA")
 
 pluginManagement {
     val detekt_version: String by settings

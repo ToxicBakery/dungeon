@@ -9,19 +9,16 @@ data class RegionLocation(
 ) {
 
     /**
-     * Ensure x and y coords are in bounds and wrap if necessary.
+     * Ensure x and y coordinates are in bounds and wrap if necessary.
      */
     fun wrap(regionsWidth: Int): RegionLocation {
-        val newX =
-            wrapCoordinate(regionsWidth, x)
-        val newY =
-            wrapCoordinate(regionsWidth, y)
+        val newX = wrapCoordinate(regionsWidth, x)
+        val newY = wrapCoordinate(regionsWidth, y)
         return if (newX == x && newY == y) this
         else RegionLocation(newX, newY)
     }
 
-    object Serializer :
-        org.mapdb.Serializer<RegionLocation> {
+    object Serializer : org.mapdb.Serializer<RegionLocation> {
 
         override fun serialize(out: DataOutput2, value: RegionLocation) {
             out.packInt(value.x)

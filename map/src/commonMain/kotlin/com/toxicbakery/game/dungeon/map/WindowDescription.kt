@@ -7,14 +7,18 @@ data class WindowDescription(
     val size: Int
 ) {
 
-    val topLeftLocation: Location = Location(
-        x = location.x - size / 2,
-        y = location.y - size / 2
+    init {
+        require(size > 0 && size % 2 == 1) { "Size must be a positive odd number: Size=$size" }
+    }
+
+    fun getTopLeftLocation(mapSize: Int): Location = Location(
+        x = (location.x - size / 2).wrapTo(mapSize),
+        y = (location.y - size / 2).wrapTo(mapSize)
     )
 
-    val bottomRightLocation = Location(
-        x = location.x + size / 2,
-        y = location.y + size / 2
+    fun getBottomRightLocation(mapSize: Int) = Location(
+        x = (location.x + size / 2).wrapTo(mapSize),
+        y = (location.y + size / 2).wrapTo(mapSize)
     )
 
 }
