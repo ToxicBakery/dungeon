@@ -27,7 +27,6 @@ private class ProcessorGsayImpl(
         communicationManager.gsay(player, message)
         return commandMachine
     }
-
 }
 
 interface ProcessorGsay : SingleStateProcessor {

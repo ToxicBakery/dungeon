@@ -4,4 +4,5 @@ interface Equipable {
     val name: String
     val slot: EquipmentSlot
     val equipmentType: EquipmentType
+    val weight: Int
 }

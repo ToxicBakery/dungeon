@@ -1,7 +1,7 @@
 package com.toxicbakery.game.dungeon.manager
 
+import com.toxicbakery.game.dungeon.model.Lookable.*
 import com.toxicbakery.game.dungeon.model.auth.Credentials
-import com.toxicbakery.game.dungeon.model.character.Player
 import com.toxicbakery.game.dungeon.model.session.AuthenticatedGameSession
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
@@ -42,7 +42,6 @@ private class AuthenticationManagerImpl(
     override suspend fun playerLeft(
         player: Player
     ) = dungeonStateStore.modify { dungeonState -> dungeonState.removePlayerAndSession(player) }
-
 }
 
 interface AuthenticationManager {
@@ -62,7 +61,6 @@ interface AuthenticationManager {
     suspend fun registerPlayer(
         credentials: Credentials
     ): Player
-
 }
 
 val authenticationManagerModule = Kodein.Module("authenticationManagerModule") {

@@ -25,5 +25,4 @@ abstract class BroadcastChannelStore<T>(initialValue: T) : ChannelStore<T> {
     override suspend fun observe() = channel.asFlow()
 
     override suspend fun value(): T = channel.value
-
 }

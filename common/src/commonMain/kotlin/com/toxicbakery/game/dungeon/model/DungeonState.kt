@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.model
 
-import com.toxicbakery.game.dungeon.model.character.Player
+import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
 
@@ -21,7 +21,7 @@ data class DungeonState(
 
     fun updatePlayer(player: Player): DungeonState = copy(
         playerSessionsByPlayerId = playerSessionsByPlayerId +
-                (player.id to playerSessionsByPlayerId.getValue(player.id).copy(player = player))
+            (player.id to playerSessionsByPlayerId.getValue(player.id).copy(player = player))
     )
 
     fun getAuthenticatedGameSession(gameSession: GameSession): GameSession? =
@@ -62,5 +62,4 @@ data class DungeonState(
                 gameSessionsBySessionId = gameSessionsBySessionId.minus(storedSession.sessionId)
             )
         }
-
 }

@@ -44,6 +44,7 @@ private class AuthenticationMachineImpl(
             commandMachine = commandMachine,
             authMachineState = gameSession.cycle()
         )
+
         else -> this
     }
 
@@ -78,16 +79,15 @@ private class AuthenticationMachineImpl(
             state = AuthenticationState.Authenticated,
             credentials = credentials
         )
-    } catch (e: NoPlayerWithUsernameException) {
+    } catch (_: NoPlayerWithUsernameException) {
         sendMessage("User not found, are you sure you have registered?")
         close()
         initAuthentication()
-    } catch (e: AuthenticationException) {
+    } catch (_: AuthenticationException) {
         sendMessage("Authentication failed, check your password and try again.")
         close()
         initAuthentication()
     }
-
 }
 
 private data class AuthMachineState(

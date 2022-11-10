@@ -16,5 +16,4 @@ data class WindowRowMutable(
     fun toWindowRow(): WindowRow = WindowRow(
         row = row.toList()
     )
-
 }

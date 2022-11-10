@@ -5,8 +5,7 @@ import com.toxicbakery.game.dungeon.map.MapData
 interface MapPreviewer {
 
     fun preview(
-        mapSize:
-        Int, mapData: MapData
+        mapSize: Int,
+        mapData: MapData
     )
-
 }

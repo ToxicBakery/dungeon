@@ -1,3 +1,8 @@
 package com.toxicbakery.game.dungeon.exception
 
-class UnknownCommandException(command: String) : Exception("""Unknown command "$command".""")
+class UnknownCommandException : Exception {
+    constructor(command: String) : super("""Unknown command: "$command".""")
+    constructor(command: String, message: String) : super(
+        """($command) Unknown subcommand: ${message.take(20)}"""
+    )
+}

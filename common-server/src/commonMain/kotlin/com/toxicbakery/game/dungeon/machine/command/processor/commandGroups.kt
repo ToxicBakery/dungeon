@@ -1,7 +1,11 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
 import org.kodein.di.Kodein
-import org.kodein.di.erased.*
+import org.kodein.di.erased.bind
+import org.kodein.di.erased.inSet
+import org.kodein.di.erased.instance
+import org.kodein.di.erased.setBinding
+import org.kodein.di.erased.singleton
 
 val commandGroupsModule = Kodein.Module("commandGroupsModule") {
     bind() from setBinding<CommandGroupRef>()

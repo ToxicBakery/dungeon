@@ -34,6 +34,7 @@ class Seedling : ISeedling {
         when (this) {
             Arbor.VERBOSE,
             Arbor.DEBUG -> console.log(msg)
+
             Arbor.INFO -> console.info(msg)
             Arbor.WARNING -> console.warn(msg)
             else -> console.error(msg)
@@ -45,6 +46,7 @@ class Seedling : ISeedling {
         when (this) {
             Arbor.VERBOSE,
             Arbor.DEBUG -> console.log(msg, *args)
+
             Arbor.INFO -> console.info(msg, *args)
             Arbor.WARNING -> console.warn(msg, *args)
             else -> console.error(msg, *args)
@@ -63,5 +65,4 @@ class Seedling : ISeedling {
     companion object {
         private const val CALLER_POSITION = 5
     }
-
 }

@@ -27,7 +27,6 @@ private class ProcessorSayImpl(
         communicationManager.say(player, message)
         return commandMachine
     }
-
 }
 
 interface ProcessorSay : SingleStateProcessor {

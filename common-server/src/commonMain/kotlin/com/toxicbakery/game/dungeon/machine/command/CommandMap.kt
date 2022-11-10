@@ -35,7 +35,7 @@ private class CommandMapImpl(
                 }
                 .joinToString("")
 
-            "~~ ${group.name} ~~\n${commands}"
+            "~~ ${group.name} ~~\n$commands"
         }
     }
 
@@ -62,7 +62,6 @@ private class CommandMapImpl(
     companion object {
         private const val COMMANDS_PER_ROW = 4
     }
-
 }
 
 interface CommandMap {
@@ -86,7 +85,6 @@ interface CommandMap {
         gameSession: GameSession,
         message: String
     ): Machine<*>
-
 }
 
 val commandMapModule = Kodein.Module("commandMapModule") {

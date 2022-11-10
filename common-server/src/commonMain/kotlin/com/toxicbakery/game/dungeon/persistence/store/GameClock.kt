@@ -1,5 +1,6 @@
 package com.toxicbakery.game.dungeon.persistence.store
 
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
@@ -8,7 +9,6 @@ import kotlinx.datetime.Instant
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.singleton
-import kotlin.random.Random
 
 class GameClock(
     startDay: Int,
@@ -28,10 +28,9 @@ class GameClock(
     }
 
     companion object {
-        private const val SECONDS_PER_DAY: Long = 86400L
+        private const val SECONDS_PER_DAY: Long = 86_400L
         private const val TICK_RATE: Long = 100L
     }
-
 }
 
 // Start the game clock sometime between the years 500 and 700 + up to slightly less than one year of days

@@ -3,8 +3,8 @@ package com.toxicbakery.game.dungeon.map
 internal class Point(
     private val width: Int,
     private val height: Int,
-    val x: Int,
-    val y: Int
+    private val x: Int,
+    private val y: Int
 ) {
 
     val sampleCoordinate: Int = x * width + y
@@ -46,5 +46,4 @@ internal class Point(
     }
 
     private fun newPoint(x: Int, y: Int) = Point(width, height, x, y)
-
 }

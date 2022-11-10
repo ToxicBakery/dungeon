@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.map
 
-import com.toxicbakery.game.dungeon.model.character.Location
+import com.toxicbakery.game.dungeon.model.world.Location
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -31,5 +31,4 @@ class DistanceFilterTest {
     }
 
     private fun location(x: Int, y: Int) = Location(x, y, 0)
-
 }

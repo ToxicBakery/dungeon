@@ -48,7 +48,6 @@ private class InitMachineImpl(
         private const val CMD_REGISTER = "register"
         private const val HELP_INSTRUCTIONS = "Available options:\n$CMD_LOGIN\n$CMD_REGISTER"
     }
-
 }
 
 interface InitMachine : Machine<InitState>

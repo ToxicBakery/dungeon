@@ -29,7 +29,7 @@ class HtmlMapPreviewer : MapPreviewer {
                         |</style>
                         |</head>
                         |<body style="white-space: nowrap;">
-                        |""".trimMargin()
+                    """.trimMargin()
                 )
                 for (x in 0 until mapSize) {
                     for (y in 0 until mapSize) {
@@ -41,5 +41,4 @@ class HtmlMapPreviewer : MapPreviewer {
                 writer.write("</body></html>")
             }
     }
-
 }

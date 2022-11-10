@@ -45,5 +45,4 @@ interface GameSession {
     companion object {
         const val NULL_PLAYER_ID = -1
     }
-
 }

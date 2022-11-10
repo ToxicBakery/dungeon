@@ -6,20 +6,20 @@ import com.sudoplay.joise.module.ModuleBasisFunction
 import com.sudoplay.joise.module.ModuleFractal
 import com.toxicbakery.game.dungeon.map.MapGenerator.MapConfig
 import com.toxicbakery.game.dungeon.map.preview.MapPreviewer
+import kotlin.random.Random
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
 import org.mapdb.HTreeMap
-import kotlin.random.Random
 
 @Suppress("MagicNumber", "SameParameterValue")
 private class MapGeneratorImpl(
     private val mapStore: MapStore
 ) : MapBaseFunctionality(
     mapSizeAtomic = mapStore.mapSizeAtomic,
-    regionSizeAtomic = mapStore.regionSizeAtomic
-), MapGenerator {
+),
+    MapGenerator {
 
     private val sampleGenerator: Module
         get() {
@@ -34,13 +34,13 @@ private class MapGeneratorImpl(
             val ac = ModuleAutoCorrect()
             ac.setSource(gen)
             ac.setRange(0.0, 1.0)
-            ac.samples = 10000
+            ac.samples = 10_000
             ac.calculate()
 
             return ac
         }
 
-    private val map: HTreeMap<RegionLocation, Region>
+    private val map: HTreeMap<RegionLocation, Byte>
         get() = mapStore.map
 
     @Suppress("NestedBlockDepth")
@@ -48,24 +48,21 @@ private class MapGeneratorImpl(
         mapConfig: MapConfig,
         previewers: List<MapPreviewer>
     ) {
-
         try {
-            if (mapSize == mapConfig.mapSize && regionSize == mapConfig.regionSize) {
+            if (mapSize == mapConfig.mapSize) {
                 println("Skipping map generation; map meets requested configuration.")
                 return
             }
 
-            if (mapConfig.mapSize <= regionSize) error("Map size must be larger than region size")
-
-            if (!mapConfig.mapSize.isPositivePowerOfTwo() || !mapConfig.regionSize.isPositivePowerOfTwo())
+            if (!mapConfig.mapSize.isPositivePowerOfTwo() || !mapConfig.regionSize.isPositivePowerOfTwo()) {
                 error("Map and Region sizes must be positive powers of 2")
-        } catch (e: DimensionNotSetException) {
+            }
+        } catch (_: DimensionNotSetException) {
             // No map previously generated, starting with clean database.
             println("Creating new map DB")
         }
 
         mapSize = mapConfig.mapSize
-        regionSize = mapConfig.regionSize
 
         val mapData = TerrainGenerator(
             moduleFactory = { sampleGenerator },
@@ -77,22 +74,6 @@ private class MapGeneratorImpl(
 
         // Copy generated map into db
         populateDb(mapData)
-
-        printRegion(0, 0)
-        printRegion(1, 0)
-        printRegion(0,1)
-        printRegion(1, 1)
-    }
-
-    private fun printRegion(rX: Int, rY: Int) {
-        println("$rX, $rY")
-        val region = map[RegionLocation(rX, rY)]!!
-        for (x in 0 until regionSize) {
-            for (y in 0 until regionSize)
-                print(MapLegend.representingByte(region.byteArray[y * regionSize + x]).ascii)
-
-            println()
-        }
     }
 
     /**
@@ -104,21 +85,9 @@ private class MapGeneratorImpl(
 
         // Fill the map with regions. Reminder that source data is in y,x format and thus has to be rotated
         // when copying to the map database such that regions and their sub data are properly populated.
-        val regionSizePow2 = regionSize * regionSize
-        val mapRegions = mapSize / regionSize
-        for (rY in 0 until mapRegions) {
-            for (rX in 0 until mapRegions) {
-                val regionData = ByteArray(regionSizePow2)
-                for (x in 0 until regionSize) {
-                    for (y in 0 until regionSize) {
-                        val x0 = x % regionSize
-                        val y0 = y % regionSize
-                        regionData[x0 * regionSize + y0] =
-                            mapData[(rY * regionSize + y) * mapSize + (rX * regionSize + x)].byteRepresentation
-                    }
-                }
-
-                map[RegionLocation(rX, rY)] = Region(regionData)
+        for (y in 0 until mapSize) {
+            for (x in 0 until mapSize) {
+                map[RegionLocation(x, y)] = mapData[y * mapSize + x].byteRepresentation
             }
         }
     }
@@ -127,7 +96,6 @@ private class MapGeneratorImpl(
         private fun Int.isPositivePowerOfTwo(): Boolean =
             this > 0 && ((this and (this - 1)) == 0)
     }
-
 }
 
 interface MapGenerator {
@@ -141,7 +109,6 @@ interface MapGenerator {
         val mapSize: Int,
         val regionSize: Int
     )
-
 }
 
 val mapGeneratorModule = Kodein.Module("mapGeneratorModule") {

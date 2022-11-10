@@ -1,8 +1,8 @@
 package com.toxicbakery.game.dungeon.model.world
 
 import com.toxicbakery.game.dungeon.model.Identifiable
-import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
 data class World(

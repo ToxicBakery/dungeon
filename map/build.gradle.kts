@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("org.jetbrains.kotlin.plugin.serialization")
@@ -19,51 +21,78 @@ kotlin {
     sourceSets {
         all {
             languageSettings.enableLanguageFeature("InlineClasses")
-            languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
-            languageSettings.useExperimentalAnnotation("kotlinx.coroutines.ExperimentalCoroutinesApi")
-            languageSettings.useExperimentalAnnotation("kotlinx.coroutines.FlowPreview")
-            languageSettings.useExperimentalAnnotation("kotlinx.serialization.ImplicitReflectionSerializer")
-            languageSettings.useExperimentalAnnotation("io.ktor.util.KtorExperimentalAPI")
+        }
+        val commonMain by getting {
+            dependencies {
+                implementation(kotlin("stdlib"))
+                implementation(project(":model"))
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
+                implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
+                implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test-junit"))
+            }
+        }
+        val jsMain by getting {
+            dependencies {
+                implementation("org.kodein.di:kodein-di-erased-js:${findProperty("kodein_version")}")
+            }
+        }
+        val jsTest by getting {
+            dependencies {
+                implementation(kotlin("test-js"))
+            }
         }
     }
-    sourceSets["commonMain"].dependencies {
-        implementation(kotlin("stdlib-common"))
-        implementation(project(":model"))
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
-        implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
-        implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")
-        implementation("com.soywiz.korlibs.klock:klock:${findProperty("klock_version")}")
-    }
-    sourceSets["commonTest"].dependencies {
-        implementation(kotlin("test-common"))
-        implementation(kotlin("test-annotations-common"))
-    }
-    sourceSets["jvmMain"].dependencies {
-        implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")
-    }
-    sourceSets["jvmTest"].dependencies {
-        implementation(kotlin("test-junit"))
-    }
-    sourceSets["jsMain"].dependencies {
-        implementation(kotlin("stdlib-js"))
-        implementation("org.kodein.di:kodein-di-erased-js:${findProperty("kodein_version")}")
-    }
-    sourceSets["jsTest"].dependencies {
-        implementation(kotlin("test-js"))
+}
+
+dependencies {
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${findProperty("detekt_version")}")
+}
+
+tasks.withType(KotlinCompile::class.java).configureEach {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs.plus(
+            listOf(
+                "-opt-in=kotlin.time.ExperimentalTime",
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-opt-in=kotlinx.serialization.ImplicitReflectionSerializer",
+                "-opt-in=io.ktor.util.KtorExperimentalAPI",
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+            )
+        )
     }
 }
 
 detekt {
-    failFast = true
-    buildUponDefaultConfig = true
-    config = files("${rootProject.projectDir}/detekt/config.yml")
-    input = files(
-        kotlin.sourceSets
-            .flatMap { sourceSet -> sourceSet.kotlin.srcDirs }
-            .map { file -> file.relativeTo(projectDir) }
+    config = files("$rootDir/detekt/config.yml")
+    source.from(
+        files(
+            kotlin.sourceSets
+                .flatMap { sourceSet -> sourceSet.kotlin.srcDirs }
+                .map { file -> file.relativeTo(projectDir) }
+        )
     )
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
-        html.enabled = true
+        html.required.set(true)
     }
 }

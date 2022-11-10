@@ -1,11 +1,11 @@
 @file:Suppress("MagicNumber")
 
-package com.toxicbakery.game.dungeon.model.character
+package com.toxicbakery.game.dungeon.model.world
 
-import kotlinx.serialization.protobuf.ProtoNumber
-import kotlinx.serialization.Serializable
-import kotlin.math.abs
+import com.toxicbakery.game.dungeon.model.world.Distance.Companion.wrappedDistanceLine
 import kotlin.math.sqrt
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 
 /**
  * Representation of the characters current location in the world.
@@ -28,21 +28,12 @@ data class Location(
         mapSize: Int
     ): Int {
         if (worldId != location.worldId) error("Attempted to calculate distance between different worlds.")
-        val x = wrappedDistance(x, location.x, mapSize).pow(2)
-        val y = wrappedDistance(y, location.y, mapSize).pow(2)
+        if (this == location) return 0
+        val x = wrappedDistanceLine(x, location.x, mapSize).pow2()
+        val y = wrappedDistanceLine(y, location.y, mapSize).pow2()
         return sqrt((x + y).toDouble()).toInt()
     }
 
-    private fun wrappedDistance(
-        a: Int,
-        b: Int,
-        mapSize: Int
-    ): Int = abs(a - b).let { r ->
-        if (r > mapSize / 2) mapSize - r
-        else a - b
-    }
-
-    private fun Int.pow(pow: Int): Int =
-        (0 until pow - 1).fold(this) { acc, _ -> acc * this }
-
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun Int.pow2(): Int = this * this
 }

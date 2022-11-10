@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.map
 
-import com.toxicbakery.game.dungeon.model.character.Location
+import com.toxicbakery.game.dungeon.model.world.Location
 
 data class WindowDescription(
     val location: Location,
@@ -20,5 +20,4 @@ data class WindowDescription(
         x = (location.x + size / 2).wrapTo(mapSize),
         y = (location.y + size / 2).wrapTo(mapSize)
     )
-
 }

@@ -1,6 +1,7 @@
 package com.toxicbakery.game.dungeon.model.client
 
 import com.toxicbakery.game.dungeon.map.model.Window
+import com.toxicbakery.game.dungeon.model.world.LookLocation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -45,4 +46,9 @@ sealed class ClientMessage {
         val window: Window
     ) : ClientMessage()
 
+    @Serializable
+    data class DirectedLookMessage(
+        @ProtoNumber(1)
+        val lookLocation: LookLocation
+    ) : ClientMessage()
 }

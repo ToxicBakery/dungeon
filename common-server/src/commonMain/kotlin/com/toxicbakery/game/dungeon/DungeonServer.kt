@@ -30,7 +30,6 @@ private class DungeonServerImpl(
     override suspend fun onNewSession(session: GameSession) = gameSessionManager.sessionCreated(session)
 
     override suspend fun onLostSession(session: GameSession) = gameSessionManager.sessionDestroyed(session)
-
 }
 
 interface DungeonServer {
@@ -47,7 +46,6 @@ interface DungeonServer {
     suspend fun onLostSession(
         session: GameSession
     )
-
 }
 
 val dungeonServerModule = Kodein.Module("dungeonServerModule") {

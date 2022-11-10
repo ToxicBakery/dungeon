@@ -1,5 +1,8 @@
 package com.toxicbakery.game.dungeon.map
 
+import com.toxicbakery.game.dungeon.model.world.Distance
+import com.toxicbakery.game.dungeon.model.world.Distance.Companion.wrappedDistance
+import com.toxicbakery.game.dungeon.model.world.Location
 import org.mapdb.DataInput2
 import org.mapdb.DataOutput2
 
@@ -7,6 +10,19 @@ data class RegionLocation(
     val x: Int,
     val y: Int
 ) {
+
+    /**
+     * Get the top left location of the region in world coordinates.
+     */
+    fun topLeftLocation(regionSize: Int) = Location(
+        x = x * regionSize,
+        y = y * regionSize,
+    )
+
+    /**
+     * Load the region from the store.
+     */
+    fun loadRegion(mapStore: MapStore): Byte = mapStore.map.getValue(this)
 
     /**
      * Ensure x and y coordinates are in bounds and wrap if necessary.
@@ -17,6 +33,17 @@ data class RegionLocation(
         return if (newX == x && newY == y) this
         else RegionLocation(newX, newY)
     }
+
+    fun distance(
+        regionLocation: RegionLocation,
+        regionCount: Int,
+    ): Distance = wrappedDistance(
+        x1 = regionLocation.x,
+        x2 = x,
+        y1 = regionLocation.y,
+        y2 = y,
+        wrap = regionCount
+    )
 
     object Serializer : org.mapdb.Serializer<RegionLocation> {
 
@@ -32,7 +59,6 @@ data class RegionLocation(
             )
 
         override fun isTrusted(): Boolean = true
-
     }
 
     companion object {
@@ -57,5 +83,4 @@ data class RegionLocation(
             else -> coordinate
         }
     }
-
 }

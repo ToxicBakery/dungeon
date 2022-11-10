@@ -36,7 +36,7 @@ private class CommandMachineImpl(
 
     private suspend fun GameSession.handleSubCommand(message: String): Machine<*> = try {
         commandMap.process(newInstance(), this, message)
-    } catch (e: UnknownCommandException) {
+    } catch (_: UnknownCommandException) {
         processorFailure()
         this@CommandMachineImpl
     } finally {
@@ -67,7 +67,6 @@ private class CommandMachineImpl(
     companion object {
         private const val COMMAND_HELP = "help"
     }
-
 }
 
 interface CommandMachine : Machine<CommandState>

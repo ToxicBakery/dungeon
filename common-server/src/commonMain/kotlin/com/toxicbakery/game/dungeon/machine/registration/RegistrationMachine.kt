@@ -42,6 +42,7 @@ private class RegistrationMachineImpl(
             authenticationMachine = authenticationMachine,
             registrationMachineState = gameSession.cycle()
         )
+
         else -> this
     }
 
@@ -83,12 +84,11 @@ private class RegistrationMachineImpl(
                     state = RegistrationState.Registered,
                     credentials = newCredentials
                 )
-            } catch (e: AlreadyRegisteredException) {
+            } catch (_: AlreadyRegisteredException) {
                 sendMessage("Registration failure! User already exists.")
                 initRegistration()
             }
         }
-
 }
 
 private data class RegistrationMachineState(

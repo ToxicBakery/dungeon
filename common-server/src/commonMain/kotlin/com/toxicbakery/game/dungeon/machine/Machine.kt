@@ -24,6 +24,5 @@ interface Machine<S> {
     /**
      * Start the machine
      */
-    suspend fun initMachine(gameSession: GameSession):Machine<S> = this
-
+    suspend fun initMachine(gameSession: GameSession): Machine<S> = this
 }

@@ -1,8 +1,9 @@
 @file:Suppress("MagicNumber")
+
 package com.toxicbakery.game.dungeon.model.character.stats
 
-import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
 data class Stats(
@@ -26,5 +27,4 @@ data class Stats(
             defence = defence + other.defence,
             luck = luck + other.luck
         )
-
 }

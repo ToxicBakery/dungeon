@@ -2,7 +2,7 @@
 
 package com.toxicbakery.game.dungeon.model.client
 
-import com.toxicbakery.game.dungeon.model.character.Location
+import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.model.character.stats.Stats
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber

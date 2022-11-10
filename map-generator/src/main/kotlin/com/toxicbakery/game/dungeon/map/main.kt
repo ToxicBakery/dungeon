@@ -2,12 +2,11 @@ package com.toxicbakery.game.dungeon.map
 
 import com.toxicbakery.game.dungeon.map.BuildConfig.MAP_SIZE
 import com.toxicbakery.game.dungeon.map.BuildConfig.REGION_SIZE
-import com.toxicbakery.game.dungeon.map.model.Window
 import com.toxicbakery.game.dungeon.map.preview.BmpMapPreviewer
 import com.toxicbakery.game.dungeon.map.preview.HtmlMapPreviewer
+import kotlin.time.ExperimentalTime
 import org.kodein.di.Kodein
 import org.kodein.di.erased.instance
-import kotlin.time.ExperimentalTime
 
 private val applicationKodein = Kodein {
     import(mapManagerModule)
@@ -30,13 +29,4 @@ fun main() {
             HtmlMapPreviewer()
         )
     )
-
-
 }
-
-private fun Window.render() = windowRows
-    .also { println("Window") }
-    .forEach { row ->
-        row.forEach { b -> print(MapLegend.representingByte(b).ascii) }
-        println()
-    }

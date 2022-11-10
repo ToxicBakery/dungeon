@@ -51,6 +51,7 @@ class BmpMapPreviewer : MapPreviewer {
         when (mapLegend) {
             MapLegend.BEACH,
             MapLegend.DESERT -> byteArrayOf(0x00, 255.toByte(), 255.toByte())
+
             MapLegend.FOREST_1 -> byteArrayOf(0x00, 160.toByte(), 0x00)
             MapLegend.FOREST_2 -> byteArrayOf(0x00, 139.toByte(), 0x00)
             MapLegend.FOREST_3 -> byteArrayOf(0x00, 128.toByte(), 0x00)
@@ -97,5 +98,4 @@ class BmpMapPreviewer : MapPreviewer {
             stream.writeDibHeader(mapSize)
             stream.writeMapData(mapSize, mapData)
         }
-
 }

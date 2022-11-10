@@ -28,7 +28,6 @@ private class PlayerDataManagerImpl(
                 stats = player.getComputedStats()
             )
         }
-
 }
 
 /**
@@ -42,7 +41,6 @@ interface PlayerDataManager {
     suspend fun getPlayerData(
         gameSession: GameSession
     ): PlayerData
-
 }
 
 val playerDataManagerModule = Kodein.Module("playerDataManagerModule") {

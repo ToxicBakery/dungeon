@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Dungeon</title>
-    <link rel="stylesheet" href="index.css">
+    <link href="index.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
     <script src="common-client.js"></script>
 </head>
@@ -15,8 +15,8 @@
     <div class="messages" id="messages"></div>
     <div class="form">
         <div id="inputContainer">
-            <input type="text" id="commandInput" autofocus>
-            <input type="button" id="sendButton" value="send">
+            <input autofocus id="commandInput" type="text">
+            <input id="sendButton" type="button" value="send">
         </div>
         <div id="playerStatus">
             <span class="health">Health: <span id="healthValue">0%</span></span>

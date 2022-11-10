@@ -1,9 +1,9 @@
 package com.toxicbakery.game.dungeon.manager
 
 import com.toxicbakery.game.dungeon.map.DistanceFilter
-import com.toxicbakery.game.dungeon.model.character.Location
-import com.toxicbakery.game.dungeon.model.character.Player
+import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
+import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.persistence.Database
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
 import kotlinx.coroutines.async
@@ -43,7 +43,6 @@ private class PlayerManagerImpl(
         location: Location,
         distanceFilter: DistanceFilter
     ): List<Player> = database.getPlayersNear(location, distanceFilter)
-
 }
 
 interface PlayerManager {
@@ -61,7 +60,6 @@ interface PlayerManager {
         location: Location,
         distanceFilter: DistanceFilter
     ): List<Player>
-
 }
 
 val playerManagerModule = Kodein.Module("playerManagerModule") {

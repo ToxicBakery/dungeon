@@ -1,10 +1,12 @@
 package com.toxicbakery.game.dungeon.model.client
 
-import com.toxicbakery.game.dungeon.model.client.ClientMessage.*
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
+import com.toxicbakery.game.dungeon.model.client.ClientMessage.PlayerDataMessage
+import com.toxicbakery.game.dungeon.model.client.ClientMessage.ServerMessage
+import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 
 class ClientMessageTest {
 
@@ -37,5 +39,4 @@ class ClientMessageTest {
         val deserialized: List<ClientMessage> = Json.Default.decodeFromString(clientMessageListSerializer, json)
         assertEquals(messageList, deserialized)
     }
-
 }

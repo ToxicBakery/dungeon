@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.map
 
-import com.toxicbakery.game.dungeon.model.character.Location
+import com.toxicbakery.game.dungeon.model.world.Location
 
 data class DistanceFilter(
     val mapSize: Int,
@@ -11,7 +11,5 @@ data class DistanceFilter(
     fun nearby(
         locationA: Location,
         locationB: Location
-    ): Boolean = locationA.worldId == locationB.worldId
-            && locationA.distance(locationB, mapSize) <= maxDistance
-
+    ): Boolean = locationA.worldId == locationB.worldId && locationA.distance(locationB, mapSize) <= maxDistance
 }

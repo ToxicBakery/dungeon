@@ -1,7 +1,6 @@
-
 plugins {
-    kotlin("multiplatform") version "1.5.31" apply false
-    kotlin("plugin.serialization") version "1.5.31" apply false
+    kotlin("multiplatform") version "1.7.10" apply false
+    kotlin("plugin.serialization") version "1.7.10" apply false
 }
 
 allprojects {
@@ -9,8 +8,7 @@ allprojects {
     version = "1.0.0-SNAPSHOT"
 
     repositories {
-        jcenter()
         mavenCentral()
-        maven { setUrl("https://kotlin.bintray.com/kotlinx/") }
+        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
     }
 }

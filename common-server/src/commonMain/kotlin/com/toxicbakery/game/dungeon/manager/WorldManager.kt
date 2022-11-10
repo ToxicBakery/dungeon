@@ -1,28 +1,23 @@
 package com.toxicbakery.game.dungeon.manager
 
-import com.soywiz.klock.DateFormat
-import com.soywiz.klock.PatternDateFormat
-import com.soywiz.klock.format
 import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.map.MapLegend
 import com.toxicbakery.game.dungeon.map.MapManager
 import com.toxicbakery.game.dungeon.map.WindowDescription
 import com.toxicbakery.game.dungeon.map.model.Direction
 import com.toxicbakery.game.dungeon.map.model.Window
-import com.toxicbakery.game.dungeon.model.Displayable
-import com.toxicbakery.game.dungeon.model.animal.Animal
-import com.toxicbakery.game.dungeon.model.character.Location
-import com.toxicbakery.game.dungeon.model.character.Player
-import com.toxicbakery.game.dungeon.model.character.npc.Npc
-import com.toxicbakery.game.dungeon.model.creature.Creature
+import com.toxicbakery.game.dungeon.model.Lookable
+import com.toxicbakery.game.dungeon.model.Lookable.*
 import com.toxicbakery.game.dungeon.model.session.GameSession
+import com.toxicbakery.game.dungeon.model.world.Location
+import com.toxicbakery.game.dungeon.model.world.LookLocation
 import com.toxicbakery.game.dungeon.model.world.World
 import com.toxicbakery.game.dungeon.persistence.store.GameClock
+import kotlin.time.Duration.Companion.seconds
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
-import kotlin.math.abs
 
 private class WorldManagerImpl(
     private val gameClock: GameClock,
@@ -32,7 +27,7 @@ private class WorldManagerImpl(
 
     override suspend fun getWorldById(id: Int): World = World(0, "Overworld")
 
-    override suspend fun getWorldTime(): String = dateFormat.format(gameClock.gameSeconds * MILLIS_PER_SECOND)
+    override suspend fun getWorldTime(): String = gameClock.gameSeconds.seconds.toIsoString()
 
     @Suppress("MagicNumber")
     override suspend fun getWindow(gameSession: GameSession): Window =
@@ -41,58 +36,73 @@ private class WorldManagerImpl(
     override suspend fun getTravelLocation(
         player: Player,
         direction: Direction
-    ): Location = player.location.travel(direction)
+    ): Location = player.location atDirectionOf direction
 
     @Suppress("MagicNumber")
     private suspend fun getWindow(player: Player): Window {
         val windowDescription = windowDescriptionFor(player)
-        val window = mapManager.drawWindow(windowDescription)
-        val nearbyThings = nearbyThings(player)
-        val center = WINDOW_SIZE / 2
-        val mapSize = mapManager.mapSize()
-        val halfMapSize = mapSize / 2
-
-        nearbyThings.forEach { displayable ->
-            val xDist = abs(displayable.location.x - player.location.x)
-            val yDist = abs(displayable.location.y - player.location.y)
-
-            // Account for wrap points and offset from center
-            val rX = (if (xDist > halfMapSize) mapSize - displayable.location.x else xDist) + center
-            val rY = (if (yDist > halfMapSize) mapSize - displayable.location.y else yDist) + center
-
-            val xInBounds = rX in 0 until WINDOW_SIZE
-            val yInBounds = rY in 0 until WINDOW_SIZE
-            if (xInBounds && yInBounds) window.windowRows[rY][rX] = displayable.toMapLegend.byteRepresentation
+        val nearbyThings = nearbyThings(
+            player = player,
+            distanceCap = windowDescription.size / 2 + 1
+        ).locationMapped()
+        return mapManager.drawWindow(windowDescription) { mapOverlay ->
+            nearbyThings.forEach { (location, displayable) ->
+                mapOverlay.addOverlayItem(
+                    location,
+                    displayable.toMapLegend
+                )
+            }
         }
-
-        return window
     }
 
     // TODO This should be moved to its own manager
-    private suspend fun nearbyThings(player: Player): List<Displayable> {
-        val npcsNearby = listOf<Displayable>().locationMapped()
-        val animalsNearby = listOf<Displayable>(
-            Animal(0, "", Location(1, 1), true),
-            Animal(0, "", Location(0, 1), true),
-            Animal(0, "", Location(1, 0), true),
-            Animal(0, "", Location(2, 1), true),
-            Animal(0, "", Location(1, 2), true)
-        ).locationMapped()
-        val creaturesNearby = listOf<Displayable>().locationMapped()
-        val playersNearbyAndThisPlayer = playersNear(player)
-            .plus(player)
-            .locationMapped()
+    private suspend fun nearbyThings(
+        player: Player,
+        distanceCap: Int,
+    ): List<Lookable> {
+        val npcsNearby = listOf<Lookable>()
+        val animalsNearby = listOf<Lookable>(
+            Animal(1, "1, 1", Location(1, 1), true),
+            Animal(2, "0, 1", Location(0, 1), true),
+            Animal(3, "1, 0", Location(1, 0), true),
+            Animal(4, "2, 1", Location(2, 1), true),
+            Animal(5, "1, 2", Location(1, 2), true)
+        )
+        val creaturesNearby = listOf<Lookable>()
+        val playersNearby = playersNear(player)
 
         // Stack nearby things in order of importance, first stacked is of lowest visual importance.
         return animalsNearby
             .plus(npcsNearby)
-            .plus(playersNearbyAndThisPlayer)
+            .plus(playersNearby)
             .plus(creaturesNearby)
-            .values
-            .toList()
+            .filter { lookable ->
+                lookable.location.distance(player.location, mapManager.mapSize()) <= distanceCap
+            }
     }
 
-    private fun List<Displayable>.locationMapped(): Map<Location, Displayable> =
+    override suspend fun look(
+        player: Player,
+        direction: Direction?
+    ): LookLocation {
+        val targetLocation =
+            if (direction == null) player.location
+            else player.location atDirectionOf direction
+
+        return LookLocation(
+            location = targetLocation,
+            lookables = nearbyThings(player, 0).minus(player),
+            mapLegendByte = mapManager.drawLocation(
+                windowDescription = WindowDescription(
+                    location = targetLocation,
+                    size = 1
+                ),
+            ),
+            world = getWorldById(targetLocation.worldId)
+        )
+    }
+
+    private fun List<Lookable>.locationMapped(): Map<Location, Lookable> =
         associate { displayable -> displayable.location to displayable }
 
     private suspend fun playersNear(player: Player): List<Player> = playerManager.getPlayersNear(
@@ -109,7 +119,7 @@ private class WorldManagerImpl(
         else -> position
     }
 
-    private fun Location.travel(
+    private infix fun Location.atDirectionOf(
         direction: Direction
     ) = when (direction) {
         Direction.NORTH -> copy(y = wrapped(mapManager.mapSize(), y - 1))
@@ -119,18 +129,13 @@ private class WorldManagerImpl(
     }
 
     companion object {
-        private const val MILLIS_PER_SECOND: Long = 1000L
-        private const val WINDOW_SIZE = 7
+        private const val WINDOW_SIZE = 9
 
-        private val dateFormat: DateFormat by lazy {
-            PatternDateFormat("yyyy-MM-dd HH:mm")
-        }
-
-        private val Displayable.toMapLegend: MapLegend
+        private val Lookable.toMapLegend: MapLegend
             get() = when (this) {
                 is Player -> MapLegend.PLAYER
                 is Npc -> MapLegend.NPC
-                is Animal -> if (this.passive) MapLegend.ANIMAL_PASSIVE else MapLegend.ANIMAL_AGGRESSIVE
+                is Animal -> if (isPassive) MapLegend.ANIMAL_PASSIVE else MapLegend.ANIMAL_AGGRESSIVE
                 is Creature -> MapLegend.CREATURE
                 else -> MapLegend.WTF
             }
@@ -140,7 +145,6 @@ private class WorldManagerImpl(
             size = WINDOW_SIZE
         )
     }
-
 }
 
 interface WorldManager {
@@ -159,6 +163,10 @@ interface WorldManager {
         direction: Direction
     ): Location
 
+    suspend fun look(
+        player: Player,
+        direction: Direction?
+    ): LookLocation
 }
 
 val worldManagerModule = Kodein.Module("worldManagerModule") {

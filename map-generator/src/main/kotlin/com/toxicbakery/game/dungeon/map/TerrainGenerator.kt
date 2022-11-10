@@ -18,7 +18,7 @@ class TerrainGenerator(
     }
 
     fun generate(): MapData {
-        val map: Array<MapLegend> = Array(width * height) { MapLegend.NULL }
+        val map: MapData = Array(width * height) { MapLegend.NULL }
         val coordinatePoints: Array<Point> = Array(width * height) { i -> point(i / width, i % width) }
         generateBaseLand(map, coordinatePoints)
         drawBeaches(map, coordinatePoints)
@@ -31,7 +31,7 @@ class TerrainGenerator(
 
     @Suppress("MagicNumber")
     private fun fourDimensionalSample(module: Module): (Int, Int) -> Double = { x: Int, y: Int ->
-        //Noise range
+        // Noise range
         val x1 = 0f
         val x2 = 2f
         val y1 = 0f
@@ -39,24 +39,26 @@ class TerrainGenerator(
         val dx = x2 - x1
         val dy = y2 - y1
 
-        //Sample noise at smaller intervals
+        // Sample noise at smaller intervals
         val s = x / width.toFloat()
         val t = y / height.toFloat()
 
         // Calculate 4D coordinates
-        val px = (x1 + cos(s * 2 * PI) * dx / (2 * PI)).toDouble()
-        val py = (y1 + cos(t * 2 * PI) * dy / (2 * PI)).toDouble()
-        val pz = (x1 + sin(s * 2 * PI) * dx / (2 * PI)).toDouble()
-        val pw = (y1 + sin(t * 2 * PI) * dy / (2 * PI)).toDouble()
+        val px = x1 + cos(s * 2 * PI) * dx / (2 * PI)
+        val py = y1 + cos(t * 2 * PI) * dy / (2 * PI)
+        val pz = x1 + sin(s * 2 * PI) * dx / (2 * PI)
+        val pw = y1 + sin(t * 2 * PI) * dy / (2 * PI)
 
         module[px, py, pz, pw]
     }
 
     private fun generateSamplesWithFunction(func: (Int, Int) -> Double): FloatArray {
         val samples = FloatArray(width * height)
-        for (x in 0 until width)
-            for (y in 0 until height)
+        for (x in 0 until width) {
+            for (y in 0 until height) {
                 samples[x * width + y] = func(x, y).toFloat()
+            }
+        }
 
         val min = samples.reduce { acc, v -> if (acc < v) acc else v }
         val max = samples.reduce { acc, v -> if (acc > v) acc else v }
@@ -101,8 +103,9 @@ class TerrainGenerator(
                     point.pSW.sampleCoordinate to map[point.pSW.sampleCoordinate],
                     point.pSE.sampleCoordinate to map[point.pSE.sampleCoordinate]
                 ).forEach { (sampleCoordinate, mapLegendValue) ->
-                    if (mapLegendValue == MapLegend.PLAIN)
+                    if (mapLegendValue == MapLegend.PLAIN) {
                         map[sampleCoordinate] = MapLegend.BEACH
+                    }
                 }
             }
         }

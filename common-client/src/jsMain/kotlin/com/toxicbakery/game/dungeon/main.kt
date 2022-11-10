@@ -1,13 +1,13 @@
 package com.toxicbakery.game.dungeon
 
 import com.toxicbakery.logging.Arbor
+import kotlinx.browser.window
+import kotlinx.dom.addClass
+import kotlinx.dom.removeClass
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
-import kotlinx.browser.window
-import kotlinx.dom.addClass
-import kotlinx.dom.removeClass
 
 private const val CONNECTION_MONITOR_INTERVAL = 500
 private const val KEY_ENTER = 13

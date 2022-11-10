@@ -1,4 +1,3 @@
-
 pluginManagement {
     val detekt_version: String by settings
     val kotlin_version: String by settings

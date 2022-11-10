@@ -27,7 +27,6 @@ private class ProcessorShoutImpl(
         communicationManager.shout(player, message)
         return commandMachine
     }
-
 }
 
 interface ProcessorShout : SingleStateProcessor {

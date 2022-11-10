@@ -2,16 +2,24 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    application
     id("io.gitlab.arturbosch.detekt")
+    application
 }
 
 detekt {
-    failFast = true
-    buildUponDefaultConfig = true
-    config = files("${rootProject.projectDir}/detekt/config.yml")
+    config = files("$rootDir/detekt/config.yml")
+    source.from(
+        files(
+            kotlin.sourceSets
+                .flatMap { sourceSet -> sourceSet.kotlin.srcDirs }
+                .map { file -> file.relativeTo(projectDir) }
+        )
+    )
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
-        html.enabled = true
+        html.required.set(true)
     }
 }
 
@@ -21,8 +29,14 @@ application {
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.jvmTarget = "1.8"
-compileKotlin.kotlinOptions.freeCompilerArgs += "-Xinline-classes"
-compileKotlin.kotlinOptions.freeCompilerArgs += "-Xuse-experimental=kotlin.Experimental"
+compileKotlin.kotlinOptions.freeCompilerArgs = listOf(
+    "-opt-in=kotlin.time.ExperimentalTime",
+    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+    "-opt-in=kotlinx.coroutines.FlowPreview",
+    "-opt-in=kotlinx.serialization.ImplicitReflectionSerializer",
+    "-opt-in=io.ktor.util.KtorExperimentalAPI",
+    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+)
 
 sourceSets {
     main {
@@ -46,8 +60,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:${findProperty("kotlin_date_time_version")}")
-    implementation("ch.qos.logback:logback-classic:+")
+    implementation("ch.qos.logback:logback-classic:1.4.4")
     implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
+
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${findProperty("detekt_version")}")
 }
 
 val taskGetDb by tasks.register<Copy>("getDbFromMapGenerator") {
@@ -59,7 +75,6 @@ val taskGetDb by tasks.register<Copy>("getDbFromMapGenerator") {
 
 val taskGetJs by tasks.register<Copy>("getJsFromClient") {
     val clientJsProject = project(":common-client")
-    dependsOn(clientJsProject.tasks.getByName("jsBrowserWebpack"))
     from("${clientJsProject.buildDir}/distributions/${clientJsProject.name}.js")
     into("$buildDir/external-resources/web")
 }

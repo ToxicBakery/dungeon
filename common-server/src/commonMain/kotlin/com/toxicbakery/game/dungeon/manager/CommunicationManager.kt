@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.manager
 
-import com.toxicbakery.game.dungeon.model.character.Player
+import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
 import kotlinx.coroutines.flow.first
@@ -45,12 +45,8 @@ private class CommunicationManagerImpl(
     private suspend fun PlayerSession.sendMessage(message: String) = session.sendMessage(message)
 
     companion object {
-        /**
-         * Distance a player can shout.
-         */
         private const val SHOUT_DISTANCE: Int = 3
     }
-
 }
 
 interface CommunicationManager {
@@ -83,7 +79,6 @@ interface CommunicationManager {
      * Get all connected and authenticated players.
      */
     suspend fun who(): List<Player>
-
 }
 
 val communicationManagerModule = Kodein.Module("communicationManagerModule") {

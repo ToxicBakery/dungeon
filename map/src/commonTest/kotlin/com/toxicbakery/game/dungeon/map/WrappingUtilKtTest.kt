@@ -14,5 +14,4 @@ class WrappingUtilKtTest {
         assertEquals(0, (-1).wrapTo(1))
         assertEquals(0, (-100).wrapTo(1))
     }
-
 }

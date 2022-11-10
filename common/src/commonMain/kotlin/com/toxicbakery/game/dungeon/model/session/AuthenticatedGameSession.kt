@@ -21,5 +21,4 @@ data class AuthenticatedGameSession(
         gameSession.sendClientMessage(clientMessage)
 
     override suspend fun close() = gameSession.close()
-
 }

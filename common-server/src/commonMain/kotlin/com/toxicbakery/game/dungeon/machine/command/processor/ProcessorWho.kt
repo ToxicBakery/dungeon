@@ -27,7 +27,6 @@ private class ProcessorWhoImpl(
 
         return commandMachine
     }
-
 }
 
 interface ProcessorWho : SingleStateProcessor {

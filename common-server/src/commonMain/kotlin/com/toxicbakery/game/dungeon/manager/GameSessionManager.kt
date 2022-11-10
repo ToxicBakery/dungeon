@@ -53,7 +53,6 @@ private class GameSessionManagerImpl(
         dungeonStateStore.modify { dungeonState -> dungeonState.removePlayerAndSession(gameSession) }
         gameMachineStore.modify { gameMachineMap -> gameMachineMap - gameSession.sessionId }
     }
-
 }
 
 interface GameSessionManager {
@@ -84,7 +83,6 @@ interface GameSessionManager {
     suspend fun sessionDestroyed(
         gameSession: GameSession
     )
-
 }
 
 val gameSessionManagerModule = Kodein.Module("gameSessionManagerModule") {

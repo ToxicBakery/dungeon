@@ -1,8 +1,9 @@
 @file:Suppress("MagicNumber")
+
 package com.toxicbakery.game.dungeon.model.character
 
-import kotlinx.serialization.protobuf.ProtoNumber
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 
 /**
  * Global data about a character unrelated to the world.

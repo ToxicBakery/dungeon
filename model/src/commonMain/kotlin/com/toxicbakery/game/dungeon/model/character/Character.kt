@@ -36,5 +36,4 @@ interface Character : Identifiable, Displayable, Named {
      */
     val equipmentSlotMap: Map<EquipmentSlot, Equipable>
         get() = mapOf()
-
 }

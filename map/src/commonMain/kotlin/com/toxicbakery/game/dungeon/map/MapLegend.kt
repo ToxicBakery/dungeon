@@ -1,12 +1,13 @@
 @file:Suppress("MagicNumber")
+
 package com.toxicbakery.game.dungeon.map
 
 enum class MapLegend(
     val byteRepresentation: Byte,
     val ascii: String
 ) {
-
     // Undefined space such as in initial map allocation
+    // This also default to empty for space a character can not see
     NULL(0x00, "    "),
 
     // Characters
@@ -26,7 +27,6 @@ enum class MapLegend(
     LAKE(0x19, "...."),
     MOUNTAIN(0x1C, """/\/\"""),
 
-
     // Animals
     ANIMAL_AGGRESSIVE(0x50, ".><."),
     ANIMAL_PASSIVE(0x51, ".<>."),
@@ -40,12 +40,13 @@ enum class MapLegend(
     WTF(0xFF.toByte(), "!!!!");
 
     val htmlRepresentation: String
-        get() = "<span class=\"_${byteRepresentation}\">${htmlSafeAscii}</span>"
+        get() = "<span class=\"_${byteRepresentation}\">$htmlSafeAscii</span>"
 
     val htmlSafeAscii: String = ascii
         .replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
+        .replace(" ", "&nbsp;")
 
     companion object {
 
@@ -53,8 +54,6 @@ enum class MapLegend(
             .map { legend -> legend.byteRepresentation to legend }
             .toMap()
 
-        fun representingByte(b: Byte): MapLegend = legendMap.getOrElse(b, { NULL })
-
+        fun representingByte(b: Byte): MapLegend = legendMap.getOrElse(b) { NULL }
     }
-
 }

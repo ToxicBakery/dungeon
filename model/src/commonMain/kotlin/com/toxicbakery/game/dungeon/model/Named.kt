@@ -6,5 +6,4 @@ interface Named {
      * Displayable name
      */
     val name: String
-
 }

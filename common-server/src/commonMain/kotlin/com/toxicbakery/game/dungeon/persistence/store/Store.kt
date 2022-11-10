@@ -19,5 +19,4 @@ interface Store<T> {
      * Get the latest set value.
      */
     suspend fun value(): T
-
 }

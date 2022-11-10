@@ -12,5 +12,4 @@ interface ChannelStore<T> : Store<T> {
      * Listen to [set] and [modify] events on the channel.
      */
     suspend fun observe(): Flow<T>
-
 }

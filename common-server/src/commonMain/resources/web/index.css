@@ -32,7 +32,7 @@ html, body {
     color: white;
     border: 1px solid green;
     background-color: black;
-    font-family: 'Roboto Mono', monospace;
+    font-family: "Lucida Console", Monaco, monospace;
     white-space: nowrap;
 }
 .message {
@@ -94,3 +94,11 @@ html, body {
 .disconnected {
     color: red;
 }
+._0 { color: darkblue; }
+._16, ._17, ._18, ._19, ._23 { color: green; }
+._20 { color: blue; }
+._22, ._24 { color: yellow; }
+._25 { color: cyan; }
+._28 { color: grey; }
+._50 { color: white; }
+._51 { color: red; }
