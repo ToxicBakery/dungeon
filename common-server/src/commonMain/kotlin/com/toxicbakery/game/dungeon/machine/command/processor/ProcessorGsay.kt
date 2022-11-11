@@ -1,6 +1,7 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
 import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorGsay.Companion.COMMAND
 import com.toxicbakery.game.dungeon.manager.CommunicationManager
@@ -22,7 +23,7 @@ private class ProcessorGsayImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> {
+    ): ProcessorMachine<*> {
         val player = playerManager.getPlayerByGameSession(gameSession)
         communicationManager.gsay(player, message)
         return commandMachine

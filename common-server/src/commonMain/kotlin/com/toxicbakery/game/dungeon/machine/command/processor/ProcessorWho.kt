@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
-import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorWho.Companion.COMMAND
 import com.toxicbakery.game.dungeon.manager.CommunicationManager
@@ -20,7 +20,7 @@ private class ProcessorWhoImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> {
+    ): ProcessorMachine<*> {
         communicationManager.who()
             .joinToString(separator = "\n") { player -> player.name }
             .let { output -> gameSession.sendMessage("Players Online:\n$output") }

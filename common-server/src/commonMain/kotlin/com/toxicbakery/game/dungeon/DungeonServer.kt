@@ -5,6 +5,7 @@ import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.logging.Arbor
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.kodein.di.Kodein
@@ -12,6 +13,7 @@ import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.singleton
 
+@OptIn(ExperimentalSerializationApi::class)
 private class DungeonServerImpl(
     private val gameSessionManager: GameSessionManager
 ) : DungeonServer {

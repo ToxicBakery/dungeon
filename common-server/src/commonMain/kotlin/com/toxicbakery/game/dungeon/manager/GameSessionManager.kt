@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.manager
 
-import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.init.InitMachine
 import com.toxicbakery.game.dungeon.model.DungeonState
 import com.toxicbakery.game.dungeon.model.session.GameSession
@@ -16,11 +16,10 @@ import org.kodein.di.erased.provider
 
 private class GameSessionManagerImpl(
     private val dungeonStateStore: DungeonStateStore,
-    private val initMachine: Machine<*>
+    private val initMachine: ProcessorMachine<*>,
 ) : GameSessionManager {
 
-    private val gameMachineStore: ChannelStore<Map<String, Machine<*>>> =
-        object : BroadcastChannelStore<Map<String, Machine<*>>>(mapOf()) {}
+    private val gameMachineStore: ChannelStore<Map<String, ProcessorMachine<*>>> = GameMachineStore()
 
     override suspend fun observeGameSessions(): Flow<List<GameSession>> = dungeonStateStore
         .observe()
@@ -54,6 +53,8 @@ private class GameSessionManagerImpl(
         gameMachineStore.modify { gameMachineMap -> gameMachineMap - gameSession.sessionId }
     }
 }
+
+private class GameMachineStore : BroadcastChannelStore<Map<String, ProcessorMachine<*>>>(mapOf())
 
 interface GameSessionManager {
 
@@ -89,7 +90,7 @@ val gameSessionManagerModule = Kodein.Module("gameSessionManagerModule") {
     bind<GameSessionManager>() with provider {
         GameSessionManagerImpl(
             dungeonStateStore = instance(),
-            initMachine = instance<InitMachine>()
+            initMachine = instance<InitMachine>(),
         )
     }
 }

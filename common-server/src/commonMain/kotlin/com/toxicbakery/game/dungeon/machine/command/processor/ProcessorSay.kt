@@ -1,10 +1,11 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
-import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorSay.Companion.COMMAND
 import com.toxicbakery.game.dungeon.manager.CommunicationManager
 import com.toxicbakery.game.dungeon.manager.PlayerManager
+import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
@@ -22,8 +23,8 @@ private class ProcessorSayImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> {
-        val player = playerManager.getPlayerByGameSession(gameSession)
+    ): ProcessorMachine<*> {
+        val player: Player = playerManager.getPlayerByGameSession(gameSession)
         communicationManager.say(player, message)
         return commandMachine
     }

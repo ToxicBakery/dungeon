@@ -1,7 +1,7 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
 import com.toxicbakery.game.dungeon.exception.UnknownCommandException
-import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.Direction.directionMap
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorLook.Companion.COMMAND
@@ -27,7 +27,7 @@ private class ProcessorLookImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> {
+    ): ProcessorMachine<*> {
         if (message.isEmpty()) {
             val window = worldManager.getWindow(gameSession)
             gameSession.sendClientMessage(MapMessage(window))

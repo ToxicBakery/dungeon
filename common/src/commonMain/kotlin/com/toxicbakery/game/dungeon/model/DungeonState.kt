@@ -3,6 +3,7 @@ package com.toxicbakery.game.dungeon.model
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
+import com.toxicbakery.game.dungeon.model.world.Location
 
 data class DungeonState(
     private val playerSessionsByPlayerId: Map<Int, PlayerSession> = mapOf(),
@@ -14,6 +15,11 @@ data class DungeonState(
 
     val gameSessionList: List<GameSession>
         get() = gameSessionsBySessionId.values.toList()
+
+    fun getPlayersAt(location: Location) =
+        playerSessionsList.filter { playerSession -> playerSession.player.location == location }
+
+    fun getPlayerSession(player: Player) = getPlayerSessionById(player.id)
 
     fun getPlayerSessionById(playerId: Int): PlayerSession = playerSessionsByPlayerId.getValue(playerId)
 

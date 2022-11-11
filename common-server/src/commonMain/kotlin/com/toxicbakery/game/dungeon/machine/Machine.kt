@@ -14,14 +14,6 @@ interface Machine<S> {
     val currentState: S
 
     /**
-     * Take a message and return a machine to handle future messages.
-     */
-    suspend fun acceptMessage(
-        gameSession: GameSession,
-        message: String
-    ): Machine<*> = this
-
-    /**
      * Start the machine
      */
     suspend fun initMachine(gameSession: GameSession): Machine<S> = this

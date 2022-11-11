@@ -33,11 +33,6 @@ private class WorldManagerImpl(
     override suspend fun getWindow(gameSession: GameSession): Window =
         getWindow(playerManager.getPlayerByGameSession(gameSession))
 
-    override suspend fun getTravelLocation(
-        player: Player,
-        direction: Direction
-    ): Location = player.location atDirectionOf direction
-
     @Suppress("MagicNumber")
     private suspend fun getWindow(player: Player): Window {
         val windowDescription = windowDescriptionFor(player)
@@ -62,11 +57,11 @@ private class WorldManagerImpl(
     ): List<Lookable> {
         val npcsNearby = listOf<Lookable>()
         val animalsNearby = listOf<Lookable>(
-            Animal(1, "1, 1", Location(1, 1), true),
-            Animal(2, "0, 1", Location(0, 1), true),
-            Animal(3, "1, 0", Location(1, 0), true),
-            Animal(4, "2, 1", Location(2, 1), true),
-            Animal(5, "1, 2", Location(1, 2), true)
+            Animal(1, "Sheep", Location(1, 1), true),
+            Animal(2, "Sheep", Location(0, 1), true),
+            Animal(3, "Sheep", Location(1, 0), true),
+            Animal(4, "Sheep", Location(2, 1), true),
+            Animal(5, "Sheep", Location(1, 2), true)
         )
         val creaturesNearby = listOf<Lookable>()
         val playersNearby = playersNear(player)
@@ -154,14 +149,6 @@ interface WorldManager {
     suspend fun getWorldTime(): String
 
     suspend fun getWindow(gameSession: GameSession): Window
-
-    /**
-     * Get the travel location or throw if travel not possible.
-     */
-    suspend fun getTravelLocation(
-        player: Player,
-        direction: Direction
-    ): Location
 
     suspend fun look(
         player: Player,

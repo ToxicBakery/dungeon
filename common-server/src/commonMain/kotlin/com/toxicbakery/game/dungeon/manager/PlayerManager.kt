@@ -3,10 +3,10 @@ package com.toxicbakery.game.dungeon.manager
 import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
+import com.toxicbakery.game.dungeon.model.session.PlayerSession
 import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.persistence.Database
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import org.kodein.di.Kodein
@@ -16,7 +16,7 @@ import org.kodein.di.erased.provider
 
 private class PlayerManagerImpl(
     private val dungeonStateStore: DungeonStateStore,
-    private val database: Database
+    private val database: Database,
 ) : PlayerManager {
 
     override suspend fun getPlayerByGameSession(
@@ -33,16 +33,17 @@ private class PlayerManagerImpl(
         player: Player,
         gameSession: GameSession
     ) = coroutineScope {
-        val t1 = async { database.updatePlayer(player) }
-        val t2 = async { dungeonStateStore.modify { dungeonState -> dungeonState.updatePlayer(player) } }
-        t1.await()
-        t2.await()
+        database.updatePlayer(player)
+        dungeonStateStore.modify { dungeonState -> dungeonState.updatePlayer(player) }
     }
 
     override suspend fun getPlayersNear(
         location: Location,
         distanceFilter: DistanceFilter
     ): List<Player> = database.getPlayersNear(location, distanceFilter)
+
+    override suspend fun getPlayersAt(location: Location): List<Player> =
+        dungeonStateStore.value().getPlayersAt(location).map(PlayerSession::player)
 }
 
 interface PlayerManager {
@@ -60,13 +61,17 @@ interface PlayerManager {
         location: Location,
         distanceFilter: DistanceFilter
     ): List<Player>
+
+    suspend fun getPlayersAt(
+        location: Location
+    ): List<Player>
 }
 
 val playerManagerModule = Kodein.Module("playerManagerModule") {
     bind<PlayerManager>() with provider {
         PlayerManagerImpl(
             dungeonStateStore = instance(),
-            database = instance()
+            database = instance(),
         )
     }
 }

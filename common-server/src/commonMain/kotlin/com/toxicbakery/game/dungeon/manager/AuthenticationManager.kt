@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.manager
 
-import com.toxicbakery.game.dungeon.model.Lookable.*
+import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.session.AuthenticatedGameSession
 import com.toxicbakery.game.dungeon.model.session.GameSession
@@ -16,7 +16,8 @@ import org.kodein.di.erased.provider
 
 private class AuthenticationManagerImpl(
     private val database: Database,
-    private val dungeonStateStore: DungeonStateStore
+    private val dungeonStateStore: DungeonStateStore,
+    private val communicationManager: CommunicationManager,
 ) : AuthenticationManager {
 
     override suspend fun authenticatedPlayers(): Flow<List<PlayerSession>> = dungeonStateStore
@@ -32,6 +33,10 @@ private class AuthenticationManagerImpl(
         dungeonStateStore.modify { dungeonState ->
             dungeonState.setAuthenticatedPlayer(player, authenticatedGameSession)
         }
+        communicationManager.serverMessage(
+            message = "${credentials.username} has joined.",
+            excludedPlayer = player,
+        )
         return player
     }
 
@@ -39,9 +44,10 @@ private class AuthenticationManagerImpl(
         credentials: Credentials
     ) = database.createPlayer(credentials)
 
-    override suspend fun playerLeft(
-        player: Player
-    ) = dungeonStateStore.modify { dungeonState -> dungeonState.removePlayerAndSession(player) }
+    override suspend fun playerLeft(player: Player) {
+        dungeonStateStore.modify { dungeonState -> dungeonState.removePlayerAndSession(player) }
+        communicationManager.serverMessage("${player.name} has left.")
+    }
 }
 
 interface AuthenticationManager {
@@ -67,7 +73,8 @@ val authenticationManagerModule = Kodein.Module("authenticationManagerModule") {
     bind<AuthenticationManager>() with provider {
         AuthenticationManagerImpl(
             database = instance(),
-            dungeonStateStore = instance()
+            dungeonStateStore = instance(),
+            communicationManager = instance(),
         )
     }
 }

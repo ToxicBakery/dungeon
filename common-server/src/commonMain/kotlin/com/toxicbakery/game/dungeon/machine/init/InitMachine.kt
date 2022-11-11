@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.machine.init
 
-import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.authentication.AuthenticationMachine
 import com.toxicbakery.game.dungeon.machine.registration.RegistrationMachine
 import com.toxicbakery.game.dungeon.model.session.GameSession
@@ -24,21 +24,15 @@ private class InitMachineImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> = when (message) {
+    ): ProcessorMachine<*> = when (message) {
         CMD_LOGIN -> authenticationMachine
         CMD_REGISTER -> registrationMachine
-        else -> InitMachineImpl(
-            authenticationMachine = authenticationMachine,
-            registrationMachine = registrationMachine
-        )
+        else -> this
     }
 
-    override suspend fun initMachine(gameSession: GameSession): Machine<InitState> {
+    override suspend fun initMachine(gameSession: GameSession): ProcessorMachine<InitState> {
         gameSession.printInstructions()
-        return InitMachineImpl(
-            authenticationMachine = authenticationMachine,
-            registrationMachine = registrationMachine
-        )
+        return this
     }
 
     private suspend fun GameSession.printInstructions() = sendMessage(HELP_INSTRUCTIONS)
@@ -50,7 +44,7 @@ private class InitMachineImpl(
     }
 }
 
-interface InitMachine : Machine<InitState>
+interface InitMachine : ProcessorMachine<InitState>
 
 val initMachineModule = Kodein.Module("initMachineModule") {
     bind<InitMachine>() with provider {

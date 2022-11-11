@@ -1,5 +1,5 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
-import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 
-interface CommandProcessor<S> : Machine<S>
+interface CommandProcessor<S> : ProcessorMachine<S>

@@ -2,6 +2,7 @@ package com.toxicbakery.game.dungeon.machine.command
 
 import com.toxicbakery.game.dungeon.exception.UnknownCommandException
 import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.manager.PlayerDataManager
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.PlayerDataMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
@@ -10,7 +11,7 @@ import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.singleton
 
-private class CommandMachineImpl(
+private data class CommandMachineImpl(
     private val commandMap: CommandMap,
     private val playerDataManager: PlayerDataManager,
     override val currentState: CommandState = CommandState.Init
@@ -18,7 +19,7 @@ private class CommandMachineImpl(
 
     override val name: String = "CommandMachine"
 
-    override suspend fun initMachine(gameSession: GameSession): Machine<CommandState> {
+    override suspend fun initMachine(gameSession: GameSession): ProcessorMachine<CommandState> {
         if (currentState == CommandState.Init) gameSession.initCommand()
         return newInstance()
     }
@@ -26,7 +27,7 @@ private class CommandMachineImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> {
+    ): ProcessorMachine<*> {
         when (message) {
             COMMAND_HELP -> gameSession.helpCommand()
             else -> gameSession.handleSubCommand(message)
@@ -58,18 +59,14 @@ private class CommandMachineImpl(
         initCommand()
     }
 
-    private fun newInstance(): CommandMachine = CommandMachineImpl(
-        commandMap = commandMap,
-        playerDataManager = playerDataManager,
-        currentState = CommandState.Initialized
-    )
+    private fun newInstance(): CommandMachine = copy(currentState = CommandState.Initialized)
 
     companion object {
         private const val COMMAND_HELP = "help"
     }
 }
 
-interface CommandMachine : Machine<CommandState>
+interface CommandMachine : ProcessorMachine<CommandState>
 
 val commandMachineModule = Kodein.Module("") {
     import(commandMapModule)

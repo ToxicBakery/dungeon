@@ -2,6 +2,7 @@ package com.toxicbakery.game.dungeon.persistence.store
 
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
@@ -10,6 +11,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.singleton
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GameClock(
     startDay: Int,
     private val clockMark: Instant

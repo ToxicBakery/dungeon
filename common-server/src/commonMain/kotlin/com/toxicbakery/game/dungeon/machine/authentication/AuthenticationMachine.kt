@@ -2,7 +2,7 @@ package com.toxicbakery.game.dungeon.machine.authentication
 
 import com.toxicbakery.game.dungeon.exception.AuthenticationException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
-import com.toxicbakery.game.dungeon.machine.Machine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorLook
 import com.toxicbakery.game.dungeon.manager.AuthenticationManager
@@ -14,10 +14,10 @@ import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
 
-private class AuthenticationMachineImpl(
+private data class AuthenticationMachineImpl(
     private val authenticationManager: AuthenticationManager,
     private val commandMachine: CommandMachine,
-    private val authMachineState: AuthMachineState = AuthMachineState()
+    private val authMachineState: AuthMachineState = AuthMachineState(),
 ) : AuthenticationMachine {
 
     override val currentState: AuthenticationState = authMachineState.state
@@ -27,24 +27,15 @@ private class AuthenticationMachineImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> = gameSession.cycle(message).let { nextState ->
+    ): ProcessorMachine<*> = gameSession.cycle(message).let { nextState ->
         when (nextState.state) {
             AuthenticationState.Authenticated -> commandMachine.acceptMessage(gameSession, ProcessorLook.COMMAND)
-            else -> AuthenticationMachineImpl(
-                authenticationManager = authenticationManager,
-                commandMachine = commandMachine,
-                authMachineState = nextState
-            )
+            else -> copy(authMachineState = nextState)
         }
     }
 
     override suspend fun initMachine(gameSession: GameSession) = when (currentState) {
-        AuthenticationState.Init -> AuthenticationMachineImpl(
-            authenticationManager = authenticationManager,
-            commandMachine = commandMachine,
-            authMachineState = gameSession.cycle()
-        )
-
+        AuthenticationState.Init -> copy(authMachineState = gameSession.cycle())
         else -> this
     }
 
@@ -95,13 +86,13 @@ private data class AuthMachineState(
     val state: AuthenticationState = AuthenticationState.Init
 )
 
-interface AuthenticationMachine : Machine<AuthenticationState>
+interface AuthenticationMachine : ProcessorMachine<AuthenticationState>
 
 val authenticationMachineModule = Kodein.Module("authenticationMachineModule") {
     bind<AuthenticationMachine>() with provider {
         AuthenticationMachineImpl(
             authenticationManager = instance(),
-            commandMachine = instance()
+            commandMachine = instance(),
         )
     }
 }

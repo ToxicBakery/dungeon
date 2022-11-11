@@ -1,8 +1,9 @@
 package com.toxicbakery.game.dungeon.machine.registration
 
 import com.toxicbakery.game.dungeon.exception.AlreadyRegisteredException
-import com.toxicbakery.game.dungeon.machine.Machine
-import com.toxicbakery.game.dungeon.machine.authentication.AuthenticationMachine
+import com.toxicbakery.game.dungeon.machine.ProcessorMachine
+import com.toxicbakery.game.dungeon.machine.command.CommandMachine
+import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorLook
 import com.toxicbakery.game.dungeon.manager.AuthenticationManager
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
@@ -12,9 +13,9 @@ import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
 
-private class RegistrationMachineImpl(
+private data class RegistrationMachineImpl(
+    private val commandMachine: CommandMachine,
     private val authenticationManager: AuthenticationManager,
-    private val authenticationMachine: AuthenticationMachine,
     private val registrationMachineState: RegistrationMachineState = RegistrationMachineState()
 ) : RegistrationMachine {
 
@@ -25,24 +26,19 @@ private class RegistrationMachineImpl(
     override suspend fun acceptMessage(
         gameSession: GameSession,
         message: String
-    ): Machine<*> = gameSession.cycle(message).let { nextState ->
+    ): ProcessorMachine<*> = gameSession.cycle(message).let { nextState ->
         when (nextState.state) {
-            RegistrationState.Registered -> authenticationMachine
-            else -> RegistrationMachineImpl(
-                authenticationManager = authenticationManager,
-                authenticationMachine = authenticationMachine,
-                registrationMachineState = nextState
+            RegistrationState.Registered -> commandMachine.acceptMessage(
+                gameSession,
+                ProcessorLook.COMMAND
             )
+
+            else -> copy(registrationMachineState = nextState)
         }
     }
 
     override suspend fun initMachine(gameSession: GameSession) = when (currentState) {
-        RegistrationState.Init -> RegistrationMachineImpl(
-            authenticationManager = authenticationManager,
-            authenticationMachine = authenticationMachine,
-            registrationMachineState = gameSession.cycle()
-        )
-
+        RegistrationState.Init -> copy(registrationMachineState = gameSession.cycle())
         else -> this
     }
 
@@ -79,7 +75,8 @@ private class RegistrationMachineImpl(
             try {
                 val newCredentials = registrationMachineState.credentials.copy(password = password)
                 authenticationManager.registerPlayer(newCredentials)
-                sendMessage("Registration successful! Returning to login.")
+                val player = authenticationManager.authenticatePlayer(newCredentials, this)
+                sendMessage("Registration successful, welcome ${player.name}!")
                 registrationMachineState.copy(
                     state = RegistrationState.Registered,
                     credentials = newCredentials
@@ -96,13 +93,13 @@ private data class RegistrationMachineState(
     val state: RegistrationState = RegistrationState.Init
 )
 
-interface RegistrationMachine : Machine<RegistrationState>
+interface RegistrationMachine : ProcessorMachine<RegistrationState>
 
 val registrationMachineModule = Kodein.Module("registrationMachineModule") {
     bind<RegistrationMachine>() with provider {
         RegistrationMachineImpl(
+            commandMachine = instance(),
             authenticationManager = instance(),
-            authenticationMachine = instance()
         )
     }
 }

@@ -1,10 +1,6 @@
 package com.toxicbakery.game.dungeon
 
 import com.toxicbakery.game.dungeon.map.MapLegend
-import com.toxicbakery.game.dungeon.model.Lookable.Animal
-import com.toxicbakery.game.dungeon.model.Lookable.Creature
-import com.toxicbakery.game.dungeon.model.Lookable.Npc
-import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.DirectedLookMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.MapMessage
@@ -12,6 +8,8 @@ import com.toxicbakery.game.dungeon.model.client.ClientMessage.PlayerDataMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
+import com.toxicbakery.game.dungeon.ui.locationDescription
+import com.toxicbakery.game.dungeon.ui.lookableDescriptions
 import kotlin.math.round
 import kotlinx.browser.document
 import kotlinx.dom.createElement
@@ -39,7 +37,7 @@ class Terminal(
     private fun handleMessage(message: UserMessage) {
         val output = if (expectedResponseType == ExpectedResponseType.Secure) "* * * *"
         else message.message
-        handleMessage("> $output<br/><br/>")
+        handleMessage("> $output${HTML_LINE_BREAK.repeat(2)}")
     }
 
     private fun handleMessage(message: ServerMessage) {
@@ -70,48 +68,16 @@ class Terminal(
     }
 
     private fun handleMessage(message: DirectedLookMessage) {
-        val locationDescription = when (MapLegend.representingByte(message.lookLocation.mapLegendByte)) {
-            MapLegend.FOREST_1,
-            MapLegend.FOREST_2 -> "A few trees here"
-
-            MapLegend.FOREST_3,
-            MapLegend.FOREST_4 -> "You peer through the thick woods"
-
-            MapLegend.OCEAN -> "The dark ocean peers back at you"
-            MapLegend.RIVER -> "A raging river runs here"
-            MapLegend.DESERT -> "An uncomfortable desert"
-            MapLegend.PLAIN -> "Fields of grass"
-            MapLegend.BEACH -> "You hear the waves crashing against the beach"
-            MapLegend.LAKE -> "A lake, maybe it has fish"
-            MapLegend.MOUNTAIN -> "Mountains, difficult and dangerous"
-            else -> "You have no idea what you're looking at..."
-        }
-
-        val output = locationDescription + message.lookLocation
-            .lookables
-            .map { displayable ->
-                when (displayable) {
-                    is Animal ->
-                        if (displayable.isPassive) "A ${displayable.name} wanders around"
-                        else "A ${displayable.name} is on the hunt"
-
-                    is Creature ->
-                        if (displayable.isPassive) "A ${displayable.name} wanders around"
-                        else "A ${displayable.name} is charging towards you"
-
-                    is Npc -> "You see ${displayable.name} looking back at you"
-                    is Player -> "You see ${displayable.name} looking back at you"
-                    else -> ""
-                }
-            }
-            .filter(String::isNotEmpty)
-            .joinToString(separator = "\n\t")
-            .let { displayables -> if (displayables.isNotEmpty()) "\n$displayables" else "" }
+        val mapLegend = MapLegend.representingByte(message.lookLocation.mapLegendByte)
+        val locationDescription = mapLegend.locationDescription()
+        val lookableDescriptions = message.lookLocation.lookables.lookableDescriptions()
+        val outputMessage = (locationDescription + lookableDescriptions)
+            .replace("\n", HTML_LINE_BREAK)
+            .replace("\t", HTML_TAB)
 
         handleMessage(
             UserMessage(
-                message = output.replace("\n", "<br/>")
-                    .replace("\t", "&emsp;")
+                message = outputMessage
             )
         )
     }
@@ -123,9 +89,11 @@ class Terminal(
     private fun createMessageElement(message: String): Element =
         document.createElement("p") { innerHTML = message }
 
-    private fun ServerMessage.toHtml(): String = message.replace("\n", "<br/>")
+    private fun ServerMessage.toHtml(): String = message.replace("\n", HTML_LINE_BREAK)
 
     companion object {
         private const val PERCENT_MULTIPLIER = 100.0
+        private const val HTML_LINE_BREAK = "<br/>"
+        private const val HTML_TAB = "&emsp;"
     }
 }

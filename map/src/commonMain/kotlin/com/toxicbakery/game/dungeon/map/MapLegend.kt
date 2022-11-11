@@ -4,7 +4,7 @@ package com.toxicbakery.game.dungeon.map
 
 enum class MapLegend(
     val byteRepresentation: Byte,
-    val ascii: String
+    val ascii: String,
 ) {
     // Undefined space such as in initial map allocation
     // This also default to empty for space a character can not see
@@ -51,8 +51,7 @@ enum class MapLegend(
     companion object {
 
         private val legendMap: Map<Byte, MapLegend> = values()
-            .map { legend -> legend.byteRepresentation to legend }
-            .toMap()
+            .associateBy { legend -> legend.byteRepresentation }
 
         fun representingByte(b: Byte): MapLegend = legendMap.getOrElse(b) { NULL }
     }

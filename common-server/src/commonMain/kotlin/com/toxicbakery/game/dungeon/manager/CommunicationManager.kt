@@ -42,6 +42,20 @@ private class CommunicationManagerImpl(
 
     override suspend fun who(): List<Player> = playerSessionList().map(PlayerSession::player)
 
+    override suspend fun notify(
+        player: Player,
+        message: String
+    ) = dungeonStateStore.value()
+        .getPlayerSession(player)
+        .sendMessage(message)
+
+    override suspend fun serverMessage(
+        message: String,
+        excludedPlayer: Player?
+    ) = playerSessionList().forEach { session: PlayerSession ->
+        if (session.player != excludedPlayer) session.sendMessage(message)
+    }
+
     private suspend fun PlayerSession.sendMessage(message: String) = session.sendMessage(message)
 
     companion object {
@@ -56,7 +70,7 @@ interface CommunicationManager {
      */
     suspend fun say(
         player: Player,
-        message: String
+        message: String,
     )
 
     /**
@@ -64,7 +78,7 @@ interface CommunicationManager {
      */
     suspend fun shout(
         player: Player,
-        message: String
+        message: String,
     )
 
     /**
@@ -72,13 +86,29 @@ interface CommunicationManager {
      */
     suspend fun gsay(
         player: Player,
-        message: String
+        message: String,
     )
 
     /**
      * Get all connected and authenticated players.
      */
     suspend fun who(): List<Player>
+
+    /**
+     * Notify a player of an event that has occurred.
+     */
+    suspend fun notify(
+        player: Player,
+        message: String,
+    )
+
+    /**
+     * Send a message to all players such as when a user joins or leaves the game.
+     */
+    suspend fun serverMessage(
+        message: String,
+        excludedPlayer: Player? = null
+    )
 }
 
 val communicationManagerModule = Kodein.Module("communicationManagerModule") {
