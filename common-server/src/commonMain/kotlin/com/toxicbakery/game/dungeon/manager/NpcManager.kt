@@ -1,17 +1,39 @@
 package com.toxicbakery.game.dungeon.manager
 
+import com.toxicbakery.game.dungeon.machine.TickableMachine
 import com.toxicbakery.game.dungeon.map.DistanceFilter
+import com.toxicbakery.game.dungeon.model.ILookable
+import com.toxicbakery.game.dungeon.model.Lookable.Animal
 import com.toxicbakery.game.dungeon.model.character.Npc
 import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.singleton
+import com.toxicbakery.game.dungeon.persistence.store.GameClock
+import com.toxicbakery.game.dungeon.tickDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.factory
+import org.kodein.di.instance
+import org.kodein.di.singleton
 
 private class NpcManagerImpl(
-    private val npcDatabase: NpcDatabase
+    private val npcDatabase: NpcDatabase,
+    gameClock: GameClock,
+    private val passiveAnimalMachineBuilder: (Animal) -> TickableMachine<*>
 ) : NpcManager {
+
+    private val npcMachinesManager = NpcMachinesManager(gameClock)
+
+    override suspend fun createNpc(npc: Npc) {
+        npcDatabase.createNpc(npc)
+        npcMachinesManager.addMachine(
+            when (npc) {
+                is Animal -> createAnimalMachine(npc)
+                else -> TODO()
+            }
+        )
+    }
 
     override suspend fun updateNpc(npc: Npc) {
         npcDatabase.updateNpc(npc)
@@ -20,22 +42,60 @@ private class NpcManagerImpl(
     override suspend fun getNpcsNear(
         location: Location,
         distanceFilter: DistanceFilter
-    ): List<Npc> = npcDatabase.getNpcsNear(location, distanceFilter)
+    ): List<ILookable> = npcDatabase.getNpcsNear(location, distanceFilter)
+
+    private fun createAnimalMachine(animal: Animal) =
+        if (animal.isPassive) passiveAnimalMachineBuilder(animal)
+        else TODO()
+}
+
+private class NpcMachinesManager(
+    private val gameClock: GameClock,
+) {
+
+    private val scope = CoroutineScope(tickDispatcher)
+    private val tickJob = scope.launch {
+        gameClock.gameTickFlow
+            .collect { tick() }
+    }
+
+    private val machines: MutableMap<String, TickableMachine<*>> = mutableMapOf()
+
+    fun shutdown() = tickJob.cancel()
+
+    fun addMachine(machine: TickableMachine<*>) {
+        scope.launch {
+            machines[machine.instanceId] = machine
+        }
+    }
+
+    private suspend fun tick() {
+        machines.values
+            .toList()
+            .forEach { machine ->
+                val newMachine = machine.tick()
+                machines[newMachine.instanceId] = newMachine
+            }
+    }
 }
 
 interface NpcManager {
+    suspend fun createNpc(npc: Npc)
+
     suspend fun updateNpc(npc: Npc)
 
     suspend fun getNpcsNear(
         location: Location,
         distanceFilter: DistanceFilter
-    ): List<Npc>
+    ): List<ILookable>
 }
 
-val npcManagerModule = Kodein.Module("npcManagerModule") {
+val npcManagerModule = DI.Module("npcManagerModule") {
     bind<NpcManager>() with singleton {
         NpcManagerImpl(
             npcDatabase = instance(),
+            gameClock = instance(),
+            passiveAnimalMachineBuilder = factory()
         )
     }
 }

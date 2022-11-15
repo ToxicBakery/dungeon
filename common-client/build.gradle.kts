@@ -30,7 +30,7 @@ kotlin {
                 implementation(kotlin("stdlib"))
                 implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
                 implementation("io.ktor:ktor-client-websockets:${findProperty("ktor_version")}")
-                implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")
+                implementation("org.kodein.di:kodein-di:${findProperty("kodein_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
@@ -58,7 +58,6 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
-                implementation("org.kodein.di:kodein-di-erased-js:${findProperty("kodein_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-html-js:${findProperty("kotlin_html_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:${findProperty("kotlin_coroutines_version")}")
             }

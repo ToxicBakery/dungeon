@@ -9,10 +9,10 @@ import com.toxicbakery.game.dungeon.persistence.store.ChannelStore
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private class GameSessionManagerImpl(
     private val dungeonStateStore: DungeonStateStore,
@@ -86,7 +86,7 @@ interface GameSessionManager {
     )
 }
 
-val gameSessionManagerModule = Kodein.Module("gameSessionManagerModule") {
+val gameSessionManagerModule = DI.Module("gameSessionManagerModule") {
     bind<GameSessionManager>() with provider {
         GameSessionManagerImpl(
             dungeonStateStore = instance(),

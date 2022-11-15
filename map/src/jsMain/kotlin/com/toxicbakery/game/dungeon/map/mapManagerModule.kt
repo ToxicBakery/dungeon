@@ -1,5 +1,5 @@
 package com.toxicbakery.game.dungeon.map
 
-import org.kodein.di.Kodein
+import org.kodein.di.DI
 
-actual val mapManagerModule: Kodein.Module = Kodein.Module("mapManagerModule") {}
+actual val mapManagerModule: DI.Module = DI.Module("mapManagerModule") {}

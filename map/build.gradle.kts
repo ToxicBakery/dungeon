@@ -29,7 +29,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
                 implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
-                implementation("org.kodein.di:kodein-di-erased:${findProperty("kodein_version")}")
+                implementation("org.kodein.di:kodein-di:${findProperty("kodein_version")}")
             }
         }
         val commonTest by getting {
@@ -50,7 +50,6 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
-                implementation("org.kodein.di:kodein-di-erased-js:${findProperty("kodein_version")}")
             }
         }
         val jsTest by getting {

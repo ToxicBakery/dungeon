@@ -7,7 +7,6 @@ import com.toxicbakery.game.dungeon.model.Locatable
 import com.toxicbakery.game.dungeon.model.Named
 import com.toxicbakery.game.dungeon.model.character.equipment.Equipable
 import com.toxicbakery.game.dungeon.model.character.equipment.EquipmentSlot
-import com.toxicbakery.game.dungeon.model.character.stats.Stats
 
 interface Character : Identifiable, Displayable, Named, Locatable, Living {
 

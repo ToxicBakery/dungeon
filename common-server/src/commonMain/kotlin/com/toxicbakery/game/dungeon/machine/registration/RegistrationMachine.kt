@@ -8,10 +8,10 @@ import com.toxicbakery.game.dungeon.manager.AuthenticationManager
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private data class RegistrationMachineImpl(
     private val commandMachine: CommandMachine,
@@ -95,7 +95,7 @@ private data class RegistrationMachineState(
 
 interface RegistrationMachine : ProcessorMachine<RegistrationState>
 
-val registrationMachineModule = Kodein.Module("registrationMachineModule") {
+val registrationMachineModule = DI.Module("registrationMachineModule") {
     bind<RegistrationMachine>() with provider {
         RegistrationMachineImpl(
             commandMachine = instance(),

@@ -4,10 +4,10 @@ import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.authentication.AuthenticationMachine
 import com.toxicbakery.game.dungeon.machine.registration.RegistrationMachine
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 /**
  * Main menu providing basic information and requesting the user to either authenticate or register.
@@ -46,7 +46,7 @@ private class InitMachineImpl(
 
 interface InitMachine : ProcessorMachine<InitState>
 
-val initMachineModule = Kodein.Module("initMachineModule") {
+val initMachineModule = DI.Module("initMachineModule") {
     bind<InitMachine>() with provider {
         InitMachineImpl(
             authenticationMachine = instance(),

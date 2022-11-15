@@ -9,10 +9,10 @@ import com.toxicbakery.game.dungeon.manager.AuthenticationManager
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private data class AuthenticationMachineImpl(
     private val authenticationManager: AuthenticationManager,
@@ -88,7 +88,7 @@ private data class AuthMachineState(
 
 interface AuthenticationMachine : ProcessorMachine<AuthenticationState>
 
-val authenticationMachineModule = Kodein.Module("authenticationMachineModule") {
+val authenticationMachineModule = DI.Module("authenticationMachineModule") {
     bind<AuthenticationMachine>() with provider {
         AuthenticationMachineImpl(
             authenticationManager = instance(),

@@ -2,15 +2,16 @@ package com.toxicbakery.game.dungeon.manager
 
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
+import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
 import kotlinx.coroutines.flow.first
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private class CommunicationManagerImpl(
-    private val dungeonStateStore: DungeonStateStore
+    private val dungeonStateStore: DungeonStateStore,
 ) : CommunicationManager {
 
     private suspend fun playerSessionList(): List<PlayerSession> =
@@ -48,6 +49,22 @@ private class CommunicationManagerImpl(
     ) = dungeonStateStore.value()
         .getPlayerSession(player)
         .sendMessage(message)
+
+    override suspend fun notifyPlayersAtLocation(
+        message: String,
+        location: Location,
+        sourcePlayer: Player?,
+    ) = dungeonStateStore.value()
+        .getPlayersAt(location)
+        .asSequence()
+        .map { session -> session.player }
+        .filter { player -> player.id != sourcePlayer?.id }
+        .forEach { playerAtLocation ->
+            notify(
+                player = playerAtLocation,
+                message = message
+            )
+        }
 
     override suspend fun serverMessage(
         message: String,
@@ -103,6 +120,15 @@ interface CommunicationManager {
     )
 
     /**
+     * Notify players at a location of an event that has occurred excluding the source player.
+     */
+    suspend fun notifyPlayersAtLocation(
+        message: String,
+        location: Location,
+        sourcePlayer: Player? = null,
+    )
+
+    /**
      * Send a message to all players such as when a user joins or leaves the game.
      */
     suspend fun serverMessage(
@@ -111,10 +137,10 @@ interface CommunicationManager {
     )
 }
 
-val communicationManagerModule = Kodein.Module("communicationManagerModule") {
+val communicationManagerModule = DI.Module("communicationManagerModule") {
     bind<CommunicationManager>() with provider {
         CommunicationManagerImpl(
-            dungeonStateStore = instance()
+            dungeonStateStore = instance(),
         )
     }
 }

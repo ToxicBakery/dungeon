@@ -1,41 +1,36 @@
 package com.toxicbakery.game.dungeon.machine.ai
 
-import com.toxicbakery.game.dungeon.gameProcessingDispatcher
-import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.TickableMachine
-import com.toxicbakery.game.dungeon.manager.NpcManager
-import com.toxicbakery.game.dungeon.manager.WorldManager
+import com.toxicbakery.game.dungeon.manager.CommunicationManager
+import com.toxicbakery.game.dungeon.manager.LookManager
+import com.toxicbakery.game.dungeon.manager.PlayerManager
 import com.toxicbakery.game.dungeon.map.MapLegend
 import com.toxicbakery.game.dungeon.map.model.Direction
 import com.toxicbakery.game.dungeon.model.Lookable.Animal
 import com.toxicbakery.game.dungeon.model.world.LookLocation
-import com.toxicbakery.game.dungeon.persistence.store.GameClock
+import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
 import com.toxicbakery.game.dungeon.util.DiceRoll
 import kotlin.jvm.JvmStatic
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.factory
-import org.kodein.di.erased.instance
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.factory
+import org.kodein.di.instance
 
 private data class PassiveAnimalMachineImpl(
     private val diceRoll: DiceRoll,
-    private val gameClock: GameClock,
-    private val npcManager: NpcManager,
-    private val worldManager: WorldManager,
-    private val passiveAiState: PassiveAiState,
-) : PassiveAnimalMachine {
+    private val state: PassiveAiState,
+    private val npcDatabase: NpcDatabase,
+    private val playerManager: PlayerManager,
+    private val lookManager: LookManager,
+    private val communicationManager: CommunicationManager,
+) : TickableMachine<AIState> {
 
-    private val tickJob = CoroutineScope(gameProcessingDispatcher).launch {
-        gameClock.gameTickFlow.collect { tick() }
-    }
+    override val name: String = "PassiveAnimalMachine (${state.subject.name})"
+    override val currentState: AIState = state.aiState
+    override val instanceId: String = state.subject.id
 
-    override val name: String = "PassiveAnimalMachine"
-    override val currentState: AIState = passiveAiState.state
-
-    override suspend fun tick(): PassiveAnimalMachine = when {
-        passiveAiState.animal.isDead && currentState != AIState.DECEASED -> die()
+    override suspend fun tick(): TickableMachine<AIState> = when {
+        state.subject.isDead && currentState != AIState.DECEASED -> die()
         currentState == AIState.FIGHTING -> tickFight()
         currentState == AIState.FLEEING -> tickFlee()
         currentState == AIState.WANDERING -> tickWandering()
@@ -43,43 +38,68 @@ private data class PassiveAnimalMachineImpl(
         else -> this
     }
 
-    private suspend fun tickFight(): PassiveAnimalMachine = this
+    private fun tickFight(): TickableMachine<AIState> =
+        if (diceRoll.roll(CHANCE_FLEE_WHEN_ATTACKED)) {
+            copy(
+                state = state.copy(
+                    aiState = AIState.FLEEING
+                )
+            )
+        } else this
 
-    private suspend fun tickFlee(): PassiveAnimalMachine = this
+    private fun tickFlee(): TickableMachine<AIState> =
+        if (diceRoll.roll(CHANCE_STOP_FLEE)) {
+            copy(
+                state = state.copy(
+                    aiState = AIState.WANDERING
+                )
+            )
+        } else this
 
-    private suspend fun tickWandering(): PassiveAnimalMachine {
+    private suspend fun tickWandering(): TickableMachine<AIState> {
         if (diceRoll.roll(CHANCE_MOVE_WHILE_WANDERING)) {
-            val walkTarget = worldManager.look(
-                lookable = passiveAiState.animal,
-                direction = Direction.getRandomDirection()
+            val randomDirection = Direction.getRandomDirection()
+            val walkTarget = lookManager.look(
+                lookable = state.subject,
+                direction = randomDirection
             )
             if (walkTarget.canBeWalkedTo) {
-                val updatedState = passiveAiState.copy(
-                    animal = passiveAiState.animal.copy(
+                val updatedState = state.copy(
+                    subject = state.subject.copy(
                         location = walkTarget.location
                     )
                 )
-                npcManager.updateNpc(updatedState.animal)
-                return copy(passiveAiState = updatedState)
+                npcDatabase.updateNpc(updatedState.subject)
+
+                communicationManager.notifyPlayersAtLocation(
+                    message = "${state.subject.name} departs to the ${randomDirection.name.lowercase()}",
+                    location = state.subject.location,
+                )
+                communicationManager.notifyPlayersAtLocation(
+                    message = "${state.subject.name} arrives from ${randomDirection.sourceDirection.name.lowercase()}",
+                    location = walkTarget.location,
+                )
+                return copy(state = updatedState)
             }
         }
 
         return this
     }
 
-    private fun tickDie(): PassiveAnimalMachine {
-        tickJob.cancel(DeadNpcCancellationException(passiveAiState.animal))
+    private fun tickDie(): TickableMachine<AIState> {
         return this
     }
 
-    private fun die(): PassiveAnimalMachine = copy(
-        passiveAiState = passiveAiState.copy(
-            state = AIState.DECEASED
+    private fun die(): TickableMachine<AIState> = copy(
+        state = state.copy(
+            aiState = AIState.DECEASED
         )
     )
 
     companion object {
-        private const val CHANCE_MOVE_WHILE_WANDERING = 20
+        private const val CHANCE_MOVE_WHILE_WANDERING = 500
+        private const val CHANCE_FLEE_WHEN_ATTACKED = 50
+        private const val CHANCE_STOP_FLEE = 100
 
         @JvmStatic
         private val walkableMapLegends = setOf(
@@ -99,23 +119,22 @@ private data class PassiveAnimalMachineImpl(
     }
 }
 
-interface PassiveAnimalMachine : Machine<AIState>, TickableMachine<AIState>
-
 private data class PassiveAiState(
-    val state: AIState = AIState.WANDERING,
-    val animal: Animal
+    val aiState: AIState = AIState.WANDERING,
+    val subject: Animal
 )
 
-val passiveAnimalMachineModule = Kodein.Module("passiveAnimalMachineModule") {
-    bind<PassiveAnimalMachine>() with factory { animal: Animal ->
+val passiveAnimalMachineModule = DI.Module("passiveAnimalMachineModule") {
+    bind<TickableMachine<*>>() with factory { animal: Animal ->
         PassiveAnimalMachineImpl(
             diceRoll = instance(),
-            gameClock = instance(),
-            npcManager = instance(),
-            worldManager = instance(),
-            passiveAiState = PassiveAiState(
-                animal = animal
-            )
+            state = PassiveAiState(
+                subject = animal
+            ),
+            npcDatabase = instance(),
+            lookManager = instance(),
+            playerManager = instance(),
+            communicationManager = instance(),
         )
     }
 }

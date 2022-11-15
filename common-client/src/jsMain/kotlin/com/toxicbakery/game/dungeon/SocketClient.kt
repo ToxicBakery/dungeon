@@ -1,9 +1,9 @@
 package com.toxicbakery.game.dungeon
 
+import com.toxicbakery.game.dungeon.model.Lookable
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
-import com.toxicbakery.game.dungeon.model.Lookable
 import com.toxicbakery.logging.Arbor
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromHexString

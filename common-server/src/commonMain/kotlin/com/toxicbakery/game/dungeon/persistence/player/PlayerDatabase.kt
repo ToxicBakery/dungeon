@@ -4,9 +4,9 @@ import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.world.Location
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 
 private class PlayerDatabaseImpl(
     private val persistenceDelegate: PersistencePlayerDatabaseDelegate
@@ -43,7 +43,7 @@ interface PlayerDatabase {
     suspend fun getPlayersNear(location: Location, distanceFilter: DistanceFilter): List<Player>
 }
 
-val playerDatabaseModule = Kodein.Module("playerDatabaseModule") {
+val playerDatabaseModule = DI.Module("playerDatabaseModule") {
     bind<PlayerDatabase>() with singleton {
         PlayerDatabaseImpl(
             persistenceDelegate = InMemoryPersistencePlayerDatabaseDelegate

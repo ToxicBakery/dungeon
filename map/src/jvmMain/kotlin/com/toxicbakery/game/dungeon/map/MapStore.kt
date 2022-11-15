@@ -1,8 +1,8 @@
 package com.toxicbakery.game.dungeon.map
 
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import org.mapdb.Atomic
 import org.mapdb.DBMaker
 import org.mapdb.HTreeMap
@@ -28,7 +28,7 @@ private const val TABLE_MAP_SIZE_REF = "table_map_size_ref"
 private const val TABLE_MAP = "map_"
 private const val TABLE_MAP_ROOT = "${TABLE_MAP}_0"
 
-val mapStoreModule = Kodein.Module("mapStoreModule") {
+val mapStoreModule = DI.Module("mapStoreModule") {
     val db = DBMaker.fileDB("dungeon.db")
         .closeOnJvmShutdown()
         .executorEnable()

@@ -6,10 +6,10 @@ import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.manager.PlayerDataManager
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.PlayerDataMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.singleton
 
 private data class CommandMachineImpl(
     private val commandMap: CommandMap,
@@ -68,7 +68,7 @@ private data class CommandMachineImpl(
 
 interface CommandMachine : ProcessorMachine<CommandState>
 
-val commandMachineModule = Kodein.Module("") {
+val commandMachineModule = DI.Module("") {
     import(commandMapModule)
     bind<CommandMachine>() with singleton {
         CommandMachineImpl(

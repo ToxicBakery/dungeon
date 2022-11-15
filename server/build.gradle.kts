@@ -54,7 +54,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
     implementation("io.ktor:ktor-server-netty:${findProperty("ktor_version")}")
     implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
-    implementation("org.kodein.di:kodein-di-erased-jvm:${findProperty("kodein_version")}")
+    implementation("org.kodein.di:kodein-di:${findProperty("kodein_version")}")
     implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${findProperty("kotlin_serialization_version")}")

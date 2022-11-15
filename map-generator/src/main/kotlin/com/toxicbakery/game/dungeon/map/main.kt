@@ -5,10 +5,10 @@ import com.toxicbakery.game.dungeon.map.BuildConfig.REGION_SIZE
 import com.toxicbakery.game.dungeon.map.preview.BmpMapPreviewer
 import com.toxicbakery.game.dungeon.map.preview.HtmlMapPreviewer
 import kotlin.time.ExperimentalTime
-import org.kodein.di.Kodein
-import org.kodein.di.erased.instance
+import org.kodein.di.DI
+import org.kodein.di.instance
 
-private val applicationKodein = Kodein {
+private val applicationKodein = DI {
     import(mapManagerModule)
     import(mapGeneratorModule)
 }

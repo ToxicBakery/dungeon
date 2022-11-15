@@ -1,9 +1,9 @@
 package com.toxicbakery.game.dungeon.util
 
 import kotlin.random.Random
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 
 private class DiceRollImpl : DiceRoll {
     override fun roll(chance: Int): Boolean = Random.nextInt(chance) == chance / 2
@@ -16,7 +16,7 @@ interface DiceRoll {
     fun roll(chance: Int): Boolean
 }
 
-val diceRollModule = Kodein.Module("diceRollModule") {
+val diceRollModule = DI.Module("diceRollModule") {
     bind<DiceRoll>() with singleton {
         DiceRollImpl()
     }

@@ -2,10 +2,10 @@ package com.toxicbakery.game.dungeon.manager
 
 import com.toxicbakery.game.dungeon.model.client.PlayerData
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 /**
  * Implementation that combines the [PlayerManager] and [WorldManager] to produce [PlayerData].
@@ -43,7 +43,7 @@ interface PlayerDataManager {
     ): PlayerData
 }
 
-val playerDataManagerModule = Kodein.Module("playerDataManagerModule") {
+val playerDataManagerModule = DI.Module("playerDataManagerModule") {
     bind<PlayerDataManager>() with provider {
         PlayerDataManagerImpl(
             playerManager = instance(),

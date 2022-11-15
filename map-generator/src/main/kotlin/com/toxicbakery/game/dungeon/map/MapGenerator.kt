@@ -7,10 +7,10 @@ import com.sudoplay.joise.module.ModuleFractal
 import com.toxicbakery.game.dungeon.map.MapGenerator.MapConfig
 import com.toxicbakery.game.dungeon.map.preview.MapPreviewer
 import kotlin.random.Random
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 import org.mapdb.HTreeMap
 
 @Suppress("MagicNumber", "SameParameterValue")
@@ -111,7 +111,7 @@ interface MapGenerator {
     )
 }
 
-val mapGeneratorModule = Kodein.Module("mapGeneratorModule") {
+val mapGeneratorModule = DI.Module("mapGeneratorModule") {
     bind<MapGenerator>() with provider {
         MapGeneratorImpl(
             mapStore = instance()

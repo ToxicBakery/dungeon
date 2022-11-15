@@ -1,11 +1,12 @@
 package com.toxicbakery.game.dungeon.persistence.npc
 
 import com.toxicbakery.game.dungeon.map.DistanceFilter
+import com.toxicbakery.game.dungeon.model.ILookable
 import com.toxicbakery.game.dungeon.model.character.Npc
 import com.toxicbakery.game.dungeon.model.world.Location
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 
 private class NpcDatabaseImpl(
     private val persistenceDelegate: PersistenceNpcDatabaseDelegate
@@ -19,7 +20,7 @@ private class NpcDatabaseImpl(
     override suspend fun getNpcsNear(
         location: Location,
         distanceFilter: DistanceFilter
-    ): List<Npc> = persistenceDelegate.getNpcsNear(location, distanceFilter)
+    ): List<ILookable> = persistenceDelegate.getNpcsNear(location, distanceFilter)
 }
 
 interface NpcDatabase {
@@ -30,10 +31,10 @@ interface NpcDatabase {
 
     suspend fun createNpc(npc: Npc)
 
-    suspend fun getNpcsNear(location: Location, distanceFilter: DistanceFilter): List<Npc>
+    suspend fun getNpcsNear(location: Location, distanceFilter: DistanceFilter): List<ILookable>
 }
 
-val npcDatabaseModule = Kodein.Module("npcDatabaseModule") {
+val npcDatabaseModule = DI.Module("npcDatabaseModule") {
     bind<NpcDatabase>() with singleton {
         NpcDatabaseImpl(
             persistenceDelegate = InMemoryPersistenceNpcDatabaseDelegate

@@ -28,7 +28,7 @@ sealed class Lookable : ILookable {
         @ProtoNumber(5)
         override val location: Location,
         @ProtoNumber(6)
-        val isPassive: Boolean
+        override val isPassive: Boolean
     ) : Lookable(), Npc
 
     @Serializable
@@ -44,7 +44,7 @@ sealed class Lookable : ILookable {
         @ProtoNumber(5)
         override val location: Location,
         @ProtoNumber(6)
-        val isPassive: Boolean,
+        override val isPassive: Boolean,
     ) : Lookable(), Npc
 
     @Serializable
@@ -61,6 +61,8 @@ sealed class Lookable : ILookable {
         override val statsBase: Stats,
         @ProtoNumber(6)
         override val canBeKilled: Boolean = false,
+        @ProtoNumber(7)
+        override val isPassive: Boolean,
     ) : Lookable(), Character, Npc
 
     @Serializable

@@ -9,10 +9,10 @@ import com.toxicbakery.game.dungeon.persistence.player.PlayerDatabase
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private class PlayerManagerImpl(
     private val dungeonStateStore: DungeonStateStore,
@@ -67,7 +67,7 @@ interface PlayerManager {
     ): List<Player>
 }
 
-val playerManagerModule = Kodein.Module("playerManagerModule") {
+val playerManagerModule = DI.Module("playerManagerModule") {
     bind<PlayerManager>() with provider {
         PlayerManagerImpl(
             dungeonStateStore = instance(),

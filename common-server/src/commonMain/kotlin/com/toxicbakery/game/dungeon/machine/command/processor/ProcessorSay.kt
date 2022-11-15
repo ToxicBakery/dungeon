@@ -7,10 +7,10 @@ import com.toxicbakery.game.dungeon.manager.CommunicationManager
 import com.toxicbakery.game.dungeon.manager.PlayerManager
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private class ProcessorSayImpl(
     private val commandMachine: CommandMachine,
@@ -36,7 +36,7 @@ interface ProcessorSay : SingleStateProcessor {
     }
 }
 
-val processorSayModule = Kodein.Module("processorSayModule") {
+val processorSayModule = DI.Module("processorSayModule") {
     bind<CommandRef>(COMMAND) with provider {
         CommandRef(
             name = COMMAND,

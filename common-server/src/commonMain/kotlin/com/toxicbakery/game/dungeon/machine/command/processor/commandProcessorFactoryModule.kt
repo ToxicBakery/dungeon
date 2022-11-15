@@ -1,8 +1,8 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
-import org.kodein.di.Kodein
+import org.kodein.di.DI
 
-val commandProcessorFactoryModule = Kodein.Module("commandProcessorFactoryModule") {
+val commandProcessorFactoryModule = DI.Module("commandProcessorFactoryModule") {
     import(processorGsayModule)
     import(processorLookModule)
     import(processorSayModule)

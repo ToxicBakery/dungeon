@@ -2,10 +2,10 @@ package com.toxicbakery.game.dungeon.map
 
 import com.toxicbakery.game.dungeon.map.model.Window
 import com.toxicbakery.game.dungeon.model.world.Location
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.singleton
 
 private class MapManagerImpl(
     private val mapStore: MapStore
@@ -90,7 +90,7 @@ private class MapManagerImpl(
     }
 }
 
-actual val mapManagerModule = Kodein.Module("mapManagerModule") {
+actual val mapManagerModule = DI.Module("mapManagerModule") {
     import(mapStoreModule)
     bind<MapManager>() with singleton {
         MapManagerImpl(

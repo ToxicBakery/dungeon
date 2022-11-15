@@ -39,7 +39,7 @@ dependencies {
     implementation(project(":common"))
     implementation("com.ToxicBakery.library.noise:generator-jvm:1.0.10")
     implementation("com.ToxicBakery.logging:arbor-jvm:${findProperty("arbor_version")}")
-    implementation("org.kodein.di:kodein-di-erased-jvm:${findProperty("kodein_version")}")
+    implementation("org.kodein.di:kodein-di-jvm:${findProperty("kodein_version")}")
     implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")
 
     testImplementation("junit:junit:4.12")

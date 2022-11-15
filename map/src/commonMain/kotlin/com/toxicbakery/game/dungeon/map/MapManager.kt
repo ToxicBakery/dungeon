@@ -1,7 +1,7 @@
 package com.toxicbakery.game.dungeon.map
 
 import com.toxicbakery.game.dungeon.map.model.Window
-import org.kodein.di.Kodein
+import org.kodein.di.DI
 
 interface MapManager {
 
@@ -33,4 +33,4 @@ interface MapManager {
     fun drawCompleteMap(): Window
 }
 
-expect val mapManagerModule: Kodein.Module
+expect val mapManagerModule: DI.Module

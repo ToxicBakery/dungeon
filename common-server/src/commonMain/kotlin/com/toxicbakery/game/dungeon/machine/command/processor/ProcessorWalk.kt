@@ -1,29 +1,26 @@
 package com.toxicbakery.game.dungeon.machine.command.processor
 
 import com.toxicbakery.game.dungeon.exception.UnknownCommandException
-import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.Direction.directionMap
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorWalk.Companion.COMMAND
 import com.toxicbakery.game.dungeon.manager.CommunicationManager
+import com.toxicbakery.game.dungeon.manager.LookManager
 import com.toxicbakery.game.dungeon.manager.PlayerManager
-import com.toxicbakery.game.dungeon.manager.WorldManager
 import com.toxicbakery.game.dungeon.map.MapLegend
 import com.toxicbakery.game.dungeon.map.model.Direction
-import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import com.toxicbakery.game.dungeon.model.world.Location
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private class ProcessorWalkImpl(
     private val commandMachine: CommandMachine,
-    private val processorLook: CommandProcessor<*>,
+    private val lookManager: LookManager,
     private val playerManager: PlayerManager,
-    private val worldManager: WorldManager,
+    private val processorLook: CommandProcessor<*>,
     private val communicationManager: CommunicationManager,
 ) : ASingleStateProcessor(), ProcessorWalk {
 
@@ -41,10 +38,10 @@ private class ProcessorWalkImpl(
         direction: Direction
     ): ProcessorMachine<*> {
         val player = playerManager.getPlayerByGameSession(gameSession)
-        val lookLocation = worldManager.look(player, direction)
+        val lookLocation = lookManager.look(player, direction)
         val targetLocationMapLegend = MapLegend.representingByte(lookLocation.mapLegendByte)
         return if (walkableMapLegends.contains(targetLocationMapLegend)) {
-            notifyPlayersAtLocation(
+            communicationManager.notifyPlayersAtLocation(
                 message = "${player.name} departs to the ${direction.name.lowercase()}",
                 location = player.location,
                 sourcePlayer = player,
@@ -55,7 +52,7 @@ private class ProcessorWalkImpl(
                 gameSession
             )
 
-            notifyPlayersAtLocation(
+            communicationManager.notifyPlayersAtLocation(
                 message = "${player.name} arrives from ${direction.sourceDirection.name.lowercase()}",
                 location = lookLocation.location,
                 sourcePlayer = player,
@@ -68,20 +65,6 @@ private class ProcessorWalkImpl(
             commandMachine
         }
     }
-
-    private suspend fun notifyPlayersAtLocation(
-        message: String,
-        location: Location,
-        sourcePlayer: Player,
-    ) = playerManager.getPlayersAt(location)
-        .asSequence()
-        .filter { p -> p.id != sourcePlayer.id }
-        .forEach { playerAtLocation ->
-            communicationManager.notify(
-                player = playerAtLocation,
-                message = message
-            )
-        }
 
     companion object {
         private val walkableMapLegends = setOf(
@@ -103,17 +86,17 @@ interface ProcessorWalk : SingleStateProcessor {
     }
 }
 
-val processorWalkModule = Kodein.Module("processorWalkModule") {
+val processorWalkModule = DI.Module("processorWalkModule") {
     bind<CommandRef>(COMMAND) with provider {
         CommandRef(
             name = COMMAND,
             processor = { commandMachine ->
                 ProcessorWalkImpl(
                     commandMachine = commandMachine,
+                    communicationManager = instance(),
+                    lookManager = instance(),
                     processorLook = instance<CommandRef>(ProcessorLook.COMMAND).processor(commandMachine),
                     playerManager = instance(),
-                    worldManager = instance(),
-                    communicationManager = instance(),
                 )
             }
         )

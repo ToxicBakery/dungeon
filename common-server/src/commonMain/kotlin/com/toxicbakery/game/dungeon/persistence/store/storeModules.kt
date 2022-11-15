@@ -1,8 +1,8 @@
 package com.toxicbakery.game.dungeon.persistence.store
 
-import org.kodein.di.Kodein
+import org.kodein.di.DI
 
-val storeModules = Kodein.Module("storeModules") {
+val storeModules = DI.Module("storeModules") {
     import(dungeonStateStoreModule)
     import(gameClockModule)
 }

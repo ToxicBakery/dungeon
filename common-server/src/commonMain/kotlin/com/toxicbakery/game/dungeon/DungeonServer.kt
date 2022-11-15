@@ -1,22 +1,43 @@
 package com.toxicbakery.game.dungeon
 
 import com.toxicbakery.game.dungeon.manager.GameSessionManager
+import com.toxicbakery.game.dungeon.manager.NpcManager
+import com.toxicbakery.game.dungeon.model.Lookable.*
+import com.toxicbakery.game.dungeon.model.character.stats.Stats
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
+import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.logging.Arbor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.protobuf.ProtoBuf
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.singleton
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.singleton
 
 @OptIn(ExperimentalSerializationApi::class)
 private class DungeonServerImpl(
-    private val gameSessionManager: GameSessionManager
+    private val gameSessionManager: GameSessionManager,
+    private val npcManager: NpcManager,
 ) : DungeonServer {
+
+    init {
+        CoroutineScope(gameProcessingDispatcher).launch {
+            npcManager.createNpc(
+                Animal(
+                    name = "Sheep",
+                    stats = Stats(health = 100),
+                    statsBase = Stats(health = 100),
+                    location = Location(),
+                    isPassive = true,
+                )
+            )
+        }
+    }
 
     override suspend fun receivedMessage(
         session: GameSession,
@@ -50,10 +71,11 @@ interface DungeonServer {
     )
 }
 
-val dungeonServerModule = Kodein.Module("dungeonServerModule") {
+val dungeonServerModule = DI.Module("dungeonServerModule") {
     bind<DungeonServer>() with singleton {
         DungeonServerImpl(
-            gameSessionManager = instance()
+            gameSessionManager = instance(),
+            npcManager = instance(),
         )
     }
 }

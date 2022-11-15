@@ -18,11 +18,11 @@ import io.ktor.websocket.webSocket
 import java.time.Duration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
-import org.kodein.di.Kodein
-import org.kodein.di.erased.instance
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 class DungeonApplication(
-    kodein: Kodein
+    kodein: DI
 ) {
 
     private val dungeonServer: DungeonServer by kodein.instance()

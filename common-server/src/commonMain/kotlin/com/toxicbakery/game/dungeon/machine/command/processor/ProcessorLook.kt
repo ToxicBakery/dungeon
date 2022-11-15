@@ -5,19 +5,23 @@ import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.machine.command.CommandMachine
 import com.toxicbakery.game.dungeon.machine.command.processor.Direction.directionMap
 import com.toxicbakery.game.dungeon.machine.command.processor.ProcessorLook.Companion.COMMAND
+import com.toxicbakery.game.dungeon.manager.DrawManager
+import com.toxicbakery.game.dungeon.manager.LookManager
 import com.toxicbakery.game.dungeon.manager.PlayerManager
 import com.toxicbakery.game.dungeon.manager.WorldManager
 import com.toxicbakery.game.dungeon.map.model.Direction
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.DirectedLookMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.MapMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import org.kodein.di.Kodein
-import org.kodein.di.erased.bind
-import org.kodein.di.erased.instance
-import org.kodein.di.erased.provider
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.provider
 
 private class ProcessorLookImpl(
     private val commandMachine: CommandMachine,
+    private val drawManager: DrawManager,
+    private val lookManager: LookManager,
     private val playerManager: PlayerManager,
     private val worldManager: WorldManager
 ) : ASingleStateProcessor(), ProcessorLook {
@@ -29,7 +33,7 @@ private class ProcessorLookImpl(
         message: String
     ): ProcessorMachine<*> {
         if (message.isEmpty()) {
-            val window = worldManager.getWindow(gameSession)
+            val window = drawManager.getWindow(gameSession)
             gameSession.sendClientMessage(
                 MapMessage(
                     window = window,
@@ -50,7 +54,7 @@ private class ProcessorLookImpl(
         direction: Direction? = null
     ) {
         val player = playerManager.getPlayerByGameSession(gameSession)
-        val lookLocation = worldManager.look(player, direction)
+        val lookLocation = lookManager.look(player, direction)
         gameSession.sendClientMessage(DirectedLookMessage(lookLocation))
     }
 }
@@ -61,15 +65,17 @@ interface ProcessorLook : SingleStateProcessor {
     }
 }
 
-val processorLookModule = Kodein.Module("processorLookModule") {
+val processorLookModule = DI.Module("processorLookModule") {
     bind<CommandRef>(COMMAND) with provider {
         CommandRef(
             name = COMMAND,
             processor = { commandMachine ->
                 ProcessorLookImpl(
                     commandMachine = commandMachine,
-                    worldManager = instance(),
+                    drawManager = instance(),
+                    lookManager = instance(),
                     playerManager = instance(),
+                    worldManager = instance(),
                 )
             }
         )
