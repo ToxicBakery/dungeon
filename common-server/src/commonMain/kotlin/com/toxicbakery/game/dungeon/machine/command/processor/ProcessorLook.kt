@@ -30,7 +30,12 @@ private class ProcessorLookImpl(
     ): ProcessorMachine<*> {
         if (message.isEmpty()) {
             val window = worldManager.getWindow(gameSession)
-            gameSession.sendClientMessage(MapMessage(window))
+            gameSession.sendClientMessage(
+                MapMessage(
+                    window = window,
+                    gameTime = worldManager.getWorldTime().also { println("Game clock: $it") },
+                )
+            )
             lookDirection(gameSession)
         } else {
             directionMap[message]

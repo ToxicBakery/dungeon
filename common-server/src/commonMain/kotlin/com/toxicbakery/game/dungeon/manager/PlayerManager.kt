@@ -5,7 +5,7 @@ import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
 import com.toxicbakery.game.dungeon.model.world.Location
-import com.toxicbakery.game.dungeon.persistence.Database
+import com.toxicbakery.game.dungeon.persistence.player.PlayerDatabase
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -16,7 +16,7 @@ import org.kodein.di.erased.provider
 
 private class PlayerManagerImpl(
     private val dungeonStateStore: DungeonStateStore,
-    private val database: Database,
+    private val playerDatabase: PlayerDatabase,
 ) : PlayerManager {
 
     override suspend fun getPlayerByGameSession(
@@ -33,14 +33,14 @@ private class PlayerManagerImpl(
         player: Player,
         gameSession: GameSession
     ) = coroutineScope {
-        database.updatePlayer(player)
+        playerDatabase.updatePlayer(player)
         dungeonStateStore.modify { dungeonState -> dungeonState.updatePlayer(player) }
     }
 
     override suspend fun getPlayersNear(
         location: Location,
         distanceFilter: DistanceFilter
-    ): List<Player> = database.getPlayersNear(location, distanceFilter)
+    ): List<Player> = playerDatabase.getPlayersNear(location, distanceFilter)
 
     override suspend fun getPlayersAt(location: Location): List<Player> =
         dungeonStateStore.value().getPlayersAt(location).map(PlayerSession::player)
@@ -71,7 +71,7 @@ val playerManagerModule = Kodein.Module("playerManagerModule") {
     bind<PlayerManager>() with provider {
         PlayerManagerImpl(
             dungeonStateStore = instance(),
-            database = instance(),
+            playerDatabase = instance(),
         )
     }
 }

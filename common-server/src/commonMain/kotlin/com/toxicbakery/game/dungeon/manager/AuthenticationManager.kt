@@ -5,7 +5,7 @@ import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.session.AuthenticatedGameSession
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.model.session.PlayerSession
-import com.toxicbakery.game.dungeon.persistence.Database
+import com.toxicbakery.game.dungeon.persistence.player.PlayerDatabase
 import com.toxicbakery.game.dungeon.persistence.store.DungeonStateStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,7 +15,7 @@ import org.kodein.di.erased.instance
 import org.kodein.di.erased.provider
 
 private class AuthenticationManagerImpl(
-    private val database: Database,
+    private val playerDatabase: PlayerDatabase,
     private val dungeonStateStore: DungeonStateStore,
     private val communicationManager: CommunicationManager,
 ) : AuthenticationManager {
@@ -28,7 +28,7 @@ private class AuthenticationManagerImpl(
         credentials: Credentials,
         gameSession: GameSession
     ): Player {
-        val player = database.authenticatePlayer(credentials)
+        val player = playerDatabase.authenticatePlayer(credentials)
         val authenticatedGameSession = AuthenticatedGameSession(player.id, gameSession)
         dungeonStateStore.modify { dungeonState ->
             dungeonState.setAuthenticatedPlayer(player, authenticatedGameSession)
@@ -42,7 +42,7 @@ private class AuthenticationManagerImpl(
 
     override suspend fun registerPlayer(
         credentials: Credentials
-    ) = database.createPlayer(credentials)
+    ) = playerDatabase.createPlayer(credentials)
 
     override suspend fun playerLeft(player: Player) {
         dungeonStateStore.modify { dungeonState -> dungeonState.removePlayerAndSession(player) }
@@ -72,7 +72,7 @@ interface AuthenticationManager {
 val authenticationManagerModule = Kodein.Module("authenticationManagerModule") {
     bind<AuthenticationManager>() with provider {
         AuthenticationManagerImpl(
-            database = instance(),
+            playerDatabase = instance(),
             dungeonStateStore = instance(),
             communicationManager = instance(),
         )

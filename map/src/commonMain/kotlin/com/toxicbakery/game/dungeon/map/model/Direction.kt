@@ -1,5 +1,8 @@
 package com.toxicbakery.game.dungeon.map.model
 
+import kotlin.jvm.JvmStatic
+import kotlin.random.Random
+
 enum class Direction() {
     NORTH,
     SOUTH,
@@ -16,5 +19,12 @@ enum class Direction() {
             WEST -> EAST
             EAST -> WEST
         }
+    }
+
+    companion object {
+        private val values = Direction.values()
+
+        @JvmStatic
+        fun getRandomDirection(): Direction = values[Random.nextInt(values.size)]
     }
 }

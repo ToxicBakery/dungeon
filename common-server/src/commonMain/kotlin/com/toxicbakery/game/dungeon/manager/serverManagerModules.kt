@@ -8,6 +8,7 @@ val serverManagerModules = Kodein.Module("serverManagerModules") {
     import(communicationManagerModule)
     import(gameSessionManagerModule)
     import(mapManagerModule)
+    import(npcManagerModule)
     import(playerDataManagerModule)
     import(playerManagerModule)
     import(worldManagerModule)

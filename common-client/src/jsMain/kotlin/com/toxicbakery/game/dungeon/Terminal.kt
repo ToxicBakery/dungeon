@@ -31,7 +31,12 @@ class Terminal(
         is ServerMessage -> handleMessage(message)
         is PlayerDataMessage -> handleMessage(message)
         is DirectedLookMessage -> handleMessage(message)
-        is MapMessage -> windowRenderer.render(message.window)
+        is MapMessage -> handleMessage(message)
+    }
+
+    private fun handleMessage(message: MapMessage) {
+        handleMessage(message.gameTime)
+        windowRenderer.render(message.window)
     }
 
     private fun handleMessage(message: UserMessage) {

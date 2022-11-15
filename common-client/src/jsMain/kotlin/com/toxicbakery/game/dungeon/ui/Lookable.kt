@@ -17,7 +17,7 @@ private fun List<Lookable>.lookableDescriptionStrings() = map { lookable ->
             if (lookable.isPassive) "A ${lookable.name} wanders around"
             else "A ${lookable.name} is charging towards you"
 
-        is Lookable.Npc -> "You see ${lookable.name} looking back at you"
+        is Lookable.NpcCharacter -> "You see ${lookable.name} looking back at you"
         is Lookable.Player -> "You see ${lookable.name} looking back at you"
         else -> ""
     }

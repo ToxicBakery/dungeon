@@ -1,4 +1,4 @@
-package com.toxicbakery.game.dungeon.persistence
+package com.toxicbakery.game.dungeon.persistence.player
 
 import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.model.Lookable.Player
@@ -8,9 +8,9 @@ import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.singleton
 
-private class DatabaseImpl(
-    private val persistenceDelegate: PersistenceDelegate
-) : Database {
+private class PlayerDatabaseImpl(
+    private val persistenceDelegate: PersistencePlayerDatabaseDelegate
+) : PlayerDatabase {
 
     override suspend fun authenticatePlayer(
         credentials: Credentials
@@ -22,7 +22,7 @@ private class DatabaseImpl(
         credentials: Credentials
     ): Player = persistenceDelegate.createPlayer(credentials)
 
-    override suspend fun getPlayerById(id: Int) = persistenceDelegate.getPlayerById(id)
+    override suspend fun getPlayerById(id: String) = persistenceDelegate.getPlayerById(id)
 
     override suspend fun getPlayersNear(
         location: Location,
@@ -30,7 +30,7 @@ private class DatabaseImpl(
     ): List<Player> = persistenceDelegate.getPlayersNear(location, distanceFilter)
 }
 
-interface Database {
+interface PlayerDatabase {
 
     suspend fun authenticatePlayer(credentials: Credentials): Player
 
@@ -38,15 +38,15 @@ interface Database {
 
     suspend fun createPlayer(credentials: Credentials): Player
 
-    suspend fun getPlayerById(id: Int): Player
+    suspend fun getPlayerById(id: String): Player
 
     suspend fun getPlayersNear(location: Location, distanceFilter: DistanceFilter): List<Player>
 }
 
-val databaseModule = Kodein.Module("databaseModule") {
-    bind<Database>() with singleton {
-        DatabaseImpl(
-            persistenceDelegate = InMemoryPersistenceDelegate
+val playerDatabaseModule = Kodein.Module("playerDatabaseModule") {
+    bind<PlayerDatabase>() with singleton {
+        PlayerDatabaseImpl(
+            persistenceDelegate = InMemoryPersistencePlayerDatabaseDelegate
         )
     }
 }

@@ -4,4 +4,5 @@ enum class AIState {
     FIGHTING,
     FLEEING,
     WANDERING,
+    DECEASED,
 }

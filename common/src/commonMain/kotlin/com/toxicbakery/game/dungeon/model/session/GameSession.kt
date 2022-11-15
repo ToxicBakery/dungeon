@@ -21,7 +21,7 @@ interface GameSession {
     /**
      * Id of the player once authenticated.
      */
-    val playerId: Int
+    val playerId: String
         get() = NULL_PLAYER_ID
 
     /**
@@ -43,6 +43,6 @@ interface GameSession {
     suspend fun close()
 
     companion object {
-        const val NULL_PLAYER_ID = -1
+        const val NULL_PLAYER_ID = "-1"
     }
 }

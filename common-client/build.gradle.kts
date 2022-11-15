@@ -35,6 +35,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${findProperty("kotlin_serialization_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
                 implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
+                implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
             }
         }
         val commonTest by getting {
@@ -47,7 +48,6 @@ kotlin {
             dependencies {
                 dependencies {
                     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
-                    implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
                 }
             }
         }

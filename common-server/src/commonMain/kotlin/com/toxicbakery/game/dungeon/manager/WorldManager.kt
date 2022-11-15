@@ -6,6 +6,7 @@ import com.toxicbakery.game.dungeon.map.MapManager
 import com.toxicbakery.game.dungeon.map.WindowDescription
 import com.toxicbakery.game.dungeon.map.model.Direction
 import com.toxicbakery.game.dungeon.map.model.Window
+import com.toxicbakery.game.dungeon.model.Locatable
 import com.toxicbakery.game.dungeon.model.Lookable
 import com.toxicbakery.game.dungeon.model.Lookable.*
 import com.toxicbakery.game.dungeon.model.session.GameSession
@@ -13,7 +14,9 @@ import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.model.world.LookLocation
 import com.toxicbakery.game.dungeon.model.world.World
 import com.toxicbakery.game.dungeon.persistence.store.GameClock
-import kotlin.time.Duration.Companion.seconds
+import com.toxicbakery.game.dungeon.util.secondsToDays
+import com.toxicbakery.game.dungeon.util.secondsToMonths
+import com.toxicbakery.game.dungeon.util.secondsToYears
 import org.kodein.di.Kodein
 import org.kodein.di.erased.bind
 import org.kodein.di.erased.instance
@@ -25,9 +28,15 @@ private class WorldManagerImpl(
     private val playerManager: PlayerManager
 ) : WorldManager {
 
-    override suspend fun getWorldById(id: Int): World = World(0, "Overworld")
+    // TODO Create world database
+    override suspend fun getWorldById(id: String): World = World("overworld", "Overworld")
 
-    override suspend fun getWorldTime(): String = gameClock.gameSeconds.seconds.toIsoString()
+    override suspend fun getWorldTime(): String = gameClock.gameSeconds.let { seconds ->
+        val year = seconds.secondsToYears
+        val month = seconds.secondsToMonths
+        val day = seconds.secondsToDays
+        "It is $month $day, $year"
+    }
 
     @Suppress("MagicNumber")
     override suspend fun getWindow(gameSession: GameSession): Window =
@@ -37,7 +46,7 @@ private class WorldManagerImpl(
     private suspend fun getWindow(player: Player): Window {
         val windowDescription = windowDescriptionFor(player)
         val nearbyThings = nearbyThings(
-            player = player,
+            lookable = player,
             distanceCap = windowDescription.size / 2 + 1
         ).locationMapped()
         return mapManager.drawWindow(windowDescription) { mapOverlay ->
@@ -52,41 +61,37 @@ private class WorldManagerImpl(
 
     // TODO This should be moved to its own manager
     private suspend fun nearbyThings(
-        player: Player,
+        lookable: Lookable,
         distanceCap: Int,
     ): List<Lookable> {
         val npcsNearby = listOf<Lookable>()
         val animalsNearby = listOf<Lookable>(
-            Animal(1, "Sheep", Location(1, 1), true),
-            Animal(2, "Sheep", Location(0, 1), true),
-            Animal(3, "Sheep", Location(1, 0), true),
-            Animal(4, "Sheep", Location(2, 1), true),
-            Animal(5, "Sheep", Location(1, 2), true)
+            Animal(name = "Sheep", location = Location(1, 1), isPassive = true),
         )
         val creaturesNearby = listOf<Lookable>()
-        val playersNearby = playersNear(player)
+        val playersNearby = playersNear(lookable)
 
         // Stack nearby things in order of importance, first stacked is of lowest visual importance.
         return animalsNearby
             .plus(npcsNearby)
             .plus(playersNearby)
             .plus(creaturesNearby)
-            .filter { lookable ->
-                lookable.location.distance(player.location, mapManager.mapSize()) <= distanceCap
+            .filter { filterLookable ->
+                filterLookable.location.distance(lookable.location, mapManager.mapSize()) <= distanceCap
             }
     }
 
     override suspend fun look(
-        player: Player,
+        lookable: Lookable,
         direction: Direction?
     ): LookLocation {
         val targetLocation =
-            if (direction == null) player.location
-            else player.location atDirectionOf direction
+            if (direction == null) lookable.location
+            else lookable.location atDirectionOf direction
 
         return LookLocation(
             location = targetLocation,
-            lookables = nearbyThings(player, 0).minus(player),
+            lookables = nearbyThings(lookable, 0).minus(lookable),
             mapLegendByte = mapManager.drawLocation(
                 windowDescription = WindowDescription(
                     location = targetLocation,
@@ -100,8 +105,8 @@ private class WorldManagerImpl(
     private fun List<Lookable>.locationMapped(): Map<Location, Lookable> =
         associate { displayable -> displayable.location to displayable }
 
-    private suspend fun playersNear(player: Player): List<Player> = playerManager.getPlayersNear(
-        location = player.location,
+    private suspend fun playersNear(locatable: Locatable): List<Player> = playerManager.getPlayersNear(
+        location = locatable.location,
         distanceFilter = DistanceFilter(mapManager.mapSize(), WINDOW_SIZE / 2 + 1)
     )
 
@@ -129,7 +134,7 @@ private class WorldManagerImpl(
         private val Lookable.toMapLegend: MapLegend
             get() = when (this) {
                 is Player -> MapLegend.PLAYER
-                is Npc -> MapLegend.NPC
+                is NpcCharacter -> MapLegend.NPC
                 is Animal -> if (isPassive) MapLegend.ANIMAL_PASSIVE else MapLegend.ANIMAL_AGGRESSIVE
                 is Creature -> MapLegend.CREATURE
                 else -> MapLegend.WTF
@@ -144,14 +149,14 @@ private class WorldManagerImpl(
 
 interface WorldManager {
 
-    suspend fun getWorldById(id: Int): World
+    suspend fun getWorldById(id: String): World
 
     suspend fun getWorldTime(): String
 
     suspend fun getWindow(gameSession: GameSession): Window
 
     suspend fun look(
-        player: Player,
+        lookable: Lookable,
         direction: Direction?
     ): LookLocation
 }

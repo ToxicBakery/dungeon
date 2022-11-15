@@ -4,7 +4,7 @@ import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
 
 data class AuthenticatedGameSession(
-    override val playerId: Int,
+    override val playerId: String,
     private val gameSession: GameSession
 ) : GameSession {
 

@@ -43,7 +43,9 @@ sealed class ClientMessage {
     @Serializable
     data class MapMessage(
         @ProtoNumber(1)
-        val window: Window
+        val window: Window,
+        @ProtoNumber(2)
+        val gameTime: String,
     ) : ClientMessage()
 
     @Serializable

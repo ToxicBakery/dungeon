@@ -5,6 +5,7 @@ import com.toxicbakery.game.dungeon.model.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
 import com.toxicbakery.game.dungeon.model.Lookable
 import com.toxicbakery.logging.Arbor
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.modules.serializersModuleOf
@@ -13,6 +14,7 @@ import org.w3c.dom.MessageEvent
 import org.w3c.dom.WebSocket
 import org.w3c.dom.events.Event
 
+@OptIn(ExperimentalSerializationApi::class)
 class SocketClient(
     private val host: String,
     private val terminal: Terminal

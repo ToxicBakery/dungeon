@@ -36,6 +36,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${findProperty("kotlin_date_time_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
                 implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")
+                implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
             }
         }
         val commonTest by getting {
@@ -48,7 +49,6 @@ kotlin {
             dependencies {
                 implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("kotlin_coroutines_version")}")
-                implementation("com.benasher44:uuid:${findProperty("uuid_version")}")
                 implementation("org.mapdb:mapdb:${findProperty("mapdb_version")}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:${findProperty("kotlin_date_time_version")}")
             }

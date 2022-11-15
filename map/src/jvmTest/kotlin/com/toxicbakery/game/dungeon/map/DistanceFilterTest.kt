@@ -24,11 +24,11 @@ class DistanceFilterTest {
     fun nearby_differentWorlds() {
         assertFalse(
             DistanceFilter(8, 1).nearby(
-                Location(0, 0, 0),
-                Location(0, 0, 1)
+                Location(0, 0, "0"),
+                Location(0, 0, "1")
             )
         )
     }
 
-    private fun location(x: Int, y: Int) = Location(x, y, 0)
+    private fun location(x: Int, y: Int) = Location(x, y)
 }

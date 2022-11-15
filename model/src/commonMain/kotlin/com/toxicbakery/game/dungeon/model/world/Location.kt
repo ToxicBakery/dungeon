@@ -20,7 +20,7 @@ data class Location(
     @ProtoNumber(2)
     val y: Int = 0,
     @ProtoNumber(3)
-    val worldId: Int = 0
+    val worldId: String = "overworld"
 ) {
 
     fun distance(
