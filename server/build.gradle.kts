@@ -24,7 +24,7 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 }
 
 application {
-    mainClass.set("io.ktor.server.netty.DevelopmentEngine")
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -51,8 +51,12 @@ dependencies {
     implementation(project(":common-client"))
     implementation(project(":common-server"))
     implementation(kotlin("stdlib-jdk8"))
+    implementation("io.ktor:ktor-server-auth:${findProperty("ktor_version")}")
     implementation("io.ktor:ktor-client-core:${findProperty("ktor_version")}")
+    implementation("io.ktor:ktor-server-call-logging:${findProperty("ktor_version")}")
+    implementation("io.ktor:ktor-server-default-headers:${findProperty("ktor_version")}")
     implementation("io.ktor:ktor-server-netty:${findProperty("ktor_version")}")
+    implementation("io.ktor:ktor-server-websockets:${findProperty("ktor_version")}")
     implementation("io.ktor:ktor-websockets:${findProperty("ktor_version")}")
     implementation("org.kodein.di:kodein-di:${findProperty("kodein_version")}")
     implementation("com.ToxicBakery.logging:common:${findProperty("arbor_version")}")

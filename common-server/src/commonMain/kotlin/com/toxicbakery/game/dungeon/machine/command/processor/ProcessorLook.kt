@@ -37,7 +37,7 @@ private class ProcessorLookImpl(
             gameSession.sendClientMessage(
                 MapMessage(
                     window = window,
-                    gameTime = worldManager.getWorldTime().also { println("Game clock: $it") },
+                    gameTime = worldManager.getWorldTime(),
                 )
             )
             lookDirection(gameSession)
