@@ -72,7 +72,7 @@ dependencies {
 
 val taskGetDb by tasks.register<Copy>("getDbFromMapGenerator") {
     val mapGeneratorProject = project(":map-generator")
-    //dependsOn(mapGeneratorProject.tasks.getByName("run"))
+    dependsOn(mapGeneratorProject.tasks.getByName("run"))
     from("${mapGeneratorProject.projectDir}/dungeon.db")
     into("$projectDir")
 }
@@ -84,3 +84,4 @@ val taskGetJs by tasks.register<Copy>("getJsFromClient") {
 }
 
 tasks.getByName("processResources").dependsOn(taskGetJs, taskGetDb)
+tasks.getByName("compileJava").dependsOn(":map-generator:run")

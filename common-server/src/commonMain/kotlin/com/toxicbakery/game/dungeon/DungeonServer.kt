@@ -10,11 +10,7 @@ import com.toxicbakery.game.dungeon.model.session.GameSession
 import com.toxicbakery.game.dungeon.persistence.store.GameClock
 import com.toxicbakery.logging.Arbor
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromHexString
@@ -32,16 +28,22 @@ private class DungeonServerImpl(
     private val npcManager: NpcManager,
 ) : DungeonServer {
 
+    private val animalGenerationFlow: Flow<Long>
+        get() = gameClock.gameTickFlow
+            .filter { npcManager.getNpcCount() < MAX_NPC_COUNT }
+            .onEach {
+                val animal = animalGenerator.create(BaseAnimal.pickNextAnimal())
+                npcManager.createNpc(animal)
+                println("Animal spawned ${animal.name}")
+            }
+            .catch { e ->
+                println("Failed to spawn animal: ${e.message}")
+                emitAll(animalGenerationFlow)
+            }
+
     init {
         tickScope.launch {
-            gameClock.gameTickFlow
-                .filter { npcManager.getNpcCount() < MAX_NPC_COUNT }
-                .map { animalGenerator.create(BaseAnimal.pickNextAnimal()) }
-                .onEach { animal ->
-                    npcManager.createNpc(animal)
-                    println("Animal spawned ${animal.name}")
-                }
-                .catch { e -> println("Failed to spawn animal: ${e.message}") }
+            animalGenerationFlow
                 .launchIn(gameProcessingScope)
         }
     }

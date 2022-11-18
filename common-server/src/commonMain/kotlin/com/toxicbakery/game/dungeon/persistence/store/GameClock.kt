@@ -7,8 +7,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
@@ -26,16 +26,12 @@ class GameClock(
         get() = gameStartYearEpochSeconds + (now.epochSeconds - offset)
 
     val gameTickFlow: Flow<Long>
-        get() = tickScope
-            .observeGameTicks()
-            .receiveAsFlow()
-
-    private fun CoroutineScope.observeGameTicks(): ReceiveChannel<Long> = produce {
-        while (true) {
-            delay(TICK_RATE)
-            send(gameSeconds)
+        get() = flow {
+            while (true) {
+                delay(TICK_RATE)
+                emit(gameSeconds)
+            }
         }
-    }
 
     companion object {
         private const val TICK_RATE: Long = 100L
