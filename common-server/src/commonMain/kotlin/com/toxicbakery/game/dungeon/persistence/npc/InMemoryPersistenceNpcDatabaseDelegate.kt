@@ -35,5 +35,7 @@ internal object InMemoryPersistenceNpcDatabaseDelegate : PersistenceNpcDatabaseD
         .filter { lookable -> distanceFilter.nearby(location, lookable.location) }
         .toList()
 
+    override suspend fun getNpcCount(): Int = idToNpcMapStore.value().size
+
     private object IdToNpcMapStore : BroadcastChannelStore<Map<String, ILookable>>(mapOf())
 }

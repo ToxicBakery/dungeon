@@ -1,6 +1,6 @@
 package com.toxicbakery.game.dungeon.persistence.store
 
-import com.toxicbakery.game.dungeon.tickDispatcher
+import com.toxicbakery.game.dungeon.tickScope
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -8,7 +8,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
@@ -25,9 +25,10 @@ class GameClock(
     val gameSeconds: Long
         get() = gameStartYearEpochSeconds + (now.epochSeconds - offset)
 
-    val gameTickFlow: Flow<Long> = CoroutineScope(tickDispatcher)
-        .observeGameTicks()
-        .consumeAsFlow()
+    val gameTickFlow: Flow<Long>
+        get() = tickScope
+            .observeGameTicks()
+            .receiveAsFlow()
 
     private fun CoroutineScope.observeGameTicks(): ReceiveChannel<Long> = produce {
         while (true) {

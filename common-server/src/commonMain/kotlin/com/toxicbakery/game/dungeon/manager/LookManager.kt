@@ -17,6 +17,7 @@ private class LookManagerImpl(
     private val nearbyManager: NearbyManager,
     private val worldManager: WorldManager,
 ) : LookManager {
+
     override suspend fun look(
         lookable: ILookable,
         direction: Direction?

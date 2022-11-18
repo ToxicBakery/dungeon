@@ -21,6 +21,8 @@ private class NpcDatabaseImpl(
         location: Location,
         distanceFilter: DistanceFilter
     ): List<ILookable> = persistenceDelegate.getNpcsNear(location, distanceFilter)
+
+    override suspend fun getNpcCount(): Int = persistenceDelegate.getNpcCount()
 }
 
 interface NpcDatabase {
@@ -32,6 +34,8 @@ interface NpcDatabase {
     suspend fun createNpc(npc: Npc)
 
     suspend fun getNpcsNear(location: Location, distanceFilter: DistanceFilter): List<ILookable>
+
+    suspend fun getNpcCount(): Int
 }
 
 val npcDatabaseModule = DI.Module("npcDatabaseModule") {

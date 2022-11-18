@@ -8,8 +8,7 @@ import com.toxicbakery.game.dungeon.model.character.Npc
 import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
 import com.toxicbakery.game.dungeon.persistence.store.GameClock
-import com.toxicbakery.game.dungeon.tickDispatcher
-import kotlinx.coroutines.CoroutineScope
+import com.toxicbakery.game.dungeon.tickScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -26,13 +25,13 @@ private class NpcManagerImpl(
     private val npcMachinesManager = NpcMachinesManager(gameClock)
 
     override suspend fun createNpc(npc: Npc) {
-        npcDatabase.createNpc(npc)
         npcMachinesManager.addMachine(
             when (npc) {
                 is Animal -> createAnimalMachine(npc)
                 else -> TODO()
             }
         )
+        npcDatabase.createNpc(npc)
     }
 
     override suspend fun updateNpc(npc: Npc) {
@@ -44,6 +43,8 @@ private class NpcManagerImpl(
         distanceFilter: DistanceFilter
     ): List<ILookable> = npcDatabase.getNpcsNear(location, distanceFilter)
 
+    override suspend fun getNpcCount(): Int = npcDatabase.getNpcCount()
+
     private fun createAnimalMachine(animal: Animal) =
         if (animal.isPassive) passiveAnimalMachineBuilder(animal)
         else TODO()
@@ -53,8 +54,7 @@ private class NpcMachinesManager(
     private val gameClock: GameClock,
 ) {
 
-    private val scope = CoroutineScope(tickDispatcher)
-    private val tickJob = scope.launch {
+    private val tickJob = tickScope.launch {
         gameClock.gameTickFlow
             .collect { tick() }
     }
@@ -64,7 +64,7 @@ private class NpcMachinesManager(
     fun shutdown() = tickJob.cancel()
 
     fun addMachine(machine: TickableMachine<*>) {
-        scope.launch {
+        tickScope.launch {
             machines[machine.instanceId] = machine
         }
     }
@@ -88,6 +88,8 @@ interface NpcManager {
         location: Location,
         distanceFilter: DistanceFilter
     ): List<ILookable>
+
+    suspend fun getNpcCount(): Int
 }
 
 val npcManagerModule = DI.Module("npcManagerModule") {

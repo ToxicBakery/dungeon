@@ -1,15 +1,20 @@
 package com.toxicbakery.game.dungeon
 
+import com.toxicbakery.game.dungeon.defaults.AnimalGenerator
+import com.toxicbakery.game.dungeon.defaults.BaseAnimal
 import com.toxicbakery.game.dungeon.manager.GameSessionManager
 import com.toxicbakery.game.dungeon.manager.NpcManager
-import com.toxicbakery.game.dungeon.model.Lookable.*
-import com.toxicbakery.game.dungeon.model.character.stats.Stats
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.UserMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
-import com.toxicbakery.game.dungeon.model.world.Location
+import com.toxicbakery.game.dungeon.persistence.store.GameClock
 import com.toxicbakery.logging.Arbor
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromHexString
@@ -19,23 +24,25 @@ import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
 
-@OptIn(ExperimentalSerializationApi::class)
+@OptIn(ExperimentalSerializationApi::class, FlowPreview::class)
 private class DungeonServerImpl(
+    private val animalGenerator: AnimalGenerator,
     private val gameSessionManager: GameSessionManager,
+    private val gameClock: GameClock,
     private val npcManager: NpcManager,
 ) : DungeonServer {
 
     init {
-        CoroutineScope(gameProcessingDispatcher).launch {
-            npcManager.createNpc(
-                Animal(
-                    name = "Sheep",
-                    stats = Stats(health = 100),
-                    statsBase = Stats(health = 100),
-                    location = Location(),
-                    isPassive = true,
-                )
-            )
+        tickScope.launch {
+            gameClock.gameTickFlow
+                .filter { npcManager.getNpcCount() < MAX_NPC_COUNT }
+                .map { animalGenerator.create(BaseAnimal.pickNextAnimal()) }
+                .onEach { animal ->
+                    npcManager.createNpc(animal)
+                    println("Animal spawned ${animal.name}")
+                }
+                .catch { e -> println("Failed to spawn animal: ${e.message}") }
+                .launchIn(gameProcessingScope)
         }
     }
 
@@ -53,6 +60,10 @@ private class DungeonServerImpl(
     override suspend fun onNewSession(session: GameSession) = gameSessionManager.sessionCreated(session)
 
     override suspend fun onLostSession(session: GameSession) = gameSessionManager.sessionDestroyed(session)
+
+    companion object {
+        private val MAX_NPC_COUNT = 100
+    }
 }
 
 interface DungeonServer {
@@ -74,6 +85,8 @@ interface DungeonServer {
 val dungeonServerModule = DI.Module("dungeonServerModule") {
     bind<DungeonServer>() with singleton {
         DungeonServerImpl(
+            animalGenerator = instance(),
+            gameClock = instance(),
             gameSessionManager = instance(),
             npcManager = instance(),
         )

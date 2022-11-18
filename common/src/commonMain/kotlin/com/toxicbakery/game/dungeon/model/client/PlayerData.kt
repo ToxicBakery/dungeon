@@ -4,9 +4,11 @@ package com.toxicbakery.game.dungeon.model.client
 
 import com.toxicbakery.game.dungeon.model.character.stats.Stats
 import com.toxicbakery.game.dungeon.model.world.Location
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class PlayerData(
     @ProtoNumber(1)
