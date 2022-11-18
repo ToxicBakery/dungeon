@@ -10,16 +10,12 @@ import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
 import com.toxicbakery.game.dungeon.persistence.store.GameClock
 import com.toxicbakery.game.dungeon.tickScope
 import kotlinx.coroutines.launch
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.factory
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 
 private class NpcManagerImpl(
     private val npcDatabase: NpcDatabase,
     gameClock: GameClock,
-    private val passiveAnimalMachineBuilder: (Animal) -> TickableMachine<*>
+    private val animalMachineBuilder: (Animal) -> TickableMachine<*>,
 ) : NpcManager {
 
     private val npcMachinesManager = NpcMachinesManager(gameClock)
@@ -45,9 +41,7 @@ private class NpcManagerImpl(
 
     override suspend fun getNpcCount(): Int = npcDatabase.getNpcCount()
 
-    private fun createAnimalMachine(animal: Animal) =
-        if (animal.isPassive) passiveAnimalMachineBuilder(animal)
-        else TODO()
+    private fun createAnimalMachine(animal: Animal) = animalMachineBuilder(animal)
 }
 
 private class NpcMachinesManager(
@@ -97,7 +91,7 @@ val npcManagerModule = DI.Module("npcManagerModule") {
         NpcManagerImpl(
             npcDatabase = instance(),
             gameClock = instance(),
-            passiveAnimalMachineBuilder = factory()
+            animalMachineBuilder = factory(),
         )
     }
 }

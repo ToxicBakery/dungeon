@@ -10,11 +10,13 @@ import com.toxicbakery.game.dungeon.model.Lookable.Animal
 import com.toxicbakery.game.dungeon.model.world.LookLocation
 import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
 import com.toxicbakery.game.dungeon.util.DiceRoll
-import kotlin.jvm.JvmStatic
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.factory
 import org.kodein.di.instance
+import kotlin.jvm.JvmStatic
+
+interface PassiveAnimalMachine : TickableMachine<AIState>
 
 private data class PassiveAnimalMachineImpl(
     private val diceRoll: DiceRoll,
@@ -23,7 +25,7 @@ private data class PassiveAnimalMachineImpl(
     private val playerManager: PlayerManager,
     private val lookManager: LookManager,
     private val communicationManager: CommunicationManager,
-) : TickableMachine<AIState> {
+) : PassiveAnimalMachine {
 
     override val name: String = "PassiveAnimalMachine (${state.subject.name})"
     override val currentState: AIState = state.aiState
@@ -125,7 +127,7 @@ private data class PassiveAiState(
 )
 
 val passiveAnimalMachineModule = DI.Module("passiveAnimalMachineModule") {
-    bind<TickableMachine<*>>() with factory { animal: Animal ->
+    bind<PassiveAnimalMachine>() with factory { animal: Animal ->
         PassiveAnimalMachineImpl(
             diceRoll = instance(),
             state = PassiveAiState(

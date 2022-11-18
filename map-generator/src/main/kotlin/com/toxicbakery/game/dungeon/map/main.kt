@@ -1,7 +1,6 @@
 package com.toxicbakery.game.dungeon.map
 
 import com.toxicbakery.game.dungeon.map.BuildConfig.MAP_SIZE
-import com.toxicbakery.game.dungeon.map.BuildConfig.REGION_SIZE
 import com.toxicbakery.game.dungeon.map.preview.BmpMapPreviewer
 import com.toxicbakery.game.dungeon.map.preview.HtmlMapPreviewer
 import kotlin.time.ExperimentalTime
@@ -22,7 +21,6 @@ fun main() {
     mapGenerator.generateMap(
         mapConfig = MapGenerator.MapConfig(
             mapSize = MAP_SIZE,
-            regionSize = REGION_SIZE
         ),
         previewers = listOf(
             BmpMapPreviewer(),

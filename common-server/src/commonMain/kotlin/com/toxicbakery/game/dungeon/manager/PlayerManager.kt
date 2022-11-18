@@ -30,8 +30,7 @@ private class PlayerManagerImpl(
         }
 
     override suspend fun updatePlayer(
-        player: Player,
-        gameSession: GameSession
+        player: Player
     ) = coroutineScope {
         playerDatabase.updatePlayer(player)
         dungeonStateStore.modify { dungeonState -> dungeonState.updatePlayer(player) }
@@ -53,8 +52,7 @@ interface PlayerManager {
     ): Player
 
     suspend fun updatePlayer(
-        player: Player,
-        gameSession: GameSession
+        player: Player
     )
 
     suspend fun getPlayersNear(

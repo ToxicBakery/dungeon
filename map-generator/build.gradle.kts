@@ -9,10 +9,15 @@ application {
     mainClass.set("com.toxicbakery.game.dungeon.map.MainKt")
 }
 
+val mapSize: String
+    get() {
+        return if (project.hasProperty("mapSize")) project.property("mapSize").toString()
+        else "128"
+    }
+
 buildConfig {
     packageName("com.toxicbakery.game.dungeon.map")
-    buildConfigField("int", "MAP_SIZE", "32")
-    buildConfigField("int", "REGION_SIZE", "4")
+    buildConfigField("int", "MAP_SIZE", mapSize)
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
