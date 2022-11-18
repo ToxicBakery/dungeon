@@ -1,7 +1,7 @@
 package com.toxicbakery.game.dungeon.persistence.store
 
 import com.toxicbakery.game.dungeon.machine.Machine
-import com.toxicbakery.game.dungeon.storeDispatcher
+import com.toxicbakery.game.dungeon.storeScope
 import com.toxicbakery.logging.Arbor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +23,7 @@ abstract class BroadcastChannelStore<T>(initialValue: T) : ChannelStore<T> {
         // Ignore the noOp store instance
         if (this === noOpStore) return
 
-        withContext(storeDispatcher) {
+        withContext(storeScope.coroutineContext) {
             Arbor.d("Updating store %s", this@BroadcastChannelStore::class.simpleName)
             set(func(_state.value))
         }

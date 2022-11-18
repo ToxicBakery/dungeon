@@ -16,7 +16,9 @@ data class Stats(
     @ProtoNumber(4)
     val defence: Int = 0,
     @ProtoNumber(5)
-    val luck: Int = 0
+    val luck: Int = 0,
+    @ProtoNumber(6)
+    val stamina: Int = 0,
 ) {
 
     operator fun plus(other: Stats): Stats =
@@ -25,6 +27,7 @@ data class Stats(
             strength = strength + other.strength,
             dexterity = dexterity + other.dexterity,
             defence = defence + other.defence,
-            luck = luck + other.luck
+            luck = luck + other.luck,
+            stamina = stamina + other.stamina,
         )
 }

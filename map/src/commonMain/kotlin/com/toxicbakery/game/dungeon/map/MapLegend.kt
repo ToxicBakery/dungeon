@@ -5,39 +5,40 @@ package com.toxicbakery.game.dungeon.map
 enum class MapLegend(
     val byteRepresentation: Byte,
     val ascii: String,
+    val type: MapLegendType,
 ) {
     // Undefined space such as in initial map allocation
     // This also default to empty for space a character can not see
-    NULL(0x00, "    "),
+    NULL(0x00, "    ", MapLegendType.NULL),
 
     // Characters
-    PLAYER(0x01, "<oo>"),
-    NPC(0x02, "<**>"),
+    PLAYER(0x01, "<oo>", MapLegendType.LIVING),
+    NPC(0x02, "<**>", MapLegendType.LIVING),
 
     // Terrain
-    FOREST_1(0x10, ".^.."),
-    FOREST_2(0x11, ".^.^"),
-    FOREST_3(0x12, ".^^^"),
-    FOREST_4(0x13, "^^^^"),
-    OCEAN(0x14, "~~~~"),
-    RIVER(0x15, "~~~~"),
-    DESERT(0x16, "...."),
-    PLAIN(0x17, "...."),
-    BEACH(0x18, "...."),
-    LAKE(0x19, "...."),
-    MOUNTAIN(0x1C, """/\/\"""),
+    FOREST_1(0x10, ".^..", MapLegendType.LAND),
+    FOREST_2(0x11, ".^.^", MapLegendType.LAND),
+    FOREST_3(0x12, ".^^^", MapLegendType.LAND),
+    FOREST_4(0x13, "^^^^", MapLegendType.LAND),
+    OCEAN(0x14, "~~~~", MapLegendType.WATER),
+    RIVER(0x15, "~~~~", MapLegendType.WATER),
+    DESERT(0x16, "....", MapLegendType.LAND),
+    PLAIN(0x17, "....", MapLegendType.LAND),
+    BEACH(0x18, "....", MapLegendType.LAND),
+    LAKE(0x19, "....", MapLegendType.WATER),
+    MOUNTAIN(0x1C, """/\/\""", MapLegendType.LAND),
 
     // Animals
-    ANIMAL_AGGRESSIVE(0x50, ".><."),
-    ANIMAL_PASSIVE(0x51, ".<>."),
+    ANIMAL_AGGRESSIVE(0x50, ".><.", MapLegendType.LIVING),
+    ANIMAL_PASSIVE(0x51, ".<>.", MapLegendType.LIVING),
 
     // Creatures
-    CREATURE(0x60, ">&&<"),
+    CREATURE(0x60, ">&&<", MapLegendType.LIVING),
 
     /**
      * A displayable lacking correlation to a [MapLegend].
      */
-    WTF(0xFF.toByte(), "!!!!");
+    WTF(0xFF.toByte(), "!!!!", MapLegendType.NULL);
 
     val htmlRepresentation: String
         get() = "<span class=\"_${byteRepresentation}\">$htmlSafeAscii</span>"

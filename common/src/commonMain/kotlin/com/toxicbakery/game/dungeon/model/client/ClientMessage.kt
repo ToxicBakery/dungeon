@@ -2,6 +2,7 @@ package com.toxicbakery.game.dungeon.model.client
 
 import com.toxicbakery.game.dungeon.map.model.Window
 import com.toxicbakery.game.dungeon.model.world.LookLocation
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -14,6 +15,7 @@ sealed class ClientMessage {
     /**
      * Message sent by the user.
      */
+    @OptIn(ExperimentalSerializationApi::class)
     @Serializable
     data class UserMessage(
         @ProtoNumber(1)
