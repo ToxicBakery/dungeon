@@ -1,14 +1,11 @@
 package com.toxicbakery.game.dungeon.machine.ai
 
 import com.toxicbakery.game.dungeon.machine.TickableMachine
-import com.toxicbakery.game.dungeon.manager.CommunicationManager
-import com.toxicbakery.game.dungeon.manager.LookManager
-import com.toxicbakery.game.dungeon.manager.PlayerManager
+import com.toxicbakery.game.dungeon.manager.*
 import com.toxicbakery.game.dungeon.map.MapLegend
 import com.toxicbakery.game.dungeon.map.model.Direction
 import com.toxicbakery.game.dungeon.model.Lookable.Animal
 import com.toxicbakery.game.dungeon.model.world.LookLocation
-import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
 import com.toxicbakery.game.dungeon.util.DiceRoll
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -21,7 +18,6 @@ interface PassiveAnimalMachine : TickableMachine<AIState>
 private data class PassiveAnimalMachineImpl(
     private val diceRoll: DiceRoll,
     private val state: PassiveAiState,
-    private val npcDatabase: NpcDatabase,
     private val playerManager: PlayerManager,
     private val lookManager: LookManager,
     private val communicationManager: CommunicationManager,
@@ -71,7 +67,7 @@ private data class PassiveAnimalMachineImpl(
                         location = walkTarget.location
                     )
                 )
-                npcDatabase.updateNpc(updatedState.subject)
+                state.npcManager.updateNpc(updatedState.subject)
 
                 communicationManager.notifyPlayersAtLocation(
                     message = "${state.subject.name} departs to the ${randomDirection.name.lowercase()}",
@@ -123,17 +119,18 @@ private data class PassiveAnimalMachineImpl(
 
 private data class PassiveAiState(
     val aiState: AIState = AIState.WANDERING,
-    val subject: Animal
+    val subject: Animal,
+    val npcManager: NpcManager,
 )
 
 val passiveAnimalMachineModule = DI.Module("passiveAnimalMachineModule") {
-    bind<PassiveAnimalMachine>() with factory { animal: Animal ->
+    bind<PassiveAnimalMachine>() with factory { animalInit: AnimalInit ->
         PassiveAnimalMachineImpl(
             diceRoll = instance(),
             state = PassiveAiState(
-                subject = animal
+                subject = animalInit.animal,
+                npcManager = animalInit.npcManager,
             ),
-            npcDatabase = instance(),
             lookManager = instance(),
             playerManager = instance(),
             communicationManager = instance(),

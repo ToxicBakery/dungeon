@@ -7,10 +7,7 @@ import com.toxicbakery.game.dungeon.model.ILookable
 import com.toxicbakery.game.dungeon.model.Lookable
 import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.model.world.LookLocation
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 
 private class LookManagerImpl(
     private val mapManager: MapManager,
@@ -68,7 +65,7 @@ interface LookManager {
 }
 
 val lookManagerModule = DI.Module("lookManagerModule") {
-    bind<LookManager>() with singleton {
+    bind<LookManager>() with provider {
         LookManagerImpl(
             mapManager = instance(),
             nearbyManager = instance(),

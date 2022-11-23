@@ -2,16 +2,13 @@ package com.toxicbakery.game.dungeon.machine.ai
 
 import com.toxicbakery.game.dungeon.defaults.BaseAnimal.Wolf
 import com.toxicbakery.game.dungeon.machine.TickableMachine
-import com.toxicbakery.game.dungeon.manager.CommunicationManager
-import com.toxicbakery.game.dungeon.manager.LookManager
-import com.toxicbakery.game.dungeon.manager.PlayerManager
+import com.toxicbakery.game.dungeon.manager.*
 import com.toxicbakery.game.dungeon.map.MapLegend
 import com.toxicbakery.game.dungeon.map.model.Direction
 import com.toxicbakery.game.dungeon.model.Lookable.Animal
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.character.stats.Stats
 import com.toxicbakery.game.dungeon.model.world.LookLocation
-import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
 import com.toxicbakery.game.dungeon.util.DiceRoll
 import com.toxicbakery.game.dungeon.util.getRandom
 import org.kodein.di.DI
@@ -25,7 +22,6 @@ interface AggressiveAnimalMachine : TickableMachine<AIState>
 private data class AggressiveAnimalMachineImpl(
     private val diceRoll: DiceRoll,
     private val state: AggressiveAiState,
-    private val npcDatabase: NpcDatabase,
     private val playerManager: PlayerManager,
     private val lookManager: LookManager,
     private val communicationManager: CommunicationManager,
@@ -81,7 +77,7 @@ private data class AggressiveAnimalMachineImpl(
                     location = walkTarget.location
                 )
             )
-            npcDatabase.updateNpc(updatedState.subject)
+            state.npcManager.updateNpc(updatedState.subject)
 
             communicationManager.notifyPlayersAtLocation(
                 message = "${state.subject.name} departs to the ${randomDirection.name.lowercase()}",
@@ -112,7 +108,7 @@ private data class AggressiveAnimalMachineImpl(
                 val attack = Stats(health = -10)
                 if (target is Player) attackPlayer(subject, target, attack)
                 else if (target is Animal) {
-                    npcDatabase.updateNpc(
+                    state.npcManager.updateNpc(
                         target.copy(
                             stats = target.stats + attack
                         )
@@ -142,15 +138,11 @@ private data class AggressiveAnimalMachineImpl(
         attack: Stats,
     ) {
         // TODO notify subject state machine of attack
-        npcDatabase.updateNpc(
+        state.npcManager.updateNpc(
             target.copy(
                 stats = target.stats + attack
             )
         )
-
-        if (subject.isDead) {
-
-        }
     }
 
     private fun tickDie(): TickableMachine<AIState> {
@@ -189,17 +181,18 @@ private data class AggressiveAnimalMachineImpl(
 
 private data class AggressiveAiState(
     val aiState: AIState = AIState.WANDERING,
-    val subject: Animal
+    val subject: Animal,
+    val npcManager: NpcManager,
 )
 
 val aggressiveAnimalMachineModule = DI.Module("aggressiveAnimalMachineModule") {
-    bind<AggressiveAnimalMachine>() with factory { animal: Animal ->
+    bind<AggressiveAnimalMachine>() with factory { animalInit: AnimalInit ->
         AggressiveAnimalMachineImpl(
             diceRoll = instance(),
             state = AggressiveAiState(
-                subject = animal
+                subject = animalInit.animal,
+                npcManager = animalInit.npcManager,
             ),
-            npcDatabase = instance(),
             lookManager = instance(),
             playerManager = instance(),
             communicationManager = instance(),

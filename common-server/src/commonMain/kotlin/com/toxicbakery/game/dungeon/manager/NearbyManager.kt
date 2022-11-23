@@ -4,16 +4,12 @@ import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.map.MapManager
 import com.toxicbakery.game.dungeon.model.ILookable
 import com.toxicbakery.game.dungeon.model.world.Location
-import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
 import com.toxicbakery.game.dungeon.persistence.player.PlayerDatabase
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 
 private class NearbyManagerImpl(
     private val mapManager: MapManager,
-    private val npcDatabase: NpcDatabase,
+    private val npcManager: NpcManager,
     private val playerDatabase: PlayerDatabase,
 ) : NearbyManager {
 
@@ -34,7 +30,7 @@ private class NearbyManagerImpl(
     private suspend fun getNearbyNpcs(
         location: Location,
         distance: Int,
-    ): List<ILookable> = npcDatabase.getNpcsNear(
+    ): List<ILookable> = npcManager.getNpcsNear(
         location = location,
         distanceFilter = DistanceFilter(mapSize, distance)
     )
@@ -68,10 +64,10 @@ interface NearbyManager {
 }
 
 val nearbyManagerModule = DI.Module("nearbyManagerModule") {
-    bind<NearbyManager>() with singleton {
+    bind<NearbyManager>() with provider {
         NearbyManagerImpl(
             mapManager = instance(),
-            npcDatabase = instance(),
+            npcManager = instance(),
             playerDatabase = instance(),
         )
     }
