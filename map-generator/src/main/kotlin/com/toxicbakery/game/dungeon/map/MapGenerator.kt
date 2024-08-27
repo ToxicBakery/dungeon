@@ -54,8 +54,8 @@ private class MapGeneratorImpl(
                 return
             }
 
-            if (!mapConfig.mapSize.isPositivePowerOfTwo() || !mapConfig.regionSize.isPositivePowerOfTwo()) {
-                error("Map and Region sizes must be positive powers of 2")
+            if (!mapConfig.mapSize.isPositivePowerOfTwo()) {
+                error("Map sizes must be positive powers of 2")
             }
         } catch (_: DimensionNotSetException) {
             // No map previously generated, starting with clean database.
@@ -107,7 +107,6 @@ interface MapGenerator {
 
     data class MapConfig(
         val mapSize: Int,
-        val regionSize: Int
     )
 }
 

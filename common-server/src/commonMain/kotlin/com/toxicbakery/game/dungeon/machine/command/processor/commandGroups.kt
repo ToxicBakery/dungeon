@@ -40,5 +40,15 @@ val commandGroupsModule = DI.Module("commandGroupsModule") {
                 )
             }
         }
+        add {
+            singleton {
+                CommandGroupRef(
+                    name = "Admin",
+                    commands = listOf(
+                        instance(ProcessorSpawn.COMMAND),
+                    )
+                )
+            }
+        }
     }
 }

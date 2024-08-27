@@ -1,6 +1,8 @@
 package com.toxicbakery.game.dungeon.manager
 
 import com.toxicbakery.game.dungeon.machine.TickableMachine
+import com.toxicbakery.game.dungeon.machine.ai.AggressiveAnimalMachine
+import com.toxicbakery.game.dungeon.machine.ai.PassiveAnimalMachine
 import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.model.ILookable
 import com.toxicbakery.game.dungeon.model.Lookable.Animal
@@ -19,7 +21,8 @@ import org.kodein.di.singleton
 private class NpcManagerImpl(
     private val npcDatabase: NpcDatabase,
     gameClock: GameClock,
-    private val passiveAnimalMachineBuilder: (Animal) -> TickableMachine<*>
+    private val aggressiveAnimalMachineBuilder: (AnimalInit) -> AggressiveAnimalMachine,
+    private val passiveAnimalMachineBuilder: (AnimalInit) -> PassiveAnimalMachine,
 ) : NpcManager {
 
     private val npcMachinesManager = NpcMachinesManager(gameClock)
@@ -27,7 +30,10 @@ private class NpcManagerImpl(
     override suspend fun createNpc(npc: Npc) {
         npcMachinesManager.addMachine(
             when (npc) {
-                is Animal -> createAnimalMachine(npc)
+                is Animal ->
+                    if (npc.isPassive) createPassiveAnimalMachine(npc)
+                    else createAggressiveAnimalMachine(npc)
+
                 else -> TODO()
             }
         )
@@ -45,10 +51,25 @@ private class NpcManagerImpl(
 
     override suspend fun getNpcCount(): Int = npcDatabase.getNpcCount()
 
-    private fun createAnimalMachine(animal: Animal) =
-        if (animal.isPassive) passiveAnimalMachineBuilder(animal)
-        else TODO()
+    private fun createAggressiveAnimalMachine(animal: Animal) = aggressiveAnimalMachineBuilder(
+        AnimalInit(
+            npcManager = this,
+            animal = animal,
+        )
+    )
+
+    private fun createPassiveAnimalMachine(animal: Animal) = passiveAnimalMachineBuilder(
+        AnimalInit(
+            npcManager = this,
+            animal = animal,
+        )
+    )
 }
+
+data class AnimalInit(
+    val npcManager: NpcManager,
+    val animal: Animal,
+)
 
 private class NpcMachinesManager(
     private val gameClock: GameClock,
@@ -97,7 +118,8 @@ val npcManagerModule = DI.Module("npcManagerModule") {
         NpcManagerImpl(
             npcDatabase = instance(),
             gameClock = instance(),
-            passiveAnimalMachineBuilder = factory()
+            aggressiveAnimalMachineBuilder = factory(),
+            passiveAnimalMachineBuilder = factory(),
         )
     }
 }

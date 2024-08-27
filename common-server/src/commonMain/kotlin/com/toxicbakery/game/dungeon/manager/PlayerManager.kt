@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.first
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
-import org.kodein.di.provider
+import org.kodein.di.singleton
 
 private class PlayerManagerImpl(
     private val dungeonStateStore: DungeonStateStore,
@@ -22,6 +22,7 @@ private class PlayerManagerImpl(
     override suspend fun getPlayerByGameSession(
         gameSession: GameSession
     ): Player = dungeonStateStore
+        // TODO Can this just be `.value()` ?
         .observe()
         .first()
         .let { dungeonState ->
@@ -30,8 +31,7 @@ private class PlayerManagerImpl(
         }
 
     override suspend fun updatePlayer(
-        player: Player,
-        gameSession: GameSession
+        player: Player
     ) = coroutineScope {
         playerDatabase.updatePlayer(player)
         dungeonStateStore.modify { dungeonState -> dungeonState.updatePlayer(player) }
@@ -40,7 +40,8 @@ private class PlayerManagerImpl(
     override suspend fun getPlayersNear(
         location: Location,
         distanceFilter: DistanceFilter
-    ): List<Player> = playerDatabase.getPlayersNear(location, distanceFilter)
+    ): List<Player> = playerDatabase.players()
+        .filter { player -> distanceFilter.nearby(location, player.location) }
 
     override suspend fun getPlayersAt(location: Location): List<Player> =
         dungeonStateStore.value().getPlayersAt(location).map(PlayerSession::player)
@@ -53,8 +54,7 @@ interface PlayerManager {
     ): Player
 
     suspend fun updatePlayer(
-        player: Player,
-        gameSession: GameSession
+        player: Player
     )
 
     suspend fun getPlayersNear(
@@ -68,7 +68,7 @@ interface PlayerManager {
 }
 
 val playerManagerModule = DI.Module("playerManagerModule") {
-    bind<PlayerManager>() with provider {
+    bind<PlayerManager>() with singleton {
         PlayerManagerImpl(
             dungeonStateStore = instance(),
             playerDatabase = instance(),

@@ -9,13 +9,13 @@ import kotlinx.serialization.protobuf.ProtoNumber
 /**
  * Message base type. Client messages represent data transfers between the client and server.
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 sealed class ClientMessage {
 
     /**
      * Message sent by the user.
      */
-    @OptIn(ExperimentalSerializationApi::class)
     @Serializable
     data class UserMessage(
         @ProtoNumber(1)

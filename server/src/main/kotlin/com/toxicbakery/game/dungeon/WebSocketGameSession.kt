@@ -1,6 +1,5 @@
 package com.toxicbakery.game.dungeon
 
-import com.benasher44.uuid.uuid4
 import com.toxicbakery.game.dungeon.model.client.ClientMessage
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.ServerMessage
 import com.toxicbakery.game.dungeon.model.client.ExpectedResponseType
@@ -8,11 +7,15 @@ import com.toxicbakery.game.dungeon.model.session.GameSession
 import io.ktor.server.websocket.WebSocketServerSession
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class, ExperimentalSerializationApi::class)
 data class WebSocketGameSession(
-    override val sessionId: String = uuid4().toString(),
+    override val sessionId: String = Uuid.random().toString(),
     private val webSocketServerSession: WebSocketServerSession
 ) : GameSession {
 

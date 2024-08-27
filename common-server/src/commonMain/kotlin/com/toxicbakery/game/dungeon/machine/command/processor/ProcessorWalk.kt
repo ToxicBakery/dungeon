@@ -49,7 +49,6 @@ private class ProcessorWalkImpl(
 
             playerManager.updatePlayer(
                 player.copy(location = lookLocation.location),
-                gameSession
             )
 
             communicationManager.notifyPlayersAtLocation(

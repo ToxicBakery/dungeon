@@ -1,6 +1,7 @@
 plugins {
-    kotlin("multiplatform") version "1.7.10" apply false
-    kotlin("plugin.serialization") version "1.7.10" apply false
+    kotlin("multiplatform") version libs.versions.kotlin.asProvider() apply false
+    kotlin("plugin.serialization") version libs.versions.kotlin.asProvider() apply false
+    alias(libs.plugins.detekt) apply false
 }
 
 allprojects {

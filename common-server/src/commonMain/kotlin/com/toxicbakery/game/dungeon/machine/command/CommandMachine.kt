@@ -4,6 +4,8 @@ import com.toxicbakery.game.dungeon.exception.UnknownCommandException
 import com.toxicbakery.game.dungeon.machine.Machine
 import com.toxicbakery.game.dungeon.machine.ProcessorMachine
 import com.toxicbakery.game.dungeon.manager.PlayerDataManager
+import com.toxicbakery.game.dungeon.manager.PlayerManager
+import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.client.ClientMessage.PlayerDataMessage
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import org.kodein.di.DI
@@ -14,6 +16,7 @@ import org.kodein.di.singleton
 private data class CommandMachineImpl(
     private val commandMap: CommandMap,
     private val playerDataManager: PlayerDataManager,
+    private val playerManager: PlayerManager,
     override val currentState: CommandState = CommandState.Init
 ) : CommandMachine {
 
@@ -28,8 +31,9 @@ private data class CommandMachineImpl(
         gameSession: GameSession,
         message: String
     ): ProcessorMachine<*> {
+        val player = playerManager.getPlayerByGameSession(gameSession)
         when (message) {
-            COMMAND_HELP -> gameSession.helpCommand()
+            COMMAND_HELP -> gameSession.helpCommand(player)
             else -> gameSession.handleSubCommand(message)
         }
         return this
@@ -54,8 +58,8 @@ private data class CommandMachineImpl(
         sendClientMessage(PlayerDataMessage(playerData))
     }
 
-    private suspend fun GameSession.helpCommand() {
-        sendMessage(commandMap.helpMessage)
+    private suspend fun GameSession.helpCommand(player: Player) {
+        sendMessage(commandMap.helpMessage(player))
         initCommand()
     }
 
@@ -73,7 +77,8 @@ val commandMachineModule = DI.Module("") {
     bind<CommandMachine>() with singleton {
         CommandMachineImpl(
             commandMap = instance(),
-            playerDataManager = instance()
+            playerDataManager = instance(),
+            playerManager = instance()
         )
     }
 }

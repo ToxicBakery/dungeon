@@ -15,6 +15,8 @@ interface Character : Identifiable, Displayable, Named, Locatable, Living {
      */
     override val name: String
 
+    val isAdmin: Boolean
+
     /**
      * Equipment worn or held by the character.
      */

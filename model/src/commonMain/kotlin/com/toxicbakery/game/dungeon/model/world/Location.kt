@@ -4,6 +4,7 @@ package com.toxicbakery.game.dungeon.model.world
 
 import com.toxicbakery.game.dungeon.model.world.Distance.Companion.wrappedDistanceLine
 import kotlin.math.sqrt
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -13,6 +14,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
  * @param y coordinate of the player in the world
  * @param worldId identifier of what world the player is currently located
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class Location(
     @ProtoNumber(1)

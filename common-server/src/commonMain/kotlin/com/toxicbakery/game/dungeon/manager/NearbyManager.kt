@@ -1,21 +1,23 @@
 package com.toxicbakery.game.dungeon.manager
 
+import com.toxicbakery.game.dungeon.commonApplicationKodein
 import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.map.MapManager
 import com.toxicbakery.game.dungeon.model.ILookable
 import com.toxicbakery.game.dungeon.model.world.Location
-import com.toxicbakery.game.dungeon.persistence.npc.NpcDatabase
-import com.toxicbakery.game.dungeon.persistence.player.PlayerDatabase
 import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.bind
 import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.provider
 
 private class NearbyManagerImpl(
-    private val mapManager: MapManager,
-    private val npcDatabase: NpcDatabase,
-    private val playerDatabase: PlayerDatabase,
-) : NearbyManager {
+    override val di: DI = commonApplicationKodein
+) : NearbyManager, DIAware {
+
+    private val mapManager: MapManager by di.instance()
+    private val npcManager: NpcManager by di.instance()
+    private val playerManager: PlayerManager by di.instance()
 
     private val mapSize: Int
         get() = mapManager.mapSize()
@@ -34,7 +36,7 @@ private class NearbyManagerImpl(
     private suspend fun getNearbyNpcs(
         location: Location,
         distance: Int,
-    ): List<ILookable> = npcDatabase.getNpcsNear(
+    ): List<ILookable> = npcManager.getNpcsNear(
         location = location,
         distanceFilter = DistanceFilter(mapSize, distance)
     )
@@ -46,7 +48,7 @@ private class NearbyManagerImpl(
     private suspend fun getNearbyPlayers(
         location: Location,
         distance: Int,
-    ): List<ILookable> = playerDatabase.getPlayersNear(
+    ): List<ILookable> = playerManager.getPlayersNear(
         location = location,
         distanceFilter = DistanceFilter(mapSize, distance)
     )
@@ -68,11 +70,5 @@ interface NearbyManager {
 }
 
 val nearbyManagerModule = DI.Module("nearbyManagerModule") {
-    bind<NearbyManager>() with singleton {
-        NearbyManagerImpl(
-            mapManager = instance(),
-            npcDatabase = instance(),
-            playerDatabase = instance(),
-        )
-    }
+    bind<NearbyManager>() with provider { NearbyManagerImpl() }
 }
