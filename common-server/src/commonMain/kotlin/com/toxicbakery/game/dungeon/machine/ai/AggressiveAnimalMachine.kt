@@ -5,6 +5,7 @@ import com.toxicbakery.game.dungeon.machine.TickableMachine
 import com.toxicbakery.game.dungeon.manager.*
 import com.toxicbakery.game.dungeon.map.MapLegend
 import com.toxicbakery.game.dungeon.map.model.Direction
+import com.toxicbakery.game.dungeon.model.Lookable
 import com.toxicbakery.game.dungeon.model.Lookable.Animal
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.character.stats.Stats
@@ -80,11 +81,11 @@ private data class AggressiveAnimalMachineImpl(
             state.npcManager.updateNpc(updatedState.subject)
 
             communicationManager.notifyPlayersAtLocation(
-                message = "${state.subject.name} departs to the ${randomDirection.name.lowercase()}",
+                message = "A ${state.subject.name} departs to the ${randomDirection.name.lowercase()}",
                 location = state.subject.location,
             )
             communicationManager.notifyPlayersAtLocation(
-                message = "${state.subject.name} arrives from ${randomDirection.sourceDirection.name.lowercase()}",
+                message = "A ${state.subject.name} arrives from ${randomDirection.sourceDirection.name.lowercase()}",
                 location = walkTarget.location,
             )
             return copy(state = updatedState)
@@ -100,36 +101,63 @@ private data class AggressiveAnimalMachineImpl(
             direction = null,
         )
 
-        here.lookables
-            .filter { it !is Animal || it.name != Wolf.displayName }
-            .getRandom()
-            ?.let { target ->
-                // Attack and switch to fight
-                val attack = Stats(health = -10)
-                if (target is Player) attackPlayer(subject, target, attack)
-                else if (target is Animal) {
+        suspend fun performAttack(target: Lookable): TickableMachine<AIState> {
+            // Attack and switch to fight
+            val attack = Stats(health = -10) // TODO attack based on stats
+            return when (target) {
+                is Player -> attackPlayer(subject, target, attack)
+                is Animal -> {
                     state.npcManager.updateNpc(
                         target.copy(
                             stats = target.stats + attack
                         )
                     )
+                    this
                 }
-            }
 
-        return this
+                else -> this
+            }
+        }
+
+        return state.target
+            ?.let { target -> performAttack(target) }
+            ?: here.lookables
+                .filter { it !is Animal || it.name != Wolf.displayName }
+                .getRandom()
+                ?.let { target ->
+                    performAttack(target)
+
+                    // Lock onto target
+                    copy(
+                        state = state.copy(
+                            target = target,
+                        ),
+                    )
+                }
+            ?: this
     }
 
     private suspend fun attackPlayer(
         subject: Animal,
         target: Player,
         attack: Stats,
-    ) {
+    ): TickableMachine<AIState> {
         communicationManager.notify(target, "The ${subject.name} lunges at you")
         playerManager.updatePlayer(
             target.copy(
                 stats = target.stats + attack
             )
         )
+
+        return if (target.isDead) {
+            communicationManager.serverMessage("${target.name} has been vanquished by a ${subject.name}.", target)
+
+            copy(
+                state = state.copy(
+                    target = null
+                )
+            )
+        } else this
     }
 
     private suspend fun attackAnimal(
@@ -183,6 +211,7 @@ private data class AggressiveAiState(
     val aiState: AIState = AIState.WANDERING,
     val subject: Animal,
     val npcManager: NpcManager,
+    val target: Lookable? = null,
 )
 
 val aggressiveAnimalMachineModule = DI.Module("aggressiveAnimalMachineModule") {

@@ -4,11 +4,9 @@ import com.toxicbakery.game.dungeon.exception.AlreadyRegisteredException
 import com.toxicbakery.game.dungeon.exception.AuthenticationException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithIdException
 import com.toxicbakery.game.dungeon.exception.NoPlayerWithUsernameException
-import com.toxicbakery.game.dungeon.map.DistanceFilter
 import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.auth.Credentials
 import com.toxicbakery.game.dungeon.model.auth.PlayerWithCredentials
-import com.toxicbakery.game.dungeon.model.world.Location
 import com.toxicbakery.game.dungeon.persistence.store.BroadcastChannelStore
 import com.toxicbakery.game.dungeon.persistence.store.ChannelStore
 
@@ -16,6 +14,8 @@ import com.toxicbakery.game.dungeon.persistence.store.ChannelStore
 internal object InMemoryPersistencePlayerDatabaseDelegate : PersistencePlayerDatabaseDelegate {
 
     private val playerMapStore: ChannelStore<Map<String, PlayerWithCredentials>> = PlayerMapStore
+
+    override suspend fun players(): List<Player> = playerMapStore.value().values.map(PlayerWithCredentials::player)
 
     private fun Map<String, PlayerWithCredentials>.getPlayerWithUsername(username: String): Player =
         values.first { playerWithCredentials ->
@@ -57,15 +57,6 @@ internal object InMemoryPersistencePlayerDatabaseDelegate : PersistencePlayerDat
 
     override suspend fun getPlayerById(id: String): Player =
         playerMapStore.value()[id]?.player ?: throw NoPlayerWithIdException(id)
-
-    // TODO Create a distance based filter
-    override suspend fun getPlayersNear(
-        location: Location,
-        distanceFilter: DistanceFilter
-    ): List<Player> = playerMapStore.value()
-        .values
-        .map(PlayerWithCredentials::player)
-        .filter { player -> distanceFilter.nearby(location, player.location) }
 
     private object PlayerMapStore : BroadcastChannelStore<Map<String, PlayerWithCredentials>>(mapOf())
 }

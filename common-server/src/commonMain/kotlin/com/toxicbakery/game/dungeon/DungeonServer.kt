@@ -34,7 +34,7 @@ private class DungeonServerImpl(
             .onEach {
                 val animal = animalGenerator.create(BaseAnimal.pickNextAnimal())
                 npcManager.createNpc(animal)
-                println("Animal spawned ${animal.name}")
+                println("Animal spawned ${animal.name} at ${animal.location}")
             }
             .catch { e ->
                 println("Failed to spawn animal: ${e.message}")
@@ -64,7 +64,7 @@ private class DungeonServerImpl(
     override suspend fun onLostSession(session: GameSession) = gameSessionManager.sessionDestroyed(session)
 
     companion object {
-        private val MAX_NPC_COUNT = 100
+        private const val MAX_NPC_COUNT = 100
     }
 }
 

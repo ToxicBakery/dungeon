@@ -63,6 +63,8 @@ sealed class Lookable : ILookable {
         override val canBeKilled: Boolean = false,
         @ProtoNumber(7)
         override val isPassive: Boolean,
+        @ProtoNumber(8)
+        override val isAdmin: Boolean = false,
     ) : Lookable(), Character, Npc
 
     @Serializable
@@ -78,7 +80,10 @@ sealed class Lookable : ILookable {
         @ProtoNumber(5)
         val global: Global = Global(),
         @ProtoNumber(6)
-        override val location: Location = Location()
+        override val location: Location = Location(),
+        @ProtoNumber(7)
+        // FIXME Implement admin system
+        override val isAdmin: Boolean = true,
     ) : Lookable(), Character {
 
         /**

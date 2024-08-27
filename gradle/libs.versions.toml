@@ -1,0 +1,49 @@
+[versions]
+kotlin = "2.0.20"
+arbor = "1.40.86"
+build-config = "3.0.3"
+detekt = "1.23.6"
+logback-classic = "1.4.4"
+kotlin-serialization = "1.4.1"
+kotlin-coroutines = "1.6.4"
+kotlin-date-time = "0.4.0"
+kotlin-html = "0.7.2"
+kodein = "7.16.0"
+ktor = "2.1.3"
+mapdb = "3.0.8"
+noise-generator = "1.0.10"
+
+[libraries]
+arbor = { module = "com.ToxicBakery.logging:arbor", version.ref = "arbor" }
+arbor-jvm = { module = "com.ToxicBakery.logging:arbor-jvm", version.ref = "arbor" }
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+noise-generator = { module = "com.ToxicBakery.library.noise:generator-jvm", version.ref = "noise-generator" }
+kodein = { module = "org.kodein.di:kodein-di", version.ref = "kodein" }
+kodein-jvm = { module = "org.kodein.di:kodein-di-jvm", version.ref = "kodein" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
+mapdb = { module = "org.mapdb:mapdb", version.ref = "mapdb" }
+
+# ktor
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
+ktor-server-default-headers = { module = "io.ktor:ktor-server-default-headers", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+ktor-websockets = { module = "io.ktor:ktor-websockets", version.ref = "ktor" }
+
+# kotlin
+kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-date-time" }
+kotlin-datetime-jvm = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version.ref = "kotlin-date-time" }
+kotlin-datetime-js = { module = "org.jetbrains.kotlinx:kotlinx-datetime-js", version.ref = "kotlin-date-time" }
+kotlin-html-js = { module = "org.jetbrains.kotlinx:kotlinx-html-js", version.ref = "kotlin-html" }
+kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlin-serialization" }
+kotlin-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "kotlin-serialization" }
+kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization" }
+
+[plugins]
+build-config = { id = "com.github.gmazzo.buildconfig", version.ref = "build-config" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

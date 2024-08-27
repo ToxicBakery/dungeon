@@ -7,6 +7,7 @@ val commandProcessorFactoryModule = DI.Module("commandProcessorFactoryModule") {
     import(processorLookModule)
     import(processorSayModule)
     import(processorShoutModule)
+    import(processorSpawnModule)
     import(processorWalkModule)
     import(processorWhoModule)
 }

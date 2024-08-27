@@ -66,6 +66,12 @@ private class CommunicationManagerImpl(
             )
         }
 
+    override suspend fun notifyAdmins(message: String) = dungeonStateStore.value()
+        .playerSessionsList
+        .map(PlayerSession::player)
+        .filter(Player::isAdmin)
+        .forEach { player -> notify(player, message) }
+
     override suspend fun serverMessage(
         message: String,
         excludedPlayer: Player?
@@ -76,6 +82,7 @@ private class CommunicationManagerImpl(
     private suspend fun PlayerSession.sendMessage(message: String) = session.sendMessage(message)
 
     companion object {
+        // TODO Make configurable
         private const val SHOUT_DISTANCE: Int = 3
     }
 }
@@ -126,6 +133,13 @@ interface CommunicationManager {
         message: String,
         location: Location,
         sourcePlayer: Player? = null,
+    )
+
+    /**
+     * Notify admins of an action.
+     */
+    suspend fun notifyAdmins(
+        message: String,
     )
 
     /**

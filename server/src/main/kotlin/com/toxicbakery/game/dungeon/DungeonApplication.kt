@@ -39,7 +39,9 @@ fun Application.module() {
             validate { credentials ->
                 if (credentials.name == "test" && credentials.password == "password") {
                     UserIdPrincipal(credentials.name)
-                } else null
+                } else {
+                    null
+                }
             }
         }
     }

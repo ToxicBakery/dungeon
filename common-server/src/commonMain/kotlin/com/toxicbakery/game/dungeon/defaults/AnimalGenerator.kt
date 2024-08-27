@@ -19,17 +19,16 @@ private class AnimalGeneratorImpl(
     private val mapSize: Int
         get() = mapManager.mapSize()
 
-    override suspend fun create(baseAnimal: BaseAnimal): Animal = when {
-        baseAnimal.isLandAnimal -> Animal(
-            name = baseAnimal.displayName,
-            stats = baseAnimal.stats,
-            statsBase = baseAnimal.stats,
-            location = getRandomLocationOfType(MapLegendType.LAND),
-            isPassive = baseAnimal.isPassive,
-        )
-
-        else -> TODO()
-    }
+    override suspend fun create(
+        baseAnimal: BaseAnimal,
+        location: Location?,
+    ): Animal = Animal(
+        name = baseAnimal.displayName,
+        stats = baseAnimal.stats,
+        statsBase = baseAnimal.stats,
+        location = location ?: getRandomLocationOfType(baseAnimal.spawnMapType),
+        isPassive = baseAnimal.isPassive,
+    )
 
     private fun getRandomLocationOfType(mapLegendType: MapLegendType): Location {
         while (true) {
@@ -57,7 +56,10 @@ private class AnimalGeneratorImpl(
 }
 
 interface AnimalGenerator {
-    suspend fun create(baseAnimal: BaseAnimal): Animal
+    suspend fun create(
+        baseAnimal: BaseAnimal,
+        location: Location? = null,
+    ): Animal
 }
 
 val animalGeneratorModule = DI.Module("animalGeneratorModule") {

@@ -1,5 +1,6 @@
 package com.toxicbakery.game.dungeon.defaults
 
+import com.toxicbakery.game.dungeon.map.MapLegendType
 import com.toxicbakery.game.dungeon.model.character.stats.Stats
 import kotlin.jvm.JvmStatic
 import kotlin.random.Random
@@ -9,7 +10,7 @@ enum class BaseAnimal(
     val stats: Stats,
     val distribution: Double,
     val isPassive: Boolean,
-    val isLandAnimal: Boolean = true,
+    val spawnMapType: MapLegendType = MapLegendType.LAND,
 ) {
     Sheep(
         displayName = "sheep",
@@ -50,6 +51,20 @@ enum class BaseAnimal(
         ),
         isPassive = false
     ),
+    Shark(
+        displayName = "shark",
+        distribution = 0.2,
+        stats = Stats(
+            health = 50,
+            strength = 10,
+            dexterity = 6,
+            defence = 3,
+            luck = 2,
+            stamina = 10,
+        ),
+        isPassive = false,
+        spawnMapType = MapLegendType.WATER,
+    ),
     Wolf(
         displayName = "wolf",
         distribution = 0.1,
@@ -65,13 +80,14 @@ enum class BaseAnimal(
     );
 
     companion object {
-        @JvmStatic
-        private val values = values()
+        val names: List<String> by lazy {
+            entries.map { animal -> animal.name }
+        }
 
         @JvmStatic
         fun pickNextAnimal(): BaseAnimal {
             val pick = Random.nextDouble()
-            return values.asSequence()
+            return entries.asSequence()
                 .filter { animal -> animal.distribution > pick }
                 .fold(listOf<BaseAnimal>()) { acc, animal -> acc + animal }
                 .let { animals ->

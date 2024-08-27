@@ -7,37 +7,48 @@ import com.toxicbakery.game.dungeon.machine.command.processor.CommandGroupRef
 import com.toxicbakery.game.dungeon.machine.command.processor.CommandRef
 import com.toxicbakery.game.dungeon.machine.command.processor.commandGroupsModule
 import com.toxicbakery.game.dungeon.machine.command.processor.commandProcessorFactoryModule
+import com.toxicbakery.game.dungeon.manager.PlayerManager
+import com.toxicbakery.game.dungeon.model.Lookable.Player
 import com.toxicbakery.game.dungeon.model.session.GameSession
 import org.kodein.di.DI
 import org.kodein.di.bind
-import org.kodein.di.instance
+import org.kodein.di.new
 import org.kodein.di.provider
 
 private class CommandMapImpl(
-    commandGroupRefSet: Set<CommandGroupRef>
+    private val commandGroupRefSet: Set<CommandGroupRef>,
+    private val playerManager: PlayerManager,
 ) : CommandMap {
 
     private val commandRefMap: Map<String, CommandRef> by lazy {
         commandGroupRefSet.flatMap { group -> group.commands }
-            .map { command -> command.name to command }
-            .toMap()
+            .filterNot { command -> command.isPrivileged }
+            .associateBy { command -> command.name }
     }
 
-    override val helpMessage: String by lazy {
-        commandGroupRefSet.joinToString(separator = "\n\n") { group ->
-            val commands = group.commands
-                .mapIndexed { index: Int, (command: String, _) ->
-                    when {
-                        index == 0 -> command
-                        index % COMMANDS_PER_ROW == 0 -> "\n$command"
-                        else -> ", $command"
+    private val commandRefAdminMap: Map<String, CommandRef> by lazy {
+        commandRefMap + commandGroupRefSet.flatMap { group -> group.commands }
+            .filter { command -> command.isPrivileged }
+            .associateBy { command -> command.name }
+    }
+
+    override fun helpMessage(player: Player): String = commandGroupRefSet
+        .mapNotNull { commandGroupRef ->
+            val commands = commandGroupRef.commands
+                .mapIndexedNotNull { index: Int, commandRef: CommandRef ->
+                    if (commandRef.isPrivileged && !player.isAdmin) null
+                    else when {
+                        index == 0 -> commandRef.name
+                        index % COMMANDS_PER_ROW == 0 -> "\n${commandRef.name}"
+                        else -> ", ${commandRef.name}"
                     }
                 }
-                .joinToString("")
 
-            "~~ ${group.name} ~~\n$commands"
+            if (commands.isEmpty()) null
+            else commandGroupRef to commands
+        }.joinToString(separator = "\n\n") { (commandGroupRef, commands) ->
+            "~~ ${commandGroupRef.name} ~~\n$commands"
         }
-    }
 
     @Suppress("IfThenToElvis")
     override suspend fun process(
@@ -45,6 +56,7 @@ private class CommandMapImpl(
         gameSession: GameSession,
         message: String
     ): Machine<*> {
+        val player = playerManager.getPlayerByGameSession(gameSession)
         val (command, args) = message.split(" ", limit = 2)
             .let { inputs ->
                 if (inputs.isEmpty()) throw EmptyInputException()
@@ -52,7 +64,8 @@ private class CommandMapImpl(
                 inputs.first() to (inputs.drop(1).firstOrNull() ?: "")
             }
 
-        return commandRefMap[command].let { commandRef ->
+        val commandMap = if (player.isAdmin) commandRefAdminMap else commandRefMap
+        return commandMap[command].let { commandRef ->
             if (commandRef == null) throw UnknownCommandException(command)
             else commandRef.processor(commandMachine)
                 .acceptMessage(gameSession, args)
@@ -75,7 +88,7 @@ interface CommandMap {
      * command4, command5
      * ```
      */
-    val helpMessage: String
+    fun helpMessage(player: Player): String
 
     /**
      * Process a user message automatically finding the command processor or throwing an exception
@@ -90,9 +103,5 @@ interface CommandMap {
 val commandMapModule = DI.Module("commandMapModule") {
     import(commandProcessorFactoryModule)
     import(commandGroupsModule)
-    bind<CommandMap>() with provider {
-        CommandMapImpl(
-            commandGroupRefSet = instance()
-        )
-    }
+    bind<CommandMap>() with provider { new(::CommandMapImpl) }
 }
